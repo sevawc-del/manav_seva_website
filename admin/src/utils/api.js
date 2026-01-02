@@ -17,6 +17,14 @@ api.interceptors.request.use((config) => {
 // Auth
 export const login = (data) => api.post('/auth/login', data);
 
+// Sliders
+export const getSliders = () => api.get('/sliders');
+export const getAllSliders = () => api.get('/sliders/admin');
+export const getSliderById = (id) => api.get(`/sliders/${id}`);
+export const createSlider = (data) => api.post('/sliders/admin', data);
+export const updateSlider = (id, data) => api.put(`/sliders/admin/${id}`, data);
+export const deleteSlider = (id) => api.delete(`/sliders/admin/${id}`);
+
 // News
 export const getNews = () => api.get('/news');
 export const getNewsById = (id) => api.get(`/news/${id}`);
@@ -74,3 +82,27 @@ export const deleteOrganizationStructure = () => api.delete('/about/organization
 export const getMessages = () => api.get('/about/messages');
 export const createOrUpdateMessage = (data) => api.post('/about/messages', data);
 export const deleteMessage = (id) => api.delete(`/about/messages/${id}`);
+
+// Activities
+export const getActivities = () => api.get('/activities');
+export const createActivity = (data) => api.post('/admin/activity', data);
+
+// Admin Activities (for admin-managed activities)
+export const getAdminActivities = () => api.get('/admin-activities');
+export const getAdminActivityBySlug = (slug) => api.get(`/admin-activities/${slug}`);
+export const createAdminActivity = (data) => api.post('/admin/admin-activities', data);
+export const updateAdminActivity = (id, data) => api.put(`/admin/admin-activities/${id}`, data);
+export const deleteAdminActivity = (id) => api.delete(`/admin/admin-activities/${id}`);
+
+// Geographic Activities
+export const createGeographicActivity = (data) => api.post('/admin/geographic-activity', data);
+export const updateGeographicActivity = (id, data) => api.put(`/admin/geographic-activity/${id}`, data);
+export const deleteGeographicActivity = (id) => api.delete(`/admin/geographic-activity/${id}`);
+export const getGeographicActivities = () => api.get('/geographic-activities');
+
+// Journeys
+export const getJourneys = () => api.get('/journeys');
+export const getJourneyById = (id) => api.get(`/journeys/${id}`);
+export const createJourney = (data) => api.post('/journeys/admin', data);
+export const updateJourney = (id, data) => api.put(`/journeys/admin/${id}`, data);
+export const deleteJourney = (id) => api.delete(`/journeys/admin/${id}`);

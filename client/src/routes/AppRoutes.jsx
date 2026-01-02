@@ -8,6 +8,7 @@ import Messages from '../pages/About/Messages';
 import Governance from '../pages/About/Governance';
 import GeographicFocus from '../pages/About/GeographicFocus';
 import Activities from '../pages/Activities';
+import ActivityDetail from '../pages/Activities/ActivityDetail';
 import HealthCampaigns from '../pages/Activities/HealthCampaigns';
 import EducationInitiatives from '../pages/Activities/EducationInitiatives';
 import WomenEmpowerment from '../pages/Activities/WomenEmpowerment';
@@ -30,6 +31,7 @@ const AppRoutes = () => {
           <Route path="geographic-focus" element={<GeographicFocus />} />
         </Route>
         <Route path="/activities" element={<Activities />} />
+        <Route path="/activities/:slug" element={<ActivityDetail />} />
         <Route path="/activities/health-campaigns" element={<HealthCampaigns />} />
         <Route path="/activities/education-initiatives" element={<EducationInitiatives />} />
         <Route path="/activities/women-empowerment" element={<WomenEmpowerment />} />

@@ -1,17 +1,11 @@
-# TODO: Add Manageable Map of India to Geographic Focus
+# CI/CD Setup TODO
 
-## Backend Changes
-- [ ] Update GeographicFocus model to include showMap and mapImage fields
-- [ ] Modify geographicFocusController to handle new map fields
-
-## Frontend Client Changes
-- [ ] Update GeographicFocus.jsx to conditionally display India map
-- [ ] Add map component using SVG or image
-
-## Admin Panel Changes
-- [ ] Update ManageAbout.jsx geographic-focus tab to include map management fields
-
-## Testing
-- [ ] Test map display on client side
-- [ ] Test admin panel map management
-- [ ] Verify data persistence
+- [x] Create .github/workflows/ci.yml for CI (build and test on push/PR)
+- [x] Create .github/workflows/deploy.yml for CD (deploy to Vercel and Render)
+- [x] Add vercel.json for client
+- [x] Add vercel.json for admin
+- [ ] Set up Vercel accounts for client and admin
+- [ ] Set up Render account for server
+- [ ] Configure GitHub secrets for Vercel and Render tokens
+- [ ] Test CI workflow
+- [ ] Test CD workflow

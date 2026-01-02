@@ -7,6 +7,9 @@ import ManageGallery from '../pages/ManageGallery';
 import ManageReports from '../pages/ManageReports';
 import ManageTenders from '../pages/ManageTenders';
 import ManageAbout from '../pages/ManageAbout';
+import ManageActivities from '../pages/ManageActivities';
+import ManageSliders from '../pages/ManageSliders';
+import ManageJourneys from '../pages/ManageJourneys';
 import Users from '../pages/Users';
 import Settings from '../pages/Settings';
 import Sidebar from '../components/Sidebar';
@@ -30,6 +33,9 @@ const AppRoutes = () => {
                 <Route path="/manage-reports" element={<ManageReports />} />
                 <Route path="/manage-tenders" element={<ManageTenders />} />
                 <Route path="/manage-about" element={<ManageAbout />} />
+                <Route path="/manage-activities" element={<ManageActivities />} />
+                <Route path="/manage-sliders" element={<ManageSliders />} />
+                <Route path="/manage-journeys" element={<ManageJourneys />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/settings" element={<Settings />} />
               </Routes>

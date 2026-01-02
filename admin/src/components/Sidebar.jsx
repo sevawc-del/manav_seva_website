@@ -25,6 +25,15 @@ const Sidebar = () => {
           <Link to="/manage-about" className="block py-2 px-4 rounded hover:bg-gray-700">Manage About</Link>
         </li>
         <li className="mb-4">
+          <Link to="/manage-activities" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Activities</Link>
+        </li>
+        <li className="mb-4">
+          <Link to="/manage-sliders" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Sliders</Link>
+        </li>
+        <li className="mb-4">
+          <Link to="/manage-journeys" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Journeys</Link>
+        </li>
+        <li className="mb-4">
           <Link to="/users" className="block py-2 px-4 rounded hover:bg-gray-700">Users</Link>
         </li>
         <li className="mb-4">

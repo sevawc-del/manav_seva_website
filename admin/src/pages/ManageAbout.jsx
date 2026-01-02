@@ -1,18 +1,53 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import HierarchyForm from '../components/HierarchyForm';
 import {
   getAboutUs,
   createOrUpdateAboutUs,
   getGovernance,
   createOrUpdateGovernance,
-  getGeographicFocus,
-  createOrUpdateGeographicFocus,
   getMessages,
   createOrUpdateMessage,
   deleteMessage,
+  createGeographicActivity,
+  updateGeographicActivity,
+  deleteGeographicActivity,
+  getGeographicActivities,
 } from '../utils/api';
 
+// Indian States and Districts data
+const indianStatesAndDistricts = {
+  'Andhra Pradesh': ['Anantapur', 'Chittoor', 'East Godavari', 'Guntur', 'Krishna', 'Kurnool', 'Nellore', 'Prakasam', 'Srikakulam', 'Visakhapatnam', 'Vizianagaram', 'West Godavari'],
+  'Arunachal Pradesh': ['Anjaw', 'Changlang', 'Dibang Valley', 'East Kameng', 'East Siang', 'Kra Daadi', 'Kurung Kumey', 'Lepa Rada', 'Lohit', 'Longding', 'Lower Dibang Valley', 'Lower Subansiri', 'Namsai', 'Papum Pare', 'Siang', 'Tawang', 'Tirap', 'Upper Siang', 'Upper Subansiri', 'West Kameng', 'West Siang'],
+  'Assam': ['Baksa', 'Barpeta', 'Biswanath', 'Bongaigaon', 'Cachar', 'Charaideo', 'Chirang', 'Darrang', 'Dhemaji', 'Dhubri', 'Dibrugarh', 'Goalpara', 'Golaghat', 'Hailakandi', 'Hojai', 'Jorhat', 'Kamrup', 'Kamrup Metropolitan', 'Karbi Anglong', 'Karimganj', 'Kokrajhar', 'Lakhimpur', 'Majuli', 'Morigaon', 'Nagaon', 'Nalbari', 'Sivasagar', 'Sonitpur', 'South Salmara-Mankachar', 'Tinsukia', 'Udalguri'],
+  'Bihar': ['Araria', 'Arwal', 'Aurangabad', 'Banka', 'Begusarai', 'Bhagalpur', 'Bhojpur', 'Buxar', 'Darbhanga', 'East Champaran', 'Gaya', 'Gopalganj', 'Jamui', 'Jehanabad', 'Kaimur', 'Katihar', 'Khagaria', 'Kishanganj', 'Lakhisarai', 'Madhepura', 'Madhubani', 'Munger', 'Muzaffarpur', 'Nalanda', 'Nawada', 'Patna', 'Purnia', 'Rohtas', 'Saharsa', 'Samastipur', 'Saran', 'Sheikhpura', 'Sheohar', 'Sitamarhi', 'Siwan', 'Supaul', 'Vaishali', 'West Champaran'],
+  'Chhattisgarh': ['Balod', 'Baloda Bazar', 'Balrampur', 'Bastar', 'Bemetara', 'Bijapur', 'Bilaspur', 'Dantewada', 'Dhamtari', 'Durg', 'Gariaband', 'Gaurela-Pendra-Marwahi', 'Janjgir-Champa', 'Jashpur', 'Kabirdham', 'Kanker', 'Kondagaon', 'Korba', 'Koriya', 'Mahasamund', 'Mungeli', 'Narayanpur', 'Raigarh', 'Raipur', 'Rajnandgaon', 'Sukma', 'Surajpur', 'Surguja'],
+  'Goa': ['North Goa', 'South Goa'],
+  'Gujarat': ['Ahmedabad', 'Amreli', 'Anand', 'Aravalli', 'Banaskantha', 'Bharuch', 'Bhavnagar', 'Botad', 'Chhota Udaipur', 'Dahod', 'Dang', 'Devbhoomi Dwarka', 'Gandhinagar', 'Gir Somnath', 'Jamnagar', 'Junagadh', 'Kheda', 'Kutch', 'Mahisagar', 'Mehsana', 'Morbi', 'Narmada', 'Navsari', 'Panchmahal', 'Patan', 'Porbandar', 'Rajkot', 'Sabarkantha', 'Surat', 'Surendranagar', 'Tapi', 'Vadodara', 'Valsad'],
+  'Haryana': ['Ambala', 'Bhiwani', 'Charkhi Dadri', 'Faridabad', 'Fatehabad', 'Gurugram', 'Hisar', 'Jhajjar', 'Jind', 'Kaithal', 'Karnal', 'Kurukshetra', 'Mahendragarh', 'Nuh', 'Palwal', 'Panchkula', 'Panipat', 'Rewari', 'Rohtak', 'Sirsa', 'Sonipat', 'Yamunanagar'],
+  'Himachal Pradesh': ['Bilaspur', 'Chamba', 'Hamirpur', 'Kangra', 'Kinnaur', 'Kullu', 'Lahaul and Spiti', 'Mandi', 'Shimla', 'Sirmaur', 'Solan', 'Una'],
+  'Jharkhand': ['Bokaro', 'Chatra', 'Deoghar', 'Dhanbad', 'Dumka', 'East Singhbhum', 'Garhwa', 'Giridih', 'Godda', 'Gumla', 'Hazaribagh', 'Jamtara', 'Khunti', 'Koderma', 'Latehar', 'Lohardaga', 'Pakur', 'Palamu', 'Ramgarh', 'Ranchi', 'Sahibganj', 'Seraikela Kharsawan', 'Simdega', 'West Singhbhum'],
+  'Karnataka': ['Bagalkot', 'Ballari', 'Belagavi', 'Bengaluru Rural', 'Bengaluru Urban', 'Bidar', 'Chamarajanagar', 'Chikballapur', 'Chikkamagaluru', 'Chitradurga', 'Dakshina Kannada', 'Davangere', 'Dharwad', 'Gadag', 'Hassan', 'Haveri', 'Kalaburagi', 'Kodagu', 'Kolar', 'Koppal', 'Mandya', 'Mysuru', 'Raichur', 'Ramanagara', 'Shivamogga', 'Tumakuru', 'Udupi', 'Uttara Kannada', 'Vijayapura', 'Yadgir'],
+  'Kerala': ['Alappuzha', 'Ernakulam', 'Idukki', 'Kannur', 'Kasaragod', 'Kollam', 'Kottayam', 'Kozhikode', 'Malappuram', 'Palakkad', 'Pathanamthitta', 'Thiruvananthapuram', 'Thrissur', 'Wayanad'],
+  'Madhya Pradesh': ['Agar Malwa', 'Alirajpur', 'Anuppur', 'Ashoknagar', 'Balaghat', 'Barwani', 'Betul', 'Bhind', 'Bhopal', 'Burhanpur', 'Chhatarpur', 'Chhindwara', 'Damoh', 'Datia', 'Dewas', 'Dhar', 'Dindori', 'Guna', 'Gwalior', 'Harda', 'Hoshangabad', 'Indore', 'Jabalpur', 'Jhabua', 'Katni', 'Khandwa', 'Khargone', 'Mandla', 'Mandsaur', 'Morena', 'Narsinghpur', 'Neemuch', 'Panna', 'Raisen', 'Rajgarh', 'Ratlam', 'Rewa', 'Sagar', 'Satna', 'Sehore', 'Seoni', 'Shahdol', 'Shajapur', 'Sheopur', 'Shivpuri', 'Sidhi', 'Singrauli', 'Tikamgarh', 'Ujjain', 'Umaria', 'Vidisha'],
+  'Maharashtra': ['Ahmednagar', 'Akola', 'Amravati', 'Aurangabad', 'Beed', 'Bhandara', 'Buldhana', 'Chandrapur', 'Dhule', 'Gadchiroli', 'Gondia', 'Hingoli', 'Jalgaon', 'Jalna', 'Kolhapur', 'Latur', 'Mumbai City', 'Mumbai Suburban', 'Nagpur', 'Nanded', 'Nandurbar', 'Nashik', 'Osmanabad', 'Palghar', 'Parbhani', 'Pune', 'Raigad', 'Ratnagiri', 'Sangli', 'Satara', 'Sindhudurg', 'Solapur', 'Thane', 'Wardha', 'Washim', 'Yavatmal'],
+  'Manipur': ['Bishnupur', 'Chandel', 'Churachandpur', 'Imphal East', 'Imphal West', 'Jiribam', 'Kakching', 'Kamjong', 'Kangpokpi', 'Noney', 'Pherzawl', 'Senapati', 'Tamenglong', 'Tengnoupal', 'Thoubal', 'Ukhrul'],
+  'Meghalaya': ['East Garo Hills', 'East Jaintia Hills', 'East Khasi Hills', 'North Garo Hills', 'Ri Bhoi', 'South Garo Hills', 'South West Garo Hills', 'South West Khasi Hills', 'West Garo Hills', 'West Jaintia Hills', 'West Khasi Hills'],
+  'Mizoram': ['Aizawl', 'Champhai', 'Hnahthial', 'Khawzawl', 'Kolasib', 'Lawngtlai', 'Lunglei', 'Mamit', 'Saiha', 'Saitual', 'Serchhip'],
+  'Nagaland': ['Chümoukedima', 'Dimapur', 'Kiphire', 'Kohima', 'Longleng', 'Mokokchung', 'Mon', 'Niuland', 'Noklak', 'Peren', 'Phek', 'Shamator', 'Tseminyü', 'Tuensang', 'Wokha', 'Zunheboto'],
+  'Odisha': ['Angul', 'Balangir', 'Balasore', 'Bargarh', 'Bhadrak', 'Boudh', 'Cuttack', 'Deogarh', 'Dhenkanal', 'Gajapati', 'Ganjam', 'Jagatsinghpur', 'Jajpur', 'Jharsuguda', 'Kalahandi', 'Kandhamal', 'Kendrapara', 'Kendujhar', 'Khordha', 'Koraput', 'Malkangiri', 'Mayurbhanj', 'Nabarangpur', 'Nayagarh', 'Nuapada', 'Puri', 'Rayagada', 'Sambalpur', 'Subarnapur', 'Sundargarh'],
+  'Punjab': ['Amritsar', 'Barnala', 'Bathinda', 'Faridkot', 'Fatehgarh Sahib', 'Fazilka', 'Ferozepur', 'Gurdaspur', 'Hoshiarpur', 'Jalandhar', 'Kapurthala', 'Ludhiana', 'Mansa', 'Moga', 'Muktsar', 'Nawanshahr', 'Pathankot', 'Patiala', 'Rupnagar', 'Sahibzada Ajit Singh Nagar', 'Sangrur', 'Sri Muktsar Sahib', 'Tarn Taran'],
+  'Rajasthan': ['Ajmer', 'Alwar', 'Banswara', 'Baran', 'Barmer', 'Bharatpur', 'Bhilwara', 'Bikaner', 'Bundi', 'Chittorgarh', 'Churu', 'Dausa', 'Dholpur', 'Dungarpur', 'Hanumangarh', 'Jaipur', 'Jaisalmer', 'Jalore', 'Jhalawar', 'Jhunjhunu', 'Jodhpur', 'Karauli', 'Kota', 'Nagaur', 'Pali', 'Pratapgarh', 'Rajsamand', 'Sawai Madhopur', 'Sikar', 'Sirohi', 'Sri Ganganagar', 'Tonk', 'Udaipur'],
+  'Sikkim': ['East Sikkim', 'North Sikkim', 'South Sikkim', 'West Sikkim'],
+  'Tamil Nadu': ['Ariyalur', 'Chengalpattu', 'Chennai', 'Coimbatore', 'Cuddalore', 'Dharmapuri', 'Dindigul', 'Erode', 'Kallakurichi', 'Kancheepuram', 'Kanyakumari', 'Karur', 'Krishnagiri', 'Madurai', 'Mayiladurai', 'Nagapattinam', 'Namakkal', 'Nilgiris', 'Perambalur', 'Pudukkottai', 'Ramanathapuram', 'Ranipet', 'Salem', 'Sivaganga', 'Tenkasi', 'Thanjavur', 'Theni', 'Thoothukudi', 'Tiruchirappalli', 'Tirunelveli', 'Tirupathur', 'Tiruppur', 'Tiruvallur', 'Tiruvannamalai', 'Tiruvarur', 'Vellore', 'Viluppuram', 'Virudhunagar'],
+  'Telangana': ['Adilabad', 'Bhadradri Kothagudem', 'Hyderabad', 'Jagtial', 'Jangaon', 'Jayashankar Bhupalpally', 'Jogulamba Gadwal', 'Kamareddy', 'Karimnagar', 'Khammam', 'Kumuram Bheem', 'Mahabubabad', 'Mahabubnagar', 'Mancherial', 'Medak', 'Medchal–Malkajgiri', 'Mulugu', 'Nagarkurnool', 'Nalgonda', 'Narayanpet', 'Nirmal', 'Nizamabad', 'Peddapalli', 'Rajanna Sircilla', 'Rangareddy', 'Sangareddy', 'Siddipet', 'Suryapet', 'Vikarabad', 'Wanaparthy', 'Warangal Rural', 'Warangal Urban', 'Yadadri Bhuvanagiri'],
+  'Tripura': ['Dhalai', 'Gomati', 'Khowai', 'North Tripura', 'Sepahijala', 'South Tripura', 'Unakoti', 'West Tripura'],
+  'Uttar Pradesh': ['Agra', 'Aligarh', 'Ambedkar Nagar', 'Amethi', 'Amroha', 'Auraiya', 'Ayodhya', 'Azamgarh', 'Baghpat', 'Bahraich', 'Ballia', 'Balrampur', 'Banda', 'Barabanki', 'Bareilly', 'Basti', 'Bhadohi', 'Bijnor', 'Budaun', 'Bulandshahr', 'Chandauli', 'Chitrakoot', 'Deoria', 'Etah', 'Etawah', 'Farrukhabad', 'Fatehpur', 'Firozabad', 'Gautam Buddha Nagar', 'Ghaziabad', 'Ghazipur', 'Gonda', 'Gorakhpur', 'Hamirpur', 'Hapur', 'Hardoi', 'Hathras', 'Jalaun', 'Jaunpur', 'Jhansi', 'Kannauj', 'Kanpur Dehat', 'Kanpur Nagar', 'Kasganj', 'Kaushambi', 'Kushinagar', 'Lakhimpur Kheri', 'Lalitpur', 'Lucknow', 'Maharajganj', 'Mahoba', 'Mainpuri', 'Mathura', 'Mau', 'Meerut', 'Mirzapur', 'Moradabad', 'Muzaffarnagar', 'Pilibhit', 'Pratapgarh', 'Prayagraj', 'Raebareli', 'Rampur', 'Saharanpur', 'Sambhal', 'Sant Kabir Nagar', 'Shahjahanpur', 'Shamli', 'Shravasti', 'Siddharthnagar', 'Sitapur', 'Sonbhadra', 'Sultanpur', 'Unnao', 'Varanasi'],
+  'Uttarakhand': ['Almora', 'Bageshwar', 'Chamoli', 'Champawat', 'Dehradun', 'Haridwar', 'Nainital', 'Pauri Garhwal', 'Pithoragarh', 'Rudraprayag', 'Tehri Garhwal', 'Udham Singh Nagar', 'Uttarkashi'],
+  'West Bengal': ['Alipurduar', 'Bankura', 'Birbhum', 'Cooch Behar', 'Dakshin Dinajpur', 'Darjeeling', 'Hooghly', 'Howrah', 'Jalpaiguri', 'Jhargram', 'Kalimpong', 'Kolkata', 'Malda', 'Murshidabad', 'Nadia', 'North 24 Parganas', 'Paschim Bardhaman', 'Paschim Medinipur', 'Purba Bardhaman', 'Purba Medinipur', 'Purulia', 'South 24 Parganas', 'Uttar Dinajpur']
+};
+
 const ManageAbout = () => {
+  const formRef = useRef(null);
   const [activeTab, setActiveTab] = useState('about-us');
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
@@ -31,15 +66,39 @@ const ManageAbout = () => {
     title: '',
     content: '',
     image: '',
-    showMap: false,
-    mapImage: '',
+    districts: [],
   });
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [existingActivities, setExistingActivities] = useState([]);
+  const [editingActivity, setEditingActivity] = useState(null);
+
+  const handleAddDistrict = () => {
+    if (selectedState && selectedDistrict) {
+      const newDistrict = `${selectedState}-${selectedDistrict}`;
+      if (!geographicFocusFormData.districts.includes(newDistrict)) {
+        setGeographicFocusFormData({
+          ...geographicFocusFormData,
+          districts: [...geographicFocusFormData.districts, newDistrict]
+        });
+      }
+      setSelectedState('');
+      setSelectedDistrict('');
+    }
+  };
+
+  const handleRemoveDistrict = (district) => {
+    setGeographicFocusFormData({
+      ...geographicFocusFormData,
+      districts: geographicFocusFormData.districts.filter(d => d !== district)
+    });
+  };
 
   const tabs = useMemo(() => [
     { key: 'about-us', label: 'About Us', fetch: getAboutUs, update: createOrUpdateAboutUs },
+    { key: 'geographic-focus', label: 'Geographic Focus', fetch: null, update: null },
     { key: 'messages', label: 'Messages', fetch: null, update: null },
     { key: 'governance', label: 'Governance', fetch: getGovernance, update: createOrUpdateGovernance },
-    { key: 'geographic-focus', label: 'Geographic Focus', fetch: getGeographicFocus, update: createOrUpdateGeographicFocus },
   ], []);
 
   const fetchData = async (tab) => {
@@ -66,6 +125,18 @@ const ManageAbout = () => {
         }
       };
       fetchMessages();
+    } else if (activeTab === 'geographic-focus') {
+      const fetchActivities = async () => {
+        try {
+          const res = await getGeographicActivities();
+          setExistingActivities(res.data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchActivities();
     } else {
       const activeTabData = tabs.find((tab) => tab.key === activeTab);
       if (activeTabData && activeTabData.fetch) {
@@ -101,7 +172,7 @@ const ManageAbout = () => {
         setLoading(false);
       }
     }
-  }, [activeTab, tabs]);
+  }, [activeTab, tabs, formData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -127,33 +198,48 @@ const ManageAbout = () => {
         if (activeTab === 'governance') {
           await activeTabData.update(governanceFormData);
         } else if (activeTab === 'geographic-focus') {
-          await activeTabData.update(geographicFocusFormData);
+          const districts = geographicFocusFormData.districts.map(d => {
+            const [stateCode, districtCode] = d.split('-');
+            return { stateCode, districtCode };
+          });
+          // Validate districts
+          const invalidDistricts = districts.filter(d => !d.stateCode || !d.districtCode);
+          if (invalidDistricts.length > 0) {
+            alert('Invalid district format. Please use format like State-District');
+            return;
+          }
+          if (editingActivity) {
+            await updateGeographicActivity(editingActivity._id, {
+              name: geographicFocusFormData.title,
+              description: geographicFocusFormData.content,
+              districts
+            });
+            setEditingActivity(null);
+          } else {
+            await createGeographicActivity({
+              name: geographicFocusFormData.title,
+              description: geographicFocusFormData.content,
+              districts
+            });
+          }
+          setGeographicFocusFormData({
+            title: '',
+            content: '',
+            image: '',
+            districts: [],
+          });
+          // Refresh activities
+          const res = await getGeographicActivities();
+          setExistingActivities(res.data);
         } else {
           await activeTabData.update(formData[activeTab]);
-        }
-        const updatedData = await fetchData(activeTabData);
-        if (activeTabData.key === 'governance') {
-          setGovernanceFormData({
-            title: updatedData?.title || '',
-            hierarchy: updatedData?.hierarchy || [{ id: '1', name: '', position: '', experience: '', image: '', children: [] }],
-            ethicsTitle: updatedData?.ethicsTitle || '',
-            ethicsContent: updatedData?.ethicsContent || '',
-            ethicsPoints: updatedData?.ethicsPoints || [''],
-          });
-        } else if (activeTabData.key === 'geographic-focus') {
-          setGeographicFocusFormData({
-            title: updatedData?.title || '',
-            content: updatedData?.content || '',
-            image: updatedData?.image || '',
-            showMap: updatedData?.showMap || false,
-            mapImage: updatedData?.mapImage || '',
-          });
-        } else {
+          const updatedData = await fetchData(activeTabData);
           setFormData((prev) => ({
             ...prev,
             [activeTabData.key]: { title: updatedData?.title || '', content: updatedData?.content || '', image: updatedData?.image || '' }
           }));
         }
+
         alert('Data saved successfully');
       }
     } catch (error) {
@@ -196,6 +282,34 @@ const ManageAbout = () => {
       setMessages(res.data);
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleEditActivity = (activity) => {
+    setGeographicFocusFormData({
+      title: activity.name,
+      content: activity.description,
+      image: activity.image || '',
+      districts: activity.districts ? activity.districts.map(d => `${d.stateCode}-${d.districtCode}`) : []
+    });
+    setEditingActivity(activity);
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+  const handleDeleteActivity = async (id) => {
+    if (window.confirm('Are you sure you want to delete this activity?')) {
+      try {
+        await deleteGeographicActivity(id);
+        alert('Activity deleted successfully');
+        // Refresh activities
+        const res = await getGeographicActivities();
+        setExistingActivities(res.data);
+      } catch (error) {
+        console.error(error);
+        alert('Failed to delete activity');
+      }
     }
   };
 
@@ -299,6 +413,135 @@ const ManageAbout = () => {
             ))}
           </div>
         </div>
+      ) : activeTab === 'geographic-focus' ? (
+        <div className="mb-6">
+          <form ref={formRef} onSubmit={handleSubmit} className="mb-6">
+            <input
+              type="text"
+              placeholder="Activity Name"
+              value={geographicFocusFormData.title || ''}
+              onChange={(e) => setGeographicFocusFormData({ ...geographicFocusFormData, title: e.target.value })}
+              className="w-full p-2 mb-4 border rounded"
+              required
+            />
+            <textarea
+              placeholder="Description"
+              value={geographicFocusFormData.content || ''}
+              onChange={(e) => setGeographicFocusFormData({ ...geographicFocusFormData, content: e.target.value })}
+              className="w-full p-2 mb-4 border rounded"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Image URL"
+              value={geographicFocusFormData.image || ''}
+              onChange={(e) => setGeographicFocusFormData({ ...geographicFocusFormData, image: e.target.value })}
+              className="w-full p-2 mb-4 border rounded"
+            />
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold mb-2">Select Districts</h3>
+              <div className="flex space-x-4 mb-4">
+                <select
+                  value={selectedState}
+                  onChange={(e) => {
+                    setSelectedState(e.target.value);
+                    setSelectedDistrict('');
+                  }}
+                  className="p-2 border rounded"
+                >
+                  <option value="">Select State</option>
+                  {Object.keys(indianStatesAndDistricts).map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={selectedDistrict}
+                  onChange={(e) => setSelectedDistrict(e.target.value)}
+                  className="p-2 border rounded"
+                  disabled={!selectedState}
+                >
+                  <option value="">Select District</option>
+                  {selectedState &&
+                    indianStatesAndDistricts[selectedState].map((district) => (
+                      <option key={district} value={district}>
+                        {district}
+                      </option>
+                    ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={handleAddDistrict}
+                  className="bg-green-500 text-white px-4 py-2 rounded"
+                  disabled={!selectedState || !selectedDistrict}
+                >
+                  Add District
+                </button>
+              </div>
+              <div className="space-y-2">
+                {geographicFocusFormData.districts.map((district, index) => (
+                  <div key={index} className="flex items-center space-x-2 bg-gray-100 p-2 rounded">
+                    <span>{district}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveDistrict(district)}
+                      className="bg-red-500 text-white px-2 py-1 rounded text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button type="submit" disabled={submitting} className="bg-blue-500 text-white px-4 py-2 rounded">
+              {editingActivity ? 'Update Activity' : (submitting ? 'Creating...' : 'Create Activity')}
+            </button>
+            {editingActivity && (
+              <button
+                type="button"
+                onClick={() => {
+                  setGeographicFocusFormData({
+                    title: '',
+                    content: '',
+                    image: '',
+                    districts: [],
+                  });
+                  setEditingActivity(null);
+                }}
+                className="bg-gray-500 text-white px-4 py-2 rounded ml-2"
+              >
+                Cancel
+              </button>
+            )}
+          </form>
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Existing Activities</h3>
+            {existingActivities.map((activity) => (
+              <div key={activity._id} className="bg-gray-100 p-4 rounded flex justify-between items-center">
+                <div>
+                  <h4 className="font-semibold">{activity.name}</h4>
+                  <p className="text-gray-600">{activity.description}</p>
+                  <p className="text-sm text-gray-500">Districts: {activity.districts ? activity.districts.map(d => `${d.stateCode}-${d.districtCode}`).join(', ') : ''}</p>
+                </div>
+                <div>
+                  <button
+                    onClick={() => handleEditActivity(activity)}
+                    className="bg-yellow-500 text-white px-4 py-2 rounded mr-2"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteActivity(activity._id)}
+                    className="bg-red-500 text-white px-4 py-2 rounded"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       ) : activeTab === 'governance' ? (
         <form onSubmit={handleSubmit} className="mb-6">
           <input
@@ -360,52 +603,6 @@ const ManageAbout = () => {
               Add Point
             </button>
           </div>
-          <button type="submit" disabled={submitting} className="bg-blue-500 text-white px-4 py-2 rounded">
-            {submitting ? 'Saving...' : 'Save'}
-          </button>
-        </form>
-      ) : activeTab === 'geographic-focus' ? (
-        <form onSubmit={handleSubmit} className="mb-6">
-          <input
-            type="text"
-            placeholder="Title"
-            value={geographicFocusFormData.title || ''}
-            onChange={(e) => setGeographicFocusFormData({ ...geographicFocusFormData, title: e.target.value })}
-            className="w-full p-2 mb-4 border rounded"
-            required
-          />
-          <textarea
-            placeholder="Content"
-            value={geographicFocusFormData.content || ''}
-            onChange={(e) => setGeographicFocusFormData({ ...geographicFocusFormData, content: e.target.value })}
-            className="w-full p-2 mb-4 border rounded"
-            required
-          />
-          <input
-            type="text"
-            placeholder="Image URL"
-            value={geographicFocusFormData.image || ''}
-            onChange={(e) => setGeographicFocusFormData({ ...geographicFocusFormData, image: e.target.value })}
-            className="w-full p-2 mb-4 border rounded"
-          />
-          <div className="mb-4">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={geographicFocusFormData.showMap || false}
-                onChange={(e) => setGeographicFocusFormData({ ...geographicFocusFormData, showMap: e.target.checked })}
-                className="mr-2"
-              />
-              Show Map
-            </label>
-          </div>
-          <input
-            type="text"
-            placeholder="Map Image URL"
-            value={geographicFocusFormData.mapImage || ''}
-            onChange={(e) => setGeographicFocusFormData({ ...geographicFocusFormData, mapImage: e.target.value })}
-            className="w-full p-2 mb-4 border rounded"
-          />
           <button type="submit" disabled={submitting} className="bg-blue-500 text-white px-4 py-2 rounded">
             {submitting ? 'Saving...' : 'Save'}
           </button>
