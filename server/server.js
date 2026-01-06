@@ -8,21 +8,32 @@ dotenv.config();
 
 const app = express();
 
+// Trust proxy for Render / Vercel
+app.set('trust proxy', 1);
+
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    process.env.CLIENT_URL,
+    process.env.ADMIN_URL
+  ].filter(Boolean), // prevents undefined issues
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from uploads directory
+// Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.log(err));
+// MongoDB connection
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
 
 // Routes
 app.use('/api/sliders', require('./routes/sliderRoutes'));
@@ -38,14 +49,16 @@ app.use('/api', require('./routes/adminActivityRoutes'));
 app.use('/api', require('./routes/geographicActivityRoutes'));
 app.use('/api/journeys', require('./routes/journeyRoutes'));
 
-// Error handling middleware
+// Error handler (keep LAST)
 app.use((err, req, res, next) => {
-  console.error('Server error:', err.message, err.stack);
-  res.status(err.status || 500).json({ 
+  console.error('Server error:', err);
+  res.status(err.status || 500).json({
     message: err.message || 'Internal Server Error',
     error: process.env.NODE_ENV === 'development' ? err : {}
   });
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`Server running on port ${PORT}`)
+);

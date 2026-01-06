@@ -137,3 +137,6 @@ sessions/
 *.swp
 *.swo
 *~
+
+# Sensitive scripts
+server/resetPassword.js

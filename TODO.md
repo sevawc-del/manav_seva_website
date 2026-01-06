@@ -1,11 +1,10 @@
-# CI/CD Setup TODO
+# TODO: Add Admin User to Atlas DB
 
-- [x] Create .github/workflows/ci.yml for CI (build and test on push/PR)
-- [x] Create .github/workflows/deploy.yml for CD (deploy to Vercel and Render)
-- [x] Add vercel.json for client
-- [x] Add vercel.json for admin
-- [ ] Set up Vercel accounts for client and admin
-- [ ] Set up Render account for server
-- [ ] Configure GitHub secrets for Vercel and Render tokens
-- [ ] Test CI workflow
-- [ ] Test CD workflow
+## Tasks
+- [x] Create seeding script (`server/scripts/seedAdmin.js`) to add an admin user
+- [x] Add admin creation function to `server/controllers/authController.js`
+- [x] Add seed script to `server/package.json`
+- [x] Update .env with admin credentials (if needed)
+- [x] Run the seed script locally to add admin user
+- [ ] Test admin login
+- [ ] Ensure MONGO_URI is set in production environment
