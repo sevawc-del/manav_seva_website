@@ -6,5 +6,6 @@
 - [x] Add seed script to `server/package.json`
 - [x] Update .env with admin credentials (if needed)
 - [x] Run the seed script locally to add admin user
+- [x] Fix deployment syntax errors
 - [ ] Test admin login
 - [ ] Ensure MONGO_URI is set in production environment
