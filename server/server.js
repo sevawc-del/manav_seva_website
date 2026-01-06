@@ -29,7 +29,41 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
+  .then(async () => {
+    console.log('MongoDB connected');
+
+    // Auto-seed admin user if enabled and doesn't exist
+    if (process.env.SEED_ADMIN === 'true') {
+      try {
+        const User = require('./models/User');
+        const bcrypt = require('bcryptjs');
+
+        const existingAdmin = await User.findOne({ role: 'admin' });
+        if (!existingAdmin) {
+          const hashedPassword = await bcrypt.hash(
+            process.env.ADMIN_PASSWORD || 'admin123',
+            10
+          );
+
+          const adminUser = new User({
+            username: process.env.ADMIN_USERNAME || 'admin',
+            email: process.env.ADMIN_EMAIL || 'admin@manavseva.com',
+            password: hashedPassword,
+            role: 'admin'
+          });
+
+          await adminUser.save();
+          console.log('✅ Admin user auto-seeded successfully');
+          console.log('Email:', adminUser.email);
+          console.log('⚠️  Remember to set SEED_ADMIN=false after first deployment');
+        } else {
+          console.log('ℹ️  Admin user already exists, skipping auto-seed');
+        }
+      } catch (error) {
+        console.error('❌ Error auto-seeding admin:', error);
+      }
+    }
+  })
   .catch(err => {
     console.error('MongoDB connection error:', err);
     process.exit(1);
