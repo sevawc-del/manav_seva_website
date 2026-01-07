@@ -14,7 +14,7 @@ const Login = () => {
       const res = await login(formData);
       localStorage.setItem('token', res.data.token);
       // Redirect to dashboard
-      window.location.href = '/dashboard';
+      window.location.href = '/#/dashboard';
     } catch (error) {
       console.error(error);
       alert('Login failed');
