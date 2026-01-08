@@ -47,8 +47,10 @@ const createSlider = async (req, res) => {
 
     let imageUrl = req.body.image;
     if (req.file) {
-      // For local storage, create full URL
-      imageUrl = `http://localhost:5000/uploads/${req.file.filename}` || req.file.url || req.file.secure_url || req.file.location || imageUrl;
+      // For local storage, create full URL dynamically
+      const protocol = req.protocol;
+      const host = req.get('host');
+      imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
     }
 
     if (!imageUrl) {
@@ -84,8 +86,10 @@ const updateSlider = async (req, res) => {
 
     let imageUrl = req.body.image;
     if (req.file) {
-      // For local storage, create full URL
-      imageUrl = `http://localhost:5000/uploads/${req.file.filename}` || req.file.url || req.file.secure_url || req.file.location || imageUrl;
+      // For local storage, create full URL dynamically
+      const protocol = req.protocol;
+      const host = req.get('host');
+      imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
     }
 
     const updateData = {
