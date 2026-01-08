@@ -80,6 +80,7 @@ dist
 # Gatsby files
 .cache/
 public
+!client/public/maps/
 
 # Storybook build outputs
 .out
