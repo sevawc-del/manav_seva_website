@@ -1,4 +1,5 @@
 const Slider = require('../models/Slider');
+const cloudinary = require('../config/cloudinary');
 
 // Get all active sliders (for client)
 const getSliders = async (req, res) => {
@@ -47,10 +48,17 @@ const createSlider = async (req, res) => {
 
     let imageUrl = req.body.image;
     if (req.file) {
-      // For local storage, create full URL dynamically
-      const protocol = req.protocol;
-      const host = req.get('host');
-      imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+      // Upload to Cloudinary for production
+      try {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'manav-seva/sliders',
+          resource_type: 'image'
+        });
+        imageUrl = result.secure_url;
+      } catch (uploadError) {
+        console.error('Cloudinary upload error:', uploadError);
+        return res.status(500).json({ message: 'Failed to upload image' });
+      }
     }
 
     if (!imageUrl) {
@@ -86,10 +94,17 @@ const updateSlider = async (req, res) => {
 
     let imageUrl = req.body.image;
     if (req.file) {
-      // For local storage, create full URL dynamically
-      const protocol = req.protocol;
-      const host = req.get('host');
-      imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+      // Upload to Cloudinary for production
+      try {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'manav-seva/sliders',
+          resource_type: 'image'
+        });
+        imageUrl = result.secure_url;
+      } catch (uploadError) {
+        console.error('Cloudinary upload error:', uploadError);
+        return res.status(500).json({ message: 'Failed to upload image' });
+      }
     }
 
     const updateData = {

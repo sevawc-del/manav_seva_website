@@ -141,3 +141,6 @@ sessions/
 
 # Sensitive scripts
 server/resetPassword.js
+
+#test files
+test-cloudinary.js
