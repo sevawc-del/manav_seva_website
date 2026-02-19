@@ -9,7 +9,7 @@ const getOrganizationStructure = async (req, res) => {
     }
     res.json(organizationStructure);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -33,7 +33,7 @@ const createOrUpdateOrganizationStructure = async (req, res) => {
     }
     res.json(organizationStructure);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -47,8 +47,9 @@ const deleteOrganizationStructure = async (req, res) => {
     await OrganizationStructure.deleteOne();
     res.json({ message: 'OrganizationStructure deleted' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
 module.exports = { getOrganizationStructure, createOrUpdateOrganizationStructure, deleteOrganizationStructure };
+

@@ -8,12 +8,12 @@ const {
   updateReport,
   deleteReport,
 } = require('../controllers/reportController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { protect, admin } = require('../middleware/authMiddleware');
 
 router.get('/', getAllReports);
 router.get('/:id', getReportById);
-router.post('/', authMiddleware, createReport);
-router.put('/:id', authMiddleware, updateReport);
-router.delete('/:id', authMiddleware, deleteReport);
+router.post('/', protect, admin, createReport);
+router.put('/:id', protect, admin, updateReport);
+router.delete('/:id', protect, admin, deleteReport);
 
 module.exports = router;

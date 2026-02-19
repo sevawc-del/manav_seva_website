@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import DataTable from '../components/DataTable';
 import { getUsers, createUser, updateUser, deleteUser } from '../utils/api';
+import { AuthContext } from '../context/AuthContext';
 
 const Users = () => {
+  const { user } = useContext(AuthContext);
+  const isEditor = user?.role === 'editor';
   const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState({ username: '', email: '', password: '', role: 'admin' });
   const [editing, setEditing] = useState(null);
@@ -62,44 +65,51 @@ const Users = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Manage Users</h1>
-      <form onSubmit={handleSubmit} className="mb-6">
-        <input
-          type="text"
-          placeholder="Username"
-          value={formData.username}
-          onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-          className="w-full p-2 mb-4 border rounded"
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full p-2 mb-4 border rounded"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          className="w-full p-2 mb-4 border rounded"
-          required={!editing}
-        />
-        <select
-          value={formData.role}
-          onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-          className="w-full p-2 mb-4 border rounded"
-        >
-          <option value="admin">Admin</option>
-          <option value="editor">Editor</option>
-        </select>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-          {editing ? 'Update' : 'Add'} User
-        </button>
-      </form>
-      <DataTable data={users} columns={columns} onEdit={handleEdit} onDelete={handleDelete} />
+      {!isEditor && (
+        <form onSubmit={handleSubmit} className="mb-6">
+          <input
+            type="text"
+            placeholder="Username"
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            className="w-full p-2 mb-4 border rounded"
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            className="w-full p-2 mb-4 border rounded"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            className="w-full p-2 mb-4 border rounded"
+            required={!editing}
+          />
+          <select
+            value={formData.role}
+            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+            className="w-full p-2 mb-4 border rounded"
+          >
+            <option value="admin">Admin</option>
+            <option value="editor">Editor</option>
+          </select>
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+            {editing ? 'Update' : 'Add'} User
+          </button>
+        </form>
+      )}
+      <DataTable
+        data={users}
+        columns={columns}
+        onEdit={isEditor ? undefined : handleEdit}
+        onDelete={isEditor ? undefined : handleDelete}
+      />
     </div>
   );
 };

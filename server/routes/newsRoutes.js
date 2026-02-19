@@ -8,12 +8,12 @@ const {
   updateNews,
   deleteNews,
 } = require('../controllers/newsController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { protect, admin } = require('../middleware/authMiddleware');
 
 router.get('/', getAllNews);
 router.get('/:id', getNewsById);
-router.post('/', authMiddleware, createNews);
-router.put('/:id', authMiddleware, updateNews);
-router.delete('/:id', authMiddleware, deleteNews);
+router.post('/', protect, admin, createNews);
+router.put('/:id', protect, admin, updateNews);
+router.delete('/:id', protect, admin, deleteNews);
 
 module.exports = router;

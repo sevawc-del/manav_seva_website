@@ -8,12 +8,12 @@ const {
   updateGalleryItem,
   deleteGalleryItem,
 } = require('../controllers/galleryController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { protect, admin } = require('../middleware/authMiddleware');
 
 router.get('/', getAllGalleryItems);
 router.get('/:id', getGalleryItemById);
-router.post('/', authMiddleware, createGalleryItem);
-router.put('/:id', authMiddleware, updateGalleryItem);
-router.delete('/:id', authMiddleware, deleteGalleryItem);
+router.post('/', protect, admin, createGalleryItem);
+router.put('/:id', protect, admin, updateGalleryItem);
+router.delete('/:id', protect, admin, deleteGalleryItem);
 
 module.exports = router;

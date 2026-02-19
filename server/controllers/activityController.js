@@ -7,7 +7,7 @@ const getActivities = async (req, res) => {
     const activities = await Activity.find().sort({ createdAt: -1 });
     res.json(activities);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -26,7 +26,7 @@ const getActivityPresence = async (req, res) => {
       presence
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -54,7 +54,7 @@ const createActivity = async (req, res) => {
 
     res.status(201).json(savedActivity);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: 'Invalid request data' });
   }
 };
 
@@ -63,3 +63,4 @@ module.exports = {
   getActivityPresence,
   createActivity
 };
+

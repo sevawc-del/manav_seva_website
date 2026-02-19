@@ -28,9 +28,9 @@ const Navbar = () => {
   ];
 
   const getInvolvedItems = [
-    { name: "Career", path: "/career" },
-    { name: "Tenders", path: "/tenders" },
-    { name: "Volunteer", path: "/volunteer" },
+    { name: "Career", path: "/get-involved/career" },
+    { name: "Tenders", path: "/get-involved/tenders" },
+    { name: "Volunteer", path: "/get-involved/volunteer" },
   ];
 
   return (

@@ -9,7 +9,7 @@ const getGeographicFocus = async (req, res) => {
     }
     res.json(geographicFocus);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -31,7 +31,7 @@ const createOrUpdateGeographicFocus = async (req, res) => {
     }
     res.json(geographicFocus);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -45,8 +45,9 @@ const deleteGeographicFocus = async (req, res) => {
     await GeographicFocus.deleteOne();
     res.json({ message: 'GeographicFocus deleted' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
 module.exports = { getGeographicFocus, createOrUpdateGeographicFocus, deleteGeographicFocus };
+

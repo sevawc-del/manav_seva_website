@@ -6,7 +6,7 @@ const getAdminActivities = async (req, res) => {
     const activities = await AdminActivity.find({ isActive: true }).sort({ order: 1 });
     res.json(activities);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -20,7 +20,7 @@ const getAdminActivityBySlug = async (req, res) => {
     }
     res.json(activity);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -39,7 +39,7 @@ const createAdminActivity = async (req, res) => {
     await activity.save();
     res.json(activity);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -58,7 +58,7 @@ const updateAdminActivity = async (req, res) => {
     }
     res.json(activity);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -72,8 +72,9 @@ const deleteAdminActivity = async (req, res) => {
     }
     res.json({ message: 'Activity deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
 module.exports = { getAdminActivities, getAdminActivityBySlug, createAdminActivity, updateAdminActivity, deleteAdminActivity };
+

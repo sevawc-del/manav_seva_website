@@ -1,5 +1,53 @@
 const Slider = require('../models/Slider');
 const cloudinary = require('../config/cloudinary');
+const fs = require('fs/promises');
+
+const cleanupTempUpload = async (filePath) => {
+  if (!filePath) return;
+  try {
+    await fs.unlink(filePath);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.error('Temp upload cleanup error:', error.message);
+    }
+  }
+};
+
+const extractCloudinaryPublicId = (imageUrl) => {
+  if (!imageUrl || typeof imageUrl !== 'string') return null;
+
+  try {
+    const parsedUrl = new URL(imageUrl);
+    if (!parsedUrl.hostname.includes('res.cloudinary.com')) return null;
+
+    const uploadIndex = parsedUrl.pathname.indexOf('/upload/');
+    if (uploadIndex === -1) return null;
+
+    const pathAfterUpload = parsedUrl.pathname.slice(uploadIndex + '/upload/'.length);
+    const segments = pathAfterUpload.split('/').filter(Boolean);
+    const versionIndex = segments.findIndex((segment) => /^v\d+$/.test(segment));
+    if (versionIndex === -1 || versionIndex >= segments.length - 1) return null;
+
+    const publicIdWithExtension = segments.slice(versionIndex + 1).join('/');
+    return publicIdWithExtension.replace(/\.[^/.]+$/, '');
+  } catch (error) {
+    return null;
+  }
+};
+
+const deleteCloudinaryImage = async (imageUrl) => {
+  const publicId = extractCloudinaryPublicId(imageUrl);
+  if (!publicId) return;
+
+  try {
+    await cloudinary.uploader.destroy(publicId, {
+      resource_type: 'image',
+      invalidate: true
+    });
+  } catch (error) {
+    console.error('Cloudinary delete error:', error);
+  }
+};
 
 // Get all active sliders (for client)
 const getSliders = async (req, res) => {
@@ -7,7 +55,7 @@ const getSliders = async (req, res) => {
     const sliders = await Slider.find({ isActive: true }).sort({ order: 1 });
     res.json(sliders);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -17,7 +65,7 @@ const getAllSliders = async (req, res) => {
     const sliders = await Slider.find().sort({ order: 1 });
     res.json(sliders);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -30,16 +78,13 @@ const getSliderById = async (req, res) => {
     }
     res.json(slider);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
 // Create slider (admin)
 const createSlider = async (req, res) => {
   try {
-    console.log('Create slider request body:', req.body);
-    console.log('Create slider request file:', req.file);
-    
     const { title, subtitle, order, buttonText, buttonLink, isActive } = req.body;
     
     if (!title || !subtitle) {
@@ -55,7 +100,9 @@ const createSlider = async (req, res) => {
           resource_type: 'image'
         });
         imageUrl = result.secure_url;
+        await cleanupTempUpload(req.file.path);
       } catch (uploadError) {
+        await cleanupTempUpload(req.file.path);
         console.error('Cloudinary upload error:', uploadError);
         return res.status(500).json({ message: 'Failed to upload image' });
       }
@@ -64,8 +111,6 @@ const createSlider = async (req, res) => {
     if (!imageUrl) {
       return res.status(400).json({ message: 'Image is required' });
     }
-
-    console.log('Creating slider with data:', { title, subtitle, imageUrl, order, isActive });
 
     const slider = new Slider({
       title,
@@ -78,11 +123,10 @@ const createSlider = async (req, res) => {
     });
 
     const savedSlider = await slider.save();
-    console.log('Slider saved successfully:', savedSlider);
     res.status(201).json(savedSlider);
   } catch (error) {
     console.error('Slider creation error:', error.message, error.stack);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -91,8 +135,12 @@ const updateSlider = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, subtitle, order, isActive, buttonText, buttonLink } = req.body;
+    const existingSlider = await Slider.findById(id);
+    if (!existingSlider) {
+      return res.status(404).json({ message: 'Slider not found' });
+    }
 
-    let imageUrl = req.body.image;
+    let imageUrl = req.body.image || existingSlider.image;
     if (req.file) {
       // Upload to Cloudinary for production
       try {
@@ -101,7 +149,9 @@ const updateSlider = async (req, res) => {
           resource_type: 'image'
         });
         imageUrl = result.secure_url;
+        await cleanupTempUpload(req.file.path);
       } catch (uploadError) {
+        await cleanupTempUpload(req.file.path);
         console.error('Cloudinary upload error:', uploadError);
         return res.status(500).json({ message: 'Failed to upload image' });
       }
@@ -124,14 +174,14 @@ const updateSlider = async (req, res) => {
 
     const slider = await Slider.findByIdAndUpdate(id, updateData, { new: true });
 
-    if (!slider) {
-      return res.status(404).json({ message: 'Slider not found' });
+    if (slider && slider.image && existingSlider.image && slider.image !== existingSlider.image) {
+      await deleteCloudinaryImage(existingSlider.image);
     }
 
     res.json(slider);
   } catch (error) {
     console.error('Slider update error:', error);
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: 'Invalid request data' });
   }
 };
 
@@ -147,7 +197,7 @@ const deleteSlider = async (req, res) => {
     
     res.json({ message: 'Slider deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -159,3 +209,4 @@ module.exports = {
   updateSlider,
   deleteSlider
 };
+

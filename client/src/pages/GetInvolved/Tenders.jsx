@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getTenders } from '../utils/api';
-import Loader from '../components/Loader';
+import { getTenders } from '../../utils/api.js';
+import Loader from '../../components/Loader';
 
 const Tenders = () => {
   const [tenders, setTenders] = useState([]);

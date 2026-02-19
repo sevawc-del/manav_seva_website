@@ -6,7 +6,7 @@ const getAllReports = async (req, res) => {
     const reports = await Report.find();
     res.json(reports);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -16,7 +16,7 @@ const getReportById = async (req, res) => {
     if (!report) return res.status(404).json({ message: 'Report not found' });
     res.json(report);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -26,7 +26,7 @@ const createReport = async (req, res) => {
     const newReport = await report.save();
     res.status(201).json(newReport);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: 'Invalid request data' });
   }
 };
 
@@ -36,7 +36,7 @@ const updateReport = async (req, res) => {
     if (!updatedReport) return res.status(404).json({ message: 'Report not found' });
     res.json(updatedReport);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: 'Invalid request data' });
   }
 };
 
@@ -46,7 +46,7 @@ const deleteReport = async (req, res) => {
     if (!deletedReport) return res.status(404).json({ message: 'Report not found' });
     res.json({ message: 'Report deleted' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -57,3 +57,4 @@ module.exports = {
   updateReport,
   deleteReport,
 };
+

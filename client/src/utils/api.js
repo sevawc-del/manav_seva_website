@@ -46,3 +46,12 @@ export const getGeographicActivityPresence = (id) => api.get(`/geographic-activi
 // Journeys
 export const getJourneys = () => api.get('/journeys');
 export const getJourneyById = (id) => api.get(`/journeys/${id}`);
+
+// Jobs
+export const getJobs = () => api.get('/jobs');
+export const getJobById = (id) => api.get(`/jobs/${id}`);
+
+// Volunteers
+export const getVolunteers = () => api.get('/volunteers/public');
+export const getVolunteerById = (id) => api.get(`/volunteers/public/${id}`);
+export const applyForVolunteer = (data) => api.post('/volunteers/apply', data);

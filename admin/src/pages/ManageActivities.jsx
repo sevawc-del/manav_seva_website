@@ -164,7 +164,6 @@ const ManageActivities = () => {
             onChange={(content) => setFormData(prev => ({ ...prev, content }))}
             preview="edit"
             hideToolbar={false}
-            visibleDragBar={false}
             height={300}
           />
         </div>

@@ -10,6 +10,10 @@ import ManageAbout from '../pages/ManageAbout';
 import ManageActivities from '../pages/ManageActivities';
 import ManageSliders from '../pages/ManageSliders';
 import ManageJourneys from '../pages/ManageJourneys';
+import ManageJobs from '../pages/ManageJobs';
+import ManageGetInvolved from '../pages/ManageGetInvolved';
+import ManageVolunteers from '../pages/ManageVolunteers';
+import ManageVolunteerApplications from '../pages/ManageVolunteerApplications';
 import Users from '../pages/Users';
 import Settings from '../pages/Settings';
 import Sidebar from '../components/Sidebar';
@@ -36,7 +40,15 @@ const AppRoutes = () => {
                 <Route path="/manage-activities" element={<ManageActivities />} />
                 <Route path="/manage-sliders" element={<ManageSliders />} />
                 <Route path="/manage-journeys" element={<ManageJourneys />} />
-                <Route path="/users" element={<Users />} />
+                <Route path="/manage-jobs" element={<ManageJobs />} />
+                <Route path="/manage-get-involved" element={<ManageGetInvolved />} />
+                <Route path="/manage-volunteers" element={<ManageVolunteers />} />
+                <Route path="/manage-volunteer-applications" element={<ManageVolunteerApplications />} />
+                <Route path="/users" element={
+                  <ProtectedRoute adminOnly={true}>
+                    <Users />
+                  </ProtectedRoute>
+                } />
                 <Route path="/settings" element={<Settings />} />
               </Routes>
             </div>

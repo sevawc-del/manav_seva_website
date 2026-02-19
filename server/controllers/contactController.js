@@ -11,10 +11,11 @@ const sendContactMessage = async (req, res) => {
     });
     res.json({ message: 'Message sent successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
 module.exports = {
   sendContactMessage,
 };
+

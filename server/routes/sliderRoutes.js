@@ -8,7 +8,7 @@ const {
   updateSlider,
   deleteSlider
 } = require('../controllers/sliderController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { protect, admin } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
 // Helper middleware to handle upload errors gracefully
@@ -23,14 +23,14 @@ const handleUploadError = (req, res, next) => {
   });
 };
 
-// Public routes
-router.get('/admin', getAllSliders);  // Must come BEFORE /:id to avoid wildcard match
+// Routes
+router.get('/admin', protect, admin, getAllSliders);  // Must come BEFORE /:id to avoid wildcard match
 router.get('/', getSliders);
 router.get('/:id', getSliderById);
 
 // Admin routes
-router.post('/admin', authMiddleware, handleUploadError, createSlider);
-router.put('/admin/:id', authMiddleware, handleUploadError, updateSlider);
-router.delete('/admin/:id', authMiddleware, deleteSlider);
+router.post('/admin', protect, admin, handleUploadError, createSlider);
+router.put('/admin/:id', protect, admin, handleUploadError, updateSlider);
+router.delete('/admin/:id', protect, admin, deleteSlider);
 
 module.exports = router;

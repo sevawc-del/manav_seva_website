@@ -55,7 +55,7 @@ const getGovernance = async (req, res) => {
     }
     res.json(governance);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -73,7 +73,7 @@ const createOrUpdateGovernance = async (req, res) => {
     }
     res.json(governance);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -87,8 +87,9 @@ const deleteGovernance = async (req, res) => {
     await Governance.deleteOne();
     res.json({ message: 'Governance deleted' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
 module.exports = { getGovernance, createOrUpdateGovernance, deleteGovernance };
+

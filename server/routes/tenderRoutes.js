@@ -8,12 +8,12 @@ const {
   updateTender,
   deleteTender,
 } = require('../controllers/tenderController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { protect, admin } = require('../middleware/authMiddleware');
 
 router.get('/', getAllTenders);
 router.get('/:id', getTenderById);
-router.post('/', authMiddleware, createTender);
-router.put('/:id', authMiddleware, updateTender);
-router.delete('/:id', authMiddleware, deleteTender);
+router.post('/', protect, admin, createTender);
+router.put('/:id', protect, admin, updateTender);
+router.delete('/:id', protect, admin, deleteTender);
 
 module.exports = router;

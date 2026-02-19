@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
@@ -28,8 +29,12 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
+
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -45,17 +50,22 @@ mongoose
       try {
         const User = require('./models/User');
         const bcrypt = require('bcryptjs');
+        const { ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+
+        if (!ADMIN_USERNAME || !ADMIN_EMAIL || !ADMIN_PASSWORD) {
+          throw new Error('Missing ADMIN_USERNAME, ADMIN_EMAIL, or ADMIN_PASSWORD for admin seeding');
+        }
 
         const existingAdmin = await User.findOne({ role: 'admin' });
         if (!existingAdmin) {
           const hashedPassword = await bcrypt.hash(
-            process.env.ADMIN_PASSWORD || 'admin123',
+            ADMIN_PASSWORD,
             10
           );
 
           const adminUser = new User({
-            username: process.env.ADMIN_USERNAME || 'admin',
-            email: process.env.ADMIN_EMAIL || 'admin@manavseva.com',
+            username: ADMIN_USERNAME,
+            email: ADMIN_EMAIL,
             password: hashedPassword,
             role: 'admin'
           });
@@ -71,36 +81,39 @@ mongoose
         console.error('❌ Error auto-seeding admin:', error);
       }
     }
+
+    // Routes
+    app.use('/api/sliders', require('./routes/sliderRoutes'));
+    app.use('/api/news', require('./routes/newsRoutes'));
+    app.use('/api/tenders', require('./routes/tenderRoutes'));
+    app.use('/api/gallery', require('./routes/galleryRoutes'));
+    app.use('/api/reports', require('./routes/reportRoutes'));
+    app.use('/api/auth', require('./routes/authRoutes'));
+    app.use('/api/contact', require('./routes/contactRoutes'));
+    app.use('/api/about', require('./routes/aboutRoutes'));
+    app.use('/api', require('./routes/activityRoutes'));
+    app.use('/api', require('./routes/adminActivityRoutes'));
+    app.use('/api', require('./routes/geographicActivityRoutes'));
+    app.use('/api/journeys', require('./routes/journeyRoutes'));
+    app.use('/api/jobs', require('./routes/jobRoutes'));
+    app.use('/api/volunteers', require('./routes/volunteerRoutes'));
+    app.use('/api/users', require('./routes/userRoutes'));
+
+    // Error handler (keep LAST)
+    app.use((err, req, res, next) => {
+      console.error('Server error:', err);
+      res.status(err.status || 500).json({
+        message: err.status && err.status < 500 ? 'Request failed' : 'Internal Server Error',
+        error: process.env.NODE_ENV === 'development' ? err : {}
+      });
+    });
+
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () =>
+      console.log(`Server running on port ${PORT}`)
+    );
   })
   .catch(err => {
     console.error('MongoDB connection error:', err);
     process.exit(1);
   });
-
-// Routes
-app.use('/api/sliders', require('./routes/sliderRoutes'));
-app.use('/api/news', require('./routes/newsRoutes'));
-app.use('/api/tenders', require('./routes/tenderRoutes'));
-app.use('/api/gallery', require('./routes/galleryRoutes'));
-app.use('/api/reports', require('./routes/reportRoutes'));
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/contact', require('./routes/contactRoutes'));
-app.use('/api/about', require('./routes/aboutRoutes'));
-app.use('/api', require('./routes/activityRoutes'));
-app.use('/api', require('./routes/adminActivityRoutes'));
-app.use('/api', require('./routes/geographicActivityRoutes'));
-app.use('/api/journeys', require('./routes/journeyRoutes'));
-
-// Error handler (keep LAST)
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
-    error: process.env.NODE_ENV === 'development' ? err : {}
-  });
-});
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
-  console.log(`Server running on port ${PORT}`)
-);

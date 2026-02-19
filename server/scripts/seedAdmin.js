@@ -8,6 +8,11 @@ const connectDB = require('../config/db');
 const seedAdmin = async () => {
   try {
     await connectDB();
+    const { ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+
+    if (!ADMIN_USERNAME || !ADMIN_EMAIL || !ADMIN_PASSWORD) {
+      throw new Error('Missing ADMIN_USERNAME, ADMIN_EMAIL, or ADMIN_PASSWORD');
+    }
 
     // Check if admin already exists
     const existingAdmin = await User.findOne({ role: 'admin' });
@@ -17,10 +22,10 @@ const seedAdmin = async () => {
     }
 
     // Create admin user
-    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'admin123', 10);
+    const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
     const adminUser = new User({
-      username: process.env.ADMIN_USERNAME || 'admin',
-      email: process.env.ADMIN_EMAIL || 'admin@manavseva.com',
+      username: ADMIN_USERNAME,
+      email: ADMIN_EMAIL,
       password: hashedPassword,
       role: 'admin'
     });
@@ -28,7 +33,6 @@ const seedAdmin = async () => {
     await adminUser.save();
     console.log('Admin user created successfully');
     console.log('Email:', adminUser.email);
-    console.log('Password:', process.env.ADMIN_PASSWORD || 'admin123');
 
   } catch (error) {
     console.error('Error seeding admin:', error);

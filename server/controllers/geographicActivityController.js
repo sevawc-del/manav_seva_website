@@ -16,7 +16,7 @@ const getGeographicActivities = async (req, res) => {
     );
     res.json(activitiesWithDistricts);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -31,7 +31,7 @@ const getGeographicActivityPresence = async (req, res) => {
     const presence = await GeographicActivityPresence.find({ activityId: id });
     res.json({ activity, presence });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -51,7 +51,7 @@ const createGeographicActivity = async (req, res) => {
 
     res.json(activity);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -96,7 +96,7 @@ const updateGeographicActivity = async (req, res) => {
 
     res.json(activity);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -116,8 +116,9 @@ const deleteGeographicActivity = async (req, res) => {
 
     res.json({ message: 'Activity deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
 module.exports = { getGeographicActivities, getGeographicActivityPresence, createGeographicActivity, updateGeographicActivity, deleteGeographicActivity };
+

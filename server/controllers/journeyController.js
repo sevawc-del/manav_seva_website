@@ -6,7 +6,7 @@ const getJourneys = async (req, res) => {
     const journeys = await Journey.find({ isActive: true }).sort({ order: 1 });
     res.json(journeys);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -20,7 +20,7 @@ const getJourneyById = async (req, res) => {
     }
     res.json(journey);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -36,7 +36,7 @@ const createJourney = async (req, res) => {
     await journey.save();
     res.json(journey);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -55,7 +55,7 @@ const updateJourney = async (req, res) => {
     }
     res.json(journey);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -69,8 +69,9 @@ const deleteJourney = async (req, res) => {
     }
     res.json({ message: 'Journey deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
 module.exports = { getJourneys, getJourneyById, createJourney, updateJourney, deleteJourney };
+

@@ -14,7 +14,7 @@ const getAboutUs = async (req, res) => {
     }
     res.json(aboutUs);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -22,7 +22,6 @@ const getAboutUs = async (req, res) => {
 const createOrUpdateAboutUs = async (req, res) => {
   try {
     const { title, content, image } = req.body;
-    console.log('Received data:', { title, content, image });
     let aboutUs = await AboutUs.findOne();
     if (aboutUs) {
       aboutUs.title = title;
@@ -36,7 +35,7 @@ const createOrUpdateAboutUs = async (req, res) => {
     res.json(aboutUs);
   } catch (error) {
     console.error('Error in createOrUpdateAboutUs:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -50,8 +49,9 @@ const deleteAboutUs = async (req, res) => {
     await AboutUs.deleteOne();
     res.json({ message: 'AboutUs deleted' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
 module.exports = { getAboutUs, createOrUpdateAboutUs, deleteAboutUs };
+

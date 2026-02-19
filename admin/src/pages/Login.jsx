@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { login } from '../utils/api';
+import { AuthContext } from '../context/AuthContext';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const { login: authLogin } = useContext(AuthContext);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -12,7 +14,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await login(formData);
-      localStorage.setItem('token', res.data.token);
+      authLogin(res.data);
       // Redirect to dashboard
       window.location.href = '/#/dashboard';
     } catch (error) {

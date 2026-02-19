@@ -6,7 +6,7 @@ const getMessages = async (req, res) => {
     const messages = await Message.find().sort({ displayOrder: 1 });
     res.status(200).json(messages);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -28,7 +28,7 @@ const createOrUpdateMessage = async (req, res) => {
       res.status(201).json(newMessage);
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -39,7 +39,7 @@ const deleteMessage = async (req, res) => {
     await Message.findByIdAndDelete(id);
     res.status(200).json({ message: 'Message deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -48,3 +48,4 @@ module.exports = {
   createOrUpdateMessage,
   deleteMessage,
 };
+

@@ -19,7 +19,10 @@ const Sidebar = () => {
           <Link to="/manage-reports" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Reports</Link>
         </li>
         <li className="mb-4">
-          <Link to="/manage-tenders" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Tenders</Link>
+          <Link to="/manage-get-involved" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Get Involved</Link>
+        </li>
+        <li className="mb-4">
+          <Link to="/manage-volunteer-applications" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Volunteer Applications</Link>
         </li>
         <li className="mb-4">
           <Link to="/manage-about" className="block py-2 px-4 rounded hover:bg-gray-700">Manage About</Link>

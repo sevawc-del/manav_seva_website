@@ -237,7 +237,10 @@ const ManageSliders = () => {
             />
             <div className="mt-2">
               <label className="block text-sm font-semibold mb-2">Or upload image</label>
-              <input type="file" accept="image/*" onChange={handleImageChange} />
+              <button className='inline-flex items-center px-4 py-2 cursor-pointer rounded-md
+                  border border-blue-300 text-sm font-medium text-gray-700 bg-gray-200
+                  hover:bg-gray-300
+                  transition'><input type="file" accept="image/*" onChange={handleImageChange} /></button>
             </div>
           </div>
 
