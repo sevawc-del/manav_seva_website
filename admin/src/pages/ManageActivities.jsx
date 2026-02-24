@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import MDEditor from '@uiw/react-md-editor';
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
@@ -14,10 +14,14 @@ const ManageActivities = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
+  const [selectedFileName, setSelectedFileName] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
     description: '',
+    impactNumber: '',
     content: '',
     image: '',
     order: 0,
@@ -44,10 +48,23 @@ const ManageActivities = () => {
     setSubmitting(true);
 
     try {
+      const payload = new FormData();
+      payload.append('name', formData.name);
+      payload.append('slug', formData.slug);
+      payload.append('description', formData.description);
+      payload.append('impactNumber', formData.impactNumber || '');
+      payload.append('content', formData.content || '');
+      payload.append('image', formData.image || '');
+      payload.append('order', String(formData.order || 0));
+      payload.append('isActive', String(formData.isActive));
+      if (selectedFile) {
+        payload.append('imageFile', selectedFile);
+      }
+
       if (editingActivity) {
-        await updateAdminActivity(editingActivity._id, formData);
+        await updateAdminActivity(editingActivity._id, payload);
       } else {
-        await createAdminActivity(formData);
+        await createAdminActivity(payload);
       }
       await fetchActivities();
       resetForm();
@@ -65,11 +82,17 @@ const ManageActivities = () => {
       name: activity.name,
       slug: activity.slug,
       description: activity.description,
+      impactNumber: activity.impactNumber || '',
       content: activity.content,
       image: activity.image || '',
       order: activity.order,
       isActive: activity.isActive
     });
+    setSelectedFile(null);
+    setSelectedFileName('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleDelete = async (id) => {
@@ -90,11 +113,17 @@ const ManageActivities = () => {
       name: '',
       slug: '',
       description: '',
+      impactNumber: '',
       content: '',
       image: '',
       order: 0,
       isActive: true
     });
+    setSelectedFile(null);
+    setSelectedFileName('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const generateSlug = (name) => {
@@ -108,6 +137,13 @@ const ManageActivities = () => {
       name,
       slug: generateSlug(name)
     }));
+  };
+
+  const handleImageFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedFile(file);
+    setSelectedFileName(file.name);
   };
 
   if (loading) return <div className="p-6">Loading...</div>;
@@ -158,6 +194,17 @@ const ManageActivities = () => {
         </div>
 
         <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Impact Number</label>
+          <input
+            type="text"
+            value={formData.impactNumber}
+            onChange={(e) => setFormData(prev => ({ ...prev, impactNumber: e.target.value }))}
+            className="w-full p-2 border rounded"
+            placeholder="e.g., 25,000+ beneficiaries"
+          />
+        </div>
+
+        <div className="mb-4">
           <label className="block text-sm font-medium mb-1">Content *</label>
           <MDEditor
             value={formData.content}
@@ -177,6 +224,29 @@ const ManageActivities = () => {
               onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
               className="w-full p-2 border rounded"
             />
+            <div className="mt-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageFileChange}
+                className="hidden"
+              />
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-block bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+              >
+                Choose File
+              </button>
+              {selectedFileName && (
+                <p className="mt-2 text-sm text-gray-600">Selected: {selectedFileName}</p>
+              )}
+              {!selectedFileName && editingActivity && formData.image && (
+                <p className="mt-2 text-sm text-gray-600">Using current image URL</p>
+              )}
+            </div>
           </div>
 
           <div>
@@ -240,6 +310,9 @@ const ManageActivities = () => {
                   Slug
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Impact
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Order
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -258,6 +331,9 @@ const ManageActivities = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {activity.slug}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {activity.impactNumber || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {activity.order}

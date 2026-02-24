@@ -20,6 +20,28 @@ api.interceptors.request.use(
   }
 );
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+    const message = error?.response?.data?.message;
+
+    const isAuthError =
+      status === 401 ||
+      (status === 400 && message === 'Invalid token') ||
+      status === 403;
+
+    if (isAuthError) {
+      localStorage.removeItem('token');
+      if (typeof window !== 'undefined' && window.location.hash !== '#/') {
+        window.location.hash = '#/';
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 
 // Auth
 export const login = (data) => api.post('/auth/login', data);
@@ -29,6 +51,28 @@ export const getNews = () => api.get('/news');
 export const createNews = (data) => api.post('/news', data);
 export const updateNews = (id, data) => api.put(`/news/${id}`, data);
 export const deleteNews = (id) => api.delete(`/news/${id}`);
+
+// Events
+export const getEvents = () => api.get('/events/admin');
+export const createEvent = (data) => api.post('/events/admin', data);
+export const updateEvent = (id, data) => api.put(`/events/admin/${id}`, data);
+export const deleteEvent = (id) => api.delete(`/events/admin/${id}`);
+
+// Testimonials
+export const getTestimonialsAdmin = () => api.get('/testimonials/admin');
+export const updateTestimonialAdmin = (id, data) => api.put(`/testimonials/admin/${id}`, data);
+export const deleteTestimonialAdmin = (id) => api.delete(`/testimonials/admin/${id}`);
+
+// Sponsors
+export const getSponsorsAdmin = () => api.get('/sponsors/admin');
+export const createSponsor = (data) => api.post('/sponsors/admin', data);
+export const updateSponsor = (id, data) => api.put(`/sponsors/admin/${id}`, data);
+export const deleteSponsor = (id) => api.delete(`/sponsors/admin/${id}`);
+
+// Donation Settings
+export const getDonationSettingsAdmin = () => api.get('/donation-settings/admin');
+export const createOrUpdateDonationSettings = (data) => api.post('/donation-settings/admin', data);
+export const getDonationsAdmin = (params) => api.get('/donations/admin', { params });
 
 // Tenders
 export const getTenders = () => api.get('/tenders');
@@ -120,4 +164,3 @@ export const getUsers = () => api.get('/users');
 export const createUser = (data) => api.post('/users', data);
 export const updateUser = (id, data) => api.put(`/users/${id}`, data);
 export const deleteUser = (id) => api.delete(`/users/${id}`);
-

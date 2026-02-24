@@ -4,16 +4,28 @@ const router = express.Router();
 const {
   getAllNews,
   getNewsById,
+  getNewsBySlug,
   createNews,
   updateNews,
   deleteNews,
 } = require('../controllers/newsController');
 const { protect, admin } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
+
+const handleUploadError = (req, res, next) => {
+  upload.single('imageFile')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ message: 'Invalid image upload' });
+    }
+    next();
+  });
+};
 
 router.get('/', getAllNews);
+router.get('/slug/:slug', getNewsBySlug);
 router.get('/:id', getNewsById);
-router.post('/', protect, admin, createNews);
-router.put('/:id', protect, admin, updateNews);
+router.post('/', protect, admin, handleUploadError, createNews);
+router.put('/:id', protect, admin, handleUploadError, updateNews);
 router.delete('/:id', protect, admin, deleteNews);
 
 module.exports = router;

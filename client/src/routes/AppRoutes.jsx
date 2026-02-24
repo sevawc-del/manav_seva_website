@@ -18,9 +18,13 @@ import Career from '../pages/GetInvolved/Career';
 import Tenders from '../pages/GetInvolved/Tenders';
 import Volunteer from '../pages/GetInvolved/Volunteer';
 import Gallery from '../pages/Gallery';
+import GalleryDetail from '../pages/GalleryDetail';
 import NewsEvents from '../pages/NewsEvents';
+import NewsDetail from '../pages/NewsDetail';
+import EventDetail from '../pages/EventDetail';
 import Contact from '../pages/Contact';
 import Reports from '../pages/Reports';
+import Donate from '../pages/Donate';
 
 function AppRoutes() {
   return (
@@ -33,7 +37,7 @@ function AppRoutes() {
         <Route path="/about/governance" element={<Governance />} />
         <Route path="/about/geographic-focus" element={<GeographicFocus />} />
         <Route path="/activities" element={<Activities />} />
-        <Route path="/activities/:id" element={<ActivityDetail />} />
+        <Route path="/activities/:slug" element={<ActivityDetail />} />
         <Route path="/activities/health-campaigns" element={<HealthCampaigns />} />
         <Route path="/activities/education-initiatives" element={<EducationInitiatives />} />
         <Route path="/activities/women-empowerment" element={<WomenEmpowerment />} />
@@ -42,8 +46,12 @@ function AppRoutes() {
         <Route path="/get-involved/tenders" element={<Tenders />} />
         <Route path="/get-involved/volunteer" element={<Volunteer />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/gallery/:id" element={<GalleryDetail />} />
         <Route path="/news-events" element={<NewsEvents />} />
+        <Route path="/news-events/:slug" element={<NewsDetail />} />
+        <Route path="/events/:slug" element={<EventDetail />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/donate" element={<Donate />} />
         <Route path="/reports" element={<Reports />} />
       </Routes>
     </ErrorBoundary>

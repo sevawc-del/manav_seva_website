@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,8 +33,47 @@ const Navbar = () => {
     { name: "Volunteer", path: "/get-involved/volunteer" },
   ];
 
+  const socialLinks = [
+    { name: "Facebook", href: "https://www.facebook.com", icon: Facebook },
+    { name: "Instagram", href: "https://www.instagram.com", icon: Instagram },
+    { name: "LinkedIn", href: "https://www.linkedin.com", icon: Linkedin },
+    { name: "YouTube", href: "https://www.youtube.com", icon: Youtube },
+  ];
+
   return (
-    <nav className="bg-white shadow-md fixed top-0 left-0 w-full z-50">
+    <header className="sticky top-0 w-full z-50 shadow-md">
+      <div className="bg-blue-900 text-white">
+        <div className="container mx-auto px-4 py-2 flex items-center justify-between gap-3">
+          <p className="text-xs sm:text-sm font-medium truncate">
+            Support our mission to transform lives.
+          </p>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="hidden sm:flex items-center gap-1">
+              {socialLinks.map(({ name, href, icon: Icon }) => (
+                <a
+                  key={name}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={name}
+                  className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 transition"
+                >
+                  <Icon size={15} />
+                </a>
+              ))}
+            </div>
+            <Link
+              to="/donate"
+              className="app-btn app-btn-primary !py-1.5 !px-3 sm:!px-4 !text-xs sm:!text-sm"
+            >
+              Donate Now
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <nav className="bg-white w-full">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         
         {/* LOGO */}
@@ -196,6 +235,30 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden bg-white shadow-inner px-4 py-4">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              {socialLinks.map(({ name, href, icon: Icon }) => (
+                <a
+                  key={name}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={name}
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                >
+                  <Icon size={15} />
+                </a>
+              ))}
+            </div>
+            <Link
+              to="/donate"
+              className="app-btn app-btn-primary !py-1.5 !px-3 !text-xs"
+              onClick={() => setIsOpen(false)}
+            >
+              Donate Now
+            </Link>
+          </div>
+
           <ul className="flex flex-col gap-4">
             {/* Home */}
             <li>
@@ -326,7 +389,8 @@ const Navbar = () => {
           </ul>
         </div>
       )}
-    </nav>
+      </nav>
+    </header>
   );
 };
 

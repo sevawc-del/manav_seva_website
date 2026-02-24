@@ -12,6 +12,26 @@ export const getSliders = () => api.get('/sliders');
 // News
 export const getNews = () => api.get('/news');
 export const getNewsById = (id) => api.get(`/news/${id}`);
+export const getNewsBySlug = (slug) => api.get(`/news/slug/${slug}`);
+
+// Events
+export const getEvents = () => api.get('/events');
+export const getEventBySlug = (slug) => api.get(`/events/slug/${slug}`);
+
+// Testimonials
+export const getTestimonials = () => api.get('/testimonials');
+export const submitTestimonial = (data) => api.post('/testimonials', data);
+
+// Sponsors
+export const getSponsors = () => api.get('/sponsors');
+
+// Donation Settings
+export const getDonationSettings = () => api.get('/donation-settings');
+export const createDonationOrder = (data) => api.post('/donations/create-order', data);
+export const getDonationStatus = (orderId, email) =>
+  api.get(`/donations/status/${orderId}`, {
+    params: email ? { email } : {}
+  });
 
 // Tenders
 export const getTenders = () => api.get('/tenders');
@@ -31,6 +51,7 @@ export const sendContactMessage = (data) => api.post('/contact', data);
 // About
 export const getAboutUs = () => api.get('/about/about-us');
 export const getMessages = () => api.get('/about/messages');
+export const getGovernance = () => api.get('/about/governance');
 export const getGeographicFocus = () => api.get('/about/geographic-focus');
 
 // Activities

@@ -4,6 +4,7 @@ const adminActivitySchema = new mongoose.Schema({
   name: { type: String, required: true },
   slug: { type: String, required: true, unique: true }, // e.g., 'health-campaigns'
   description: { type: String, required: true },
+  impactNumber: { type: String, default: '' },
   content: { type: String, required: true }, // Rich text content
   image: { type: String }, // Image URL
   isActive: { type: Boolean, default: true },

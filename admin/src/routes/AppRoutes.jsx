@@ -10,6 +10,7 @@ import ManageAbout from '../pages/ManageAbout';
 import ManageActivities from '../pages/ManageActivities';
 import ManageSliders from '../pages/ManageSliders';
 import ManageJourneys from '../pages/ManageJourneys';
+import ManageHomepage from '../pages/ManageHomepage';
 import ManageJobs from '../pages/ManageJobs';
 import ManageGetInvolved from '../pages/ManageGetInvolved';
 import ManageVolunteers from '../pages/ManageVolunteers';
@@ -38,6 +39,7 @@ const AppRoutes = () => {
                 <Route path="/manage-tenders" element={<ManageTenders />} />
                 <Route path="/manage-about" element={<ManageAbout />} />
                 <Route path="/manage-activities" element={<ManageActivities />} />
+                <Route path="/manage-homepage" element={<ManageHomepage />} />
                 <Route path="/manage-sliders" element={<ManageSliders />} />
                 <Route path="/manage-journeys" element={<ManageJourneys />} />
                 <Route path="/manage-jobs" element={<ManageJobs />} />

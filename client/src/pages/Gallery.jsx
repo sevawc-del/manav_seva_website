@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getGallery } from '../utils/api';
 import Loader from '../components/Loader';
 
@@ -34,9 +35,13 @@ const Gallery = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {images.map((image) => (
-            <div key={image._id} className="bg-white rounded-lg shadow-md overflow-hidden">
+            <Link
+              key={image._id}
+              to={`/gallery/${image._id}`}
+              className="bg-white rounded-lg shadow-md overflow-hidden block hover:shadow-lg transition-shadow"
+            >
               <img
-                src={image.imageUrl || 'https://via.placeholder.com/400x300?text=Image+Not+Available'}
+                src={image.image || image.imageUrl || 'https://via.placeholder.com/400x300?text=Image+Not+Available'}
                 alt={image.title || image.description || 'Gallery Image'}
                 className="w-full h-48 object-cover"
                 onError={(e) => {
@@ -46,7 +51,7 @@ const Gallery = () => {
               <div className="p-4">
                 <p className="text-gray-700">{image.title || image.description || 'Gallery Image'}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

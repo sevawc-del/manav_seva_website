@@ -10,7 +10,7 @@ const Sidebar = () => {
           <Link to="/dashboard" className="block py-2 px-4 rounded hover:bg-gray-700">Dashboard</Link>
         </li>
         <li className="mb-4">
-          <Link to="/manage-news" className="block py-2 px-4 rounded hover:bg-gray-700">Manage News</Link>
+          <Link to="/manage-news" className="block py-2 px-4 rounded hover:bg-gray-700">Manage News & Events</Link>
         </li>
         <li className="mb-4">
           <Link to="/manage-gallery" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Gallery</Link>
@@ -31,10 +31,7 @@ const Sidebar = () => {
           <Link to="/manage-activities" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Activities</Link>
         </li>
         <li className="mb-4">
-          <Link to="/manage-sliders" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Sliders</Link>
-        </li>
-        <li className="mb-4">
-          <Link to="/manage-journeys" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Journeys</Link>
+          <Link to="/manage-homepage" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Homepage</Link>
         </li>
         <li className="mb-4">
           <Link to="/users" className="block py-2 px-4 rounded hover:bg-gray-700">Users</Link>

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { getAdminActivityBySlug } from '../../utils/api';
 import Loader from '../../components/Loader';
 
 const ActivityDetail = () => {
-  const { slug } = useParams();
+  const { slug, id } = useParams();
+  const location = useLocation();
+  const activitySlug = slug || id;
+  const fromHome = location.state?.from === 'home';
   const [activity, setActivity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,7 +15,7 @@ const ActivityDetail = () => {
   useEffect(() => {
     const fetchActivity = async () => {
       try {
-        const response = await getAdminActivityBySlug(slug);
+        const response = await getAdminActivityBySlug(activitySlug);
         setActivity(response.data);
       } catch (err) {
         console.error('Failed to fetch activity:', err);
@@ -22,28 +25,46 @@ const ActivityDetail = () => {
       }
     };
 
-    if (slug) {
+    if (activitySlug) {
       fetchActivity();
     }
-  }, [slug]);
+  }, [activitySlug]);
 
   if (loading) return <Loader />;
-  if (error) return (
-    <div className="container mx-auto px-4 py-8 text-center">
-      <h1 className="text-2xl font-bold text-red-600 mb-4">{error}</h1>
-      <Link to="/activities" className="text-blue-600 hover:underline">
-        ← Back to Activities
-      </Link>
-    </div>
-  );
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">{error}</h1>
+        </div>
+        <div className="flex flex-wrap gap-3 justify-center">
+          <Link to="/activities" className="app-btn app-btn-primary">
+            Go to Activities Page
+          </Link>
+          {fromHome && (
+            <Link to="/" className="app-btn app-btn-outline">
+              Back to Home
+            </Link>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (!activity) return null;
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <Link to="/activities" className="text-blue-600 hover:underline">
-          ← Back to Activities
+      <div className="mb-6 flex flex-wrap gap-3">
+        <Link to="/activities" className="app-btn app-btn-primary">
+          Go to Activities Page
         </Link>
+        {fromHome && (
+          <Link to="/" className="app-btn app-btn-outline">
+            Back to Home
+          </Link>
+        )}
       </div>
 
       <article className="max-w-4xl mx-auto">
