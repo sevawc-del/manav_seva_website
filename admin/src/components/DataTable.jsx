@@ -23,7 +23,7 @@ const DataTable = ({ data, columns, onEdit, onDelete }) => {
               {showActions && (
                 <td className="py-2 px-4 border-b">
                   <button onClick={() => onEdit(item)} className="bg-blue-500 text-white px-2 py-1 rounded mr-2">Edit</button>
-                  <button onClick={() => onDelete(item._id)} className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+                  <button onClick={() => onDelete(item._id)} className="bg-red-600 text-white px-2 py-1 rounded">Delete</button>
                 </td>
               )}
             </tr>
