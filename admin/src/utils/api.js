@@ -73,12 +73,19 @@ export const deleteSponsor = (id) => api.delete(`/sponsors/admin/${id}`);
 export const getDonationSettingsAdmin = () => api.get('/donation-settings/admin');
 export const createOrUpdateDonationSettings = (data) => api.post('/donation-settings/admin', data);
 export const getDonationsAdmin = (params) => api.get('/donations/admin', { params });
+export const getSiteSettingsAdmin = () => api.get('/site-settings/admin');
+export const createOrUpdateSiteSettings = (data) => api.post('/site-settings/admin', data);
 
 // Tenders
 export const getTenders = () => api.get('/tenders');
 export const createTender = (data) => api.post('/tenders', data);
 export const updateTender = (id, data) => api.put(`/tenders/${id}`, data);
 export const deleteTender = (id) => api.delete(`/tenders/${id}`);
+export const uploadTenderDocument = (file) => {
+  const payload = new FormData();
+  payload.append('file', file);
+  return api.post('/tenders/upload-document', payload);
+};
 
 // Gallery
 export const getGallery = () => api.get('/gallery');
@@ -91,6 +98,11 @@ export const getReports = () => api.get('/reports');
 export const createReport = (data) => api.post('/reports', data);
 export const updateReport = (id, data) => api.put(`/reports/${id}`, data);
 export const deleteReport = (id) => api.delete(`/reports/${id}`);
+export const uploadReportFile = (file) => {
+  const payload = new FormData();
+  payload.append('file', file);
+  return api.post('/reports/upload-file', payload);
+};
 
 // Volunteers
 export const getAllVolunteers = () => api.get('/volunteers');
@@ -107,6 +119,11 @@ export const updateVolunteerApplicationStatus = (id, status) => api.put(`/volunt
 // About
 export const getAboutUs = () => api.get('/about/about-us');
 export const createOrUpdateAboutUs = (data) => api.post('/about/about-us', data);
+export const uploadAboutImage = (file) => {
+  const payload = new FormData();
+  payload.append('imageFile', file);
+  return api.post('/about/upload-image', payload);
+};
 
 // Governance
 export const getGovernance = () => api.get('/about/governance');

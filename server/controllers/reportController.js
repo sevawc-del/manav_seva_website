@@ -1,5 +1,18 @@
 // Report Controller
+const fs = require('fs/promises');
+const cloudinary = require('../config/cloudinary');
 const Report = require('../models/Report');
+
+const cleanupTempUpload = async (filePath) => {
+  if (!filePath) return;
+  try {
+    await fs.unlink(filePath);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.error('Temp upload cleanup error:', error.message);
+    }
+  }
+};
 
 const getAllReports = async (req, res) => {
   try {
@@ -50,11 +63,32 @@ const deleteReport = async (req, res) => {
   }
 };
 
+const uploadReportFile = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'File is required' });
+  }
+
+  try {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'manav-seva/reports',
+      resource_type: 'raw'
+    });
+
+    await cleanupTempUpload(req.file.path);
+    return res.status(200).json({ fileUrl: result.secure_url });
+  } catch (error) {
+    await cleanupTempUpload(req.file.path);
+    console.error('Report file upload error:', error.message);
+    return res.status(500).json({ message: 'Failed to upload file' });
+  }
+};
+
 module.exports = {
   getAllReports,
   getReportById,
   createReport,
   updateReport,
   deleteReport,
+  uploadReportFile,
 };
 

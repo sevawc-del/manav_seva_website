@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 
-const HierarchyNode = ({ node, onChange, onAddChild, onRemove, path }) => {
+const HierarchyNode = ({ node, onChange, onAddChild, onRemove, path, onUploadImage }) => {
+  const imageInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+
   const handleFieldChange = (field, value) => {
     onChange(path, { ...node, [field]: value });
   };
@@ -52,6 +55,44 @@ const HierarchyNode = ({ node, onChange, onAddChild, onRemove, path }) => {
           onChange={(e) => handleFieldChange('image', e.target.value)}
           className="p-2 border rounded"
         />
+        <div>
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              try {
+                if (!onUploadImage) {
+                  throw new Error('Image upload is not configured');
+                }
+                setUploading(true);
+                const response = await onUploadImage(file);
+                const imageUrl = response?.data?.imageUrl || '';
+                if (!imageUrl) {
+                  throw new Error('Upload succeeded but no image URL returned');
+                }
+                handleFieldChange('image', imageUrl);
+              } catch (error) {
+                console.error(error);
+                alert('Failed to upload image');
+              } finally {
+                setUploading(false);
+                e.target.value = '';
+              }
+            }}
+          />
+          <button
+            type="button"
+            disabled={uploading}
+            onClick={() => imageInputRef.current?.click()}
+            className="w-full bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+          >
+            {uploading ? 'Uploading...' : 'Choose Image'}
+          </button>
+        </div>
       </div>
       <div className="flex gap-2 mb-4">
         <button
@@ -80,6 +121,7 @@ const HierarchyNode = ({ node, onChange, onAddChild, onRemove, path }) => {
               onChange={onChange}
               onAddChild={onAddChild}
               onRemove={onRemove}
+              onUploadImage={onUploadImage}
               path={[...path, 'children', index]}
             />
           ))}
@@ -89,7 +131,7 @@ const HierarchyNode = ({ node, onChange, onAddChild, onRemove, path }) => {
   );
 };
 
-const HierarchyForm = ({ hierarchy, onChange }) => {
+const HierarchyForm = ({ hierarchy, onChange, onUploadImage }) => {
   const handleNodeChange = (path, updatedNode) => {
     const updateHierarchy = (nodes, currentPath) => {
       if (currentPath.length === 0) {
@@ -156,6 +198,7 @@ const HierarchyForm = ({ hierarchy, onChange }) => {
           onChange={handleNodeChange}
           onAddChild={handleAddChild}
           onRemove={handleRemove}
+          onUploadImage={onUploadImage}
           path={[index]}
         />
       ))}

@@ -1,11 +1,35 @@
 // Tender Controller
+const fs = require('fs/promises');
+const cloudinary = require('../config/cloudinary');
 const Tender = require('../models/Tender');
+
+const cleanupTempUpload = async (filePath) => {
+  if (!filePath) return;
+  try {
+    await fs.unlink(filePath);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.error('Temp upload cleanup error:', error.message);
+    }
+  }
+};
+
+const normalizeDocuments = (documents) => {
+  if (Array.isArray(documents)) {
+    return documents.map((doc) => String(doc || '').trim()).filter(Boolean);
+  }
+  if (typeof documents === 'string') {
+    const value = documents.trim();
+    return value ? [value] : [];
+  }
+  return [];
+};
 
 const pickTenderFields = (body = {}) => ({
   title: body.title,
   description: body.description,
   deadline: body.deadline,
-  documents: body.documents
+  documents: normalizeDocuments(body.documents)
 });
 
 const getAllTenders = async (req, res) => {
@@ -61,11 +85,32 @@ const deleteTender = async (req, res) => {
   }
 };
 
+const uploadTenderDocument = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'File is required' });
+  }
+
+  try {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'manav-seva/tenders',
+      resource_type: 'raw'
+    });
+
+    await cleanupTempUpload(req.file.path);
+    return res.status(200).json({ fileUrl: result.secure_url });
+  } catch (error) {
+    await cleanupTempUpload(req.file.path);
+    console.error('Tender file upload error:', error.message);
+    return res.status(500).json({ message: 'Failed to upload file' });
+  }
+};
+
 module.exports = {
   getAllTenders,
   getTenderById,
   createTender,
   updateTender,
   deleteTender,
+  uploadTenderDocument,
 };
 

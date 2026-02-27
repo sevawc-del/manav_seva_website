@@ -1,12 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const { protect, admin } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
+
+const handleUploadError = (req, res, next) => {
+  upload.single('imageFile')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ message: 'Invalid image upload' });
+    }
+    next();
+  });
+};
 
 // About Us
-const { getAboutUs, createOrUpdateAboutUs, deleteAboutUs } = require('../controllers/aboutUsController');
+const { getAboutUs, createOrUpdateAboutUs, deleteAboutUs, uploadAboutImage } = require('../controllers/aboutUsController');
 router.get('/about-us', getAboutUs);
 router.post('/about-us', protect, admin, createOrUpdateAboutUs);
 router.delete('/about-us', protect, admin, deleteAboutUs);
+router.post('/upload-image', protect, admin, handleUploadError, uploadAboutImage);
 
 // Governance
 const { getGovernance, createOrUpdateGovernance, deleteGovernance } = require('../controllers/governanceController');

@@ -8,6 +8,7 @@ import {
   getMessages,
   createOrUpdateMessage,
   deleteMessage,
+  uploadAboutImage,
   createGeographicActivity,
   updateGeographicActivity,
   deleteGeographicActivity,
@@ -48,6 +49,9 @@ const indianStatesAndDistricts = {
 
 const ManageAbout = () => {
   const formRef = useRef(null);
+  const messageImageInputRef = useRef(null);
+  const geographicImageInputRef = useRef(null);
+  const aboutImageInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('about-us');
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
@@ -72,6 +76,25 @@ const ManageAbout = () => {
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [existingActivities, setExistingActivities] = useState([]);
   const [editingActivity, setEditingActivity] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const uploadImageAndSetField = async (file, setter) => {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const response = await uploadAboutImage(file);
+      const imageUrl = response?.data?.imageUrl || '';
+      if (!imageUrl) {
+        throw new Error('Upload succeeded but no image URL returned');
+      }
+      setter(imageUrl);
+    } catch (error) {
+      console.error(error);
+      alert('Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const handleAddDistrict = () => {
     if (selectedState && selectedDistrict) {
@@ -371,6 +394,27 @@ const ManageAbout = () => {
               onChange={(e) => setMessageForm({ ...messageForm, image: e.target.value })}
               className="w-full p-2 mb-4 border rounded"
             />
+            <input
+              ref={messageImageInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                await uploadImageAndSetField(file, (imageUrl) =>
+                  setMessageForm((prev) => ({ ...prev, image: imageUrl }))
+                );
+                e.target.value = '';
+              }}
+            />
+            <button
+              type="button"
+              disabled={uploadingImage}
+              onClick={() => messageImageInputRef.current?.click()}
+              className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 mb-4 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+            >
+              {uploadingImage ? 'Uploading...' : 'Choose Image'}
+            </button>
             <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
               {editingMessage ? 'Update' : 'Add'} Message
             </button>
@@ -438,6 +482,27 @@ const ManageAbout = () => {
               onChange={(e) => setGeographicFocusFormData({ ...geographicFocusFormData, image: e.target.value })}
               className="w-full p-2 mb-4 border rounded"
             />
+            <input
+              ref={geographicImageInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                await uploadImageAndSetField(file, (imageUrl) =>
+                  setGeographicFocusFormData((prev) => ({ ...prev, image: imageUrl }))
+                );
+                e.target.value = '';
+              }}
+            />
+            <button
+              type="button"
+              disabled={uploadingImage}
+              onClick={() => geographicImageInputRef.current?.click()}
+              className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 mb-4 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+            >
+              {uploadingImage ? 'Uploading...' : 'Choose Image'}
+            </button>
             <div className="mb-4">
               <h3 className="text-lg font-semibold mb-2">Select Districts</h3>
               <div className="flex space-x-4 mb-4">
@@ -557,6 +622,7 @@ const ManageAbout = () => {
             <h3 className="text-lg font-semibold mb-2">Organizational Hierarchy</h3>
             <HierarchyForm
               hierarchy={governanceFormData.hierarchy}
+              onUploadImage={uploadAboutImage}
               onChange={(newHierarchy) => setGovernanceFormData({ ...governanceFormData, hierarchy: newHierarchy })}
             />
           </div>
@@ -633,6 +699,30 @@ const ManageAbout = () => {
             onChange={(e) => setFormData((prev) => ({ ...prev, [activeTab]: { ...prev[activeTab], image: e.target.value } }))}
             className="w-full p-2 mb-4 border rounded"
           />
+          <input
+            ref={aboutImageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              await uploadImageAndSetField(file, (imageUrl) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  [activeTab]: { ...prev[activeTab], image: imageUrl }
+                }))
+              );
+              e.target.value = '';
+            }}
+          />
+          <button
+            type="button"
+            disabled={uploadingImage}
+            onClick={() => aboutImageInputRef.current?.click()}
+            className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 mb-4 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+          >
+            {uploadingImage ? 'Uploading...' : 'Choose Image'}
+          </button>
           <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
             Save
           </button>

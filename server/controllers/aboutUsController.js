@@ -1,4 +1,17 @@
+const fs = require('fs/promises');
+const cloudinary = require('../config/cloudinary');
 const AboutUs = require('../models/AboutUs');
+
+const cleanupTempUpload = async (filePath) => {
+  if (!filePath) return;
+  try {
+    await fs.unlink(filePath);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.error('Temp upload cleanup error:', error.message);
+    }
+  }
+};
 
 // Get AboutUs
 const getAboutUs = async (req, res) => {
@@ -53,5 +66,25 @@ const deleteAboutUs = async (req, res) => {
   }
 };
 
-module.exports = { getAboutUs, createOrUpdateAboutUs, deleteAboutUs };
+const uploadAboutImage = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'Image file is required' });
+  }
+
+  try {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'manav-seva/about',
+      resource_type: 'image'
+    });
+
+    await cleanupTempUpload(req.file.path);
+    return res.status(200).json({ imageUrl: result.secure_url });
+  } catch (error) {
+    await cleanupTempUpload(req.file.path);
+    console.error('About image upload error:', error.message);
+    return res.status(500).json({ message: 'Failed to upload image' });
+  }
+};
+
+module.exports = { getAboutUs, createOrUpdateAboutUs, deleteAboutUs, uploadAboutImage };
 

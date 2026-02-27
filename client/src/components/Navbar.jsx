@@ -1,12 +1,27 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Menu, X, ChevronDown, Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
+import { getSiteSettings } from "../utils/api";
+
+const DEFAULT_SITE_SETTINGS = {
+  organizationName: "Manav Seva Sansthan SEVA",
+  organizationSubline: "Society for Eco-Development Voluntary Action",
+  logoUrl: "/images/logo.png",
+  supportMessage: "Support our mission to transform lives.",
+  facebookUrl: "https://www.facebook.com",
+  instagramUrl: "https://www.instagram.com",
+  linkedinUrl: "https://www.linkedin.com",
+  twitterUrl: "https://x.com",
+  youtubeUrl: "https://www.youtube.com",
+};
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isMediaOpen, setIsMediaOpen] = useState(false);
   const [isGetInvolvedOpen, setIsGetInvolvedOpen] = useState(false);
+  const [siteSettings, setSiteSettings] = useState(DEFAULT_SITE_SETTINGS);
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -33,35 +48,83 @@ const Navbar = () => {
     { name: "Volunteer", path: "/get-involved/volunteer" },
   ];
 
-  const socialLinks = [
-    { name: "Facebook", href: "https://www.facebook.com", icon: Facebook },
-    { name: "Instagram", href: "https://www.instagram.com", icon: Instagram },
-    { name: "LinkedIn", href: "https://www.linkedin.com", icon: Linkedin },
-    { name: "YouTube", href: "https://www.youtube.com", icon: Youtube },
-  ];
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchSiteSettings = async () => {
+      try {
+        const response = await getSiteSettings();
+        if (!isMounted || !response?.data) return;
+        setSiteSettings((prev) => ({
+          ...prev,
+          ...response.data,
+        }));
+      } catch (error) {
+        console.error("Failed to load site settings:", error);
+      }
+    };
+
+    fetchSiteSettings();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const socialLinks = useMemo(
+    () =>
+      [
+        { name: "Facebook", href: siteSettings.facebookUrl, icon: Facebook },
+        { name: "Instagram", href: siteSettings.instagramUrl, icon: Instagram },
+        { name: "LinkedIn", href: siteSettings.linkedinUrl, icon: Linkedin },
+        { name: "Twitter", href: siteSettings.twitterUrl, icon: FaXTwitter },
+        { name: "YouTube", href: siteSettings.youtubeUrl, icon: Youtube },
+      ].filter((link) => String(link.href || "").trim()),
+    [
+      siteSettings.facebookUrl,
+      siteSettings.instagramUrl,
+      siteSettings.linkedinUrl,
+      siteSettings.twitterUrl,
+      siteSettings.youtubeUrl,
+    ]
+  );
+
+  const organizationLabel = (siteSettings.organizationName || DEFAULT_SITE_SETTINGS.organizationName).trim();
+  const configuredSubline = (siteSettings.organizationSubline || "").trim();
+  const nameParts = organizationLabel.split(/\s+/).filter(Boolean);
+  const derivedSubline =
+    configuredSubline ||
+    (nameParts.length > 2 ? nameParts.slice(-2).join(" ") : nameParts.length === 2 ? nameParts[1] : "");
+  const primaryName =
+    configuredSubline || nameParts.length <= 2
+      ? organizationLabel
+      : nameParts.slice(0, -2).join(" ") || organizationLabel;
 
   return (
     <header className="sticky top-0 w-full z-50 shadow-md">
-      <div className="bg-blue-900 text-white">
+      <div className="bg-blue-700 text-white">
         <div className="container mx-auto px-4 py-2 flex items-center justify-between gap-3">
           <p className="text-xs sm:text-sm font-medium truncate">
-            Support our mission to transform lives.
+            {siteSettings.supportMessage || DEFAULT_SITE_SETTINGS.supportMessage}
           </p>
 
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="hidden sm:flex items-center gap-1">
-              {socialLinks.map(({ name, href, icon: Icon }) => (
-                <a
-                  key={name}
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={name}
-                  className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 transition"
-                >
-                  <Icon size={15} />
-                </a>
-              ))}
+              {socialLinks.map((item) => {
+                const IconComponent = item.icon;
+                return (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={item.name}
+                    className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 transition"
+                  >
+                    <IconComponent size={15} />
+                  </a>
+                );
+              })}
             </div>
             <Link
               to="/donate"
@@ -74,12 +137,25 @@ const Navbar = () => {
       </div>
 
       <nav className="bg-white w-full">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div className="container mx-auto px-4 py-4 md:py-3 flex items-center justify-between">
         
         {/* LOGO */}
-        <Link to="/" className="flex items-center gap-2">
-          <img src="/images/logo.png" alt="Logo" className="w-10 h-10" />
-          <span className="font-bold text-xl text-gray-800">Manav Seva India</span>
+        <Link to="/" className="flex items-center gap-2.5 min-w-0">
+          <img
+            src={siteSettings.logoUrl || DEFAULT_SITE_SETTINGS.logoUrl}
+            alt={organizationLabel || "Logo"}
+            className="w-16 h-16 md:w-20 md:h-20 object-contain shrink-0"
+          />
+          <div className="leading-none min-w-0">
+            <p className="font-bold text-base sm:text-lg md:text-xl text-green-700 truncate">
+              {primaryName}
+            </p>
+            {derivedSubline && (
+              <p className="font-semibold text-[11px] sm:text-xs md:text-sm text-orange-500 tracking-wide truncate">
+                {derivedSubline}
+              </p>
+            )}
+          </div>
         </Link>
 
         {/* Desktop Menu */}
@@ -237,18 +313,21 @@ const Navbar = () => {
         <div className="md:hidden bg-white shadow-inner px-4 py-4">
           <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
             <div className="flex items-center gap-2">
-              {socialLinks.map(({ name, href, icon: Icon }) => (
-                <a
-                  key={name}
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={name}
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
-                >
-                  <Icon size={15} />
-                </a>
-              ))}
+              {socialLinks.map((item) => {
+                const IconComponent = item.icon;
+                return (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={item.name}
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                  >
+                    <IconComponent size={15} />
+                  </a>
+                );
+              })}
             </div>
             <Link
               to="/donate"

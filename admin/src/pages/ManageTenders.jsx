@@ -1,11 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import DataTable from '../components/DataTable';
-import { getTenders, createTender, updateTender, deleteTender } from '../utils/api';
+import {
+  getTenders,
+  createTender,
+  updateTender,
+  deleteTender,
+  uploadTenderDocument
+} from '../utils/api';
 
 const ManageTenders = () => {
   const [tenders, setTenders] = useState([]);
   const [formData, setFormData] = useState({ title: '', description: '', deadline: '', documents: '' });
   const [editing, setEditing] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFileName, setSelectedFileName] = useState('');
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const fileInputRef = useRef(null);
 
   const fetchTenders = async () => {
     try {
@@ -26,22 +36,54 @@ const ManageTenders = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      let payload = { ...formData };
+      if (selectedFile) {
+        setUploadingFile(true);
+        const response = await uploadTenderDocument(selectedFile);
+        const fileUrl = response?.data?.fileUrl || '';
+        if (!fileUrl) {
+          throw new Error('Upload succeeded but no file URL returned');
+        }
+        payload = { ...payload, documents: fileUrl };
+      }
+
       if (editing) {
-        await updateTender(editing._id, formData);
+        await updateTender(editing._id, payload);
       } else {
-        await createTender(formData);
+        await createTender(payload);
       }
       setFormData({ title: '', description: '', deadline: '', documents: '' });
       setEditing(null);
+      setSelectedFile(null);
+      setSelectedFileName('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       fetchTenders();
     } catch (error) {
       console.error(error);
+      alert(error?.response?.data?.message || 'Failed to save tender');
+    } finally {
+      setUploadingFile(false);
     }
   };
 
   const handleEdit = (item) => {
-    setFormData({ title: item.title, description: item.description, deadline: item.deadline, documents: item.documents });
+    const documentsValue = Array.isArray(item.documents)
+      ? (item.documents[0] || '')
+      : (item.documents || '');
+    setFormData({
+      title: item.title,
+      description: item.description,
+      deadline: item.deadline ? String(item.deadline).split('T')[0] : '',
+      documents: documentsValue
+    });
     setEditing(item);
+    setSelectedFile(null);
+    setSelectedFileName('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleDelete = async (id) => {
@@ -93,8 +135,36 @@ const ManageTenders = () => {
           onChange={(e) => setFormData({ ...formData, documents: e.target.value })}
           className="w-full p-2 mb-4 border rounded"
         />
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-          {editing ? 'Update' : 'Add'} Tender
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setSelectedFile(file);
+            setSelectedFileName(file.name);
+          }}
+        />
+        <button
+          type="button"
+          disabled={uploadingFile}
+          onClick={() => fileInputRef.current?.click()}
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed mb-4"
+        >
+          Choose File
+        </button>
+        {selectedFileName && <p className="mb-4 text-sm text-gray-600">Selected: {selectedFileName}</p>}
+        {!selectedFileName && editing && formData.documents && (
+          <p className="mb-4 text-sm text-gray-600">Using current document URL</p>
+        )}
+        <button
+          type="submit"
+          disabled={uploadingFile}
+          className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-400"
+        >
+          {uploadingFile ? 'Uploading...' : `${editing ? 'Update' : 'Add'} Tender`}
         </button>
       </form>
       <DataTable data={tenders} columns={columns} onEdit={handleEdit} onDelete={handleDelete} />

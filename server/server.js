@@ -95,6 +95,7 @@ mongoose
     app.use('/api/events', require('./routes/eventRoutes'));
     app.use('/api/testimonials', require('./routes/testimonialRoutes'));
     app.use('/api/sponsors', require('./routes/sponsorRoutes'));
+    app.use('/api/site-settings', require('./routes/siteSettingsRoutes'));
     app.use('/api/donation-settings', require('./routes/donationSettingsRoutes'));
     app.use('/api/donations', require('./routes/donationRoutes'));
     app.use('/api/tenders', require('./routes/tenderRoutes'));

@@ -27,6 +27,7 @@ export const getSponsors = () => api.get('/sponsors');
 
 // Donation Settings
 export const getDonationSettings = () => api.get('/donation-settings');
+export const getSiteSettings = () => api.get('/site-settings');
 export const createDonationOrder = (data) => api.post('/donations/create-order', data);
 export const getDonationStatus = (orderId, email) =>
   api.get(`/donations/status/${orderId}`, {
