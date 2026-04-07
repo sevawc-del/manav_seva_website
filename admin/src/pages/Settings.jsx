@@ -12,8 +12,6 @@ const initialForm = {
   footerEmail: '',
   footerAddress: '',
   footerCopyrightText: '',
-  chairpersonName: '',
-  chairpersonImageUrl: '',
   facebookUrl: '',
   instagramUrl: '',
   linkedinUrl: '',
@@ -28,11 +26,7 @@ const Settings = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedFileName, setSelectedFileName] = useState('');
   const [selectedFilePreview, setSelectedFilePreview] = useState('');
-  const [chairpersonFile, setChairpersonFile] = useState(null);
-  const [chairpersonFileName, setChairpersonFileName] = useState('');
-  const [chairpersonPreview, setChairpersonPreview] = useState('');
   const fileInputRef = useRef(null);
-  const chairpersonFileInputRef = useRef(null);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -75,8 +69,6 @@ const Settings = () => {
       payload.append('footerEmail', formData.footerEmail || '');
       payload.append('footerAddress', formData.footerAddress || '');
       payload.append('footerCopyrightText', formData.footerCopyrightText || '');
-      payload.append('chairpersonName', formData.chairpersonName || '');
-      payload.append('chairpersonImageUrl', formData.chairpersonImageUrl || '');
       payload.append('facebookUrl', formData.facebookUrl || '');
       payload.append('instagramUrl', formData.instagramUrl || '');
       payload.append('linkedinUrl', formData.linkedinUrl || '');
@@ -86,27 +78,20 @@ const Settings = () => {
       if (selectedFile) {
         payload.append('logoFile', selectedFile);
       }
-      if (chairpersonFile) {
-        payload.append('chairpersonImageFile', chairpersonFile);
-      }
 
       const response = await createOrUpdateSiteSettings(payload);
       setFormData((prev) => ({
         ...prev,
         ...response.data
       }));
+
       setSelectedFile(null);
       setSelectedFileName('');
       setSelectedFilePreview('');
-      setChairpersonFile(null);
-      setChairpersonFileName('');
-      setChairpersonPreview('');
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-      if (chairpersonFileInputRef.current) {
-        chairpersonFileInputRef.current.value = '';
-      }
+
       alert('Site settings saved successfully');
     } catch (error) {
       console.error('Failed to save site settings:', error);
@@ -276,76 +261,6 @@ const Settings = () => {
             />
           </div>
         </div>
-
-        <h2 className="text-lg font-semibold mb-3">Chairperson Section</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Chairperson Name</label>
-            <input
-              type="text"
-              name="chairpersonName"
-              value={formData.chairpersonName || ''}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Chairperson Image URL</label>
-            <input
-              type="text"
-              name="chairpersonImageUrl"
-              value={formData.chairpersonImageUrl || ''}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              placeholder="https://..."
-            />
-          </div>
-        </div>
-
-        <div className="mb-6 text-left">
-          <input
-            ref={chairpersonFileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-              setChairpersonFile(file);
-              setChairpersonFileName(file.name);
-              const reader = new FileReader();
-              reader.onloadend = () => {
-                setChairpersonPreview(String(reader.result || ''));
-              };
-              reader.readAsDataURL(file);
-            }}
-            className="hidden"
-          />
-          <button
-            type="button"
-            onClick={() => chairpersonFileInputRef.current?.click()}
-            disabled={submitting}
-            className="inline-block bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-          >
-            Choose Chairperson Image
-          </button>
-          {chairpersonFileName && (
-            <p className="mt-2 text-sm text-gray-600">Selected: {chairpersonFileName}</p>
-          )}
-          {!chairpersonFileName && formData.chairpersonImageUrl && (
-            <p className="mt-2 text-sm text-gray-600">Using current chairperson image URL</p>
-          )}
-        </div>
-
-        {(chairpersonPreview || formData.chairpersonImageUrl) && (
-          <div className="mb-6">
-            <p className="text-sm text-gray-600 mb-2">Chairperson Image Preview</p>
-            <img
-              src={chairpersonPreview || formData.chairpersonImageUrl}
-              alt="Chairperson preview"
-              className="h-20 w-20 object-cover border rounded-full bg-white"
-            />
-          </div>
-        )}
 
         <h2 className="text-lg font-semibold mb-3">Social Links</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

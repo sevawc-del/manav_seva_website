@@ -2,6 +2,7 @@
 const Gallery = require('../models/Gallery');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs/promises');
+const { deleteCloudinaryAsset } = require('../utils/cloudinaryAsset');
 
 const cleanupTempUpload = async (filePath) => {
   if (!filePath) return;
@@ -14,40 +15,22 @@ const cleanupTempUpload = async (filePath) => {
   }
 };
 
-const extractCloudinaryPublicId = (imageUrl) => {
-  if (!imageUrl || typeof imageUrl !== 'string') return null;
-
-  try {
-    const parsedUrl = new URL(imageUrl);
-    if (!parsedUrl.hostname.includes('res.cloudinary.com')) return null;
-
-    const uploadIndex = parsedUrl.pathname.indexOf('/upload/');
-    if (uploadIndex === -1) return null;
-
-    const pathAfterUpload = parsedUrl.pathname.slice(uploadIndex + '/upload/'.length);
-    const segments = pathAfterUpload.split('/').filter(Boolean);
-    const versionIndex = segments.findIndex((segment) => /^v\d+$/.test(segment));
-    if (versionIndex === -1 || versionIndex >= segments.length - 1) return null;
-
-    const publicIdWithExtension = segments.slice(versionIndex + 1).join('/');
-    return publicIdWithExtension.replace(/\.[^/.]+$/, '');
-  } catch (error) {
-    return null;
-  }
-};
-
 const deleteCloudinaryImage = async (imageUrl) => {
-  const publicId = extractCloudinaryPublicId(imageUrl);
-  if (!publicId) return;
-
   try {
-    await cloudinary.uploader.destroy(publicId, {
-      resource_type: 'image',
+    await deleteCloudinaryAsset({
+      assetUrl: imageUrl,
+      resourceType: 'image',
+      fallbackResourceTypes: ['image'],
       invalidate: true
     });
   } catch (error) {
     console.error('Cloudinary delete error:', error);
   }
+};
+
+const parseShowOnHome = (value, fallback = true) => {
+  if (value === undefined) return fallback;
+  return value === true || value === 'true';
 };
 
 const getAllGalleryItems = async (req, res) => {
@@ -73,6 +56,7 @@ const createGalleryItem = async (req, res) => {
   try {
     const { title, description, date } = req.body;
     let imageUrl = req.body.image;
+    const showOnHome = parseShowOnHome(req.body.showOnHome, true);
 
     if (req.file) {
       try {
@@ -97,7 +81,8 @@ const createGalleryItem = async (req, res) => {
       title,
       image: imageUrl,
       description,
-      date
+      date,
+      showOnHome
     });
 
     const newGalleryItem = await galleryItem.save();
@@ -114,6 +99,7 @@ const updateGalleryItem = async (req, res) => {
 
     const { title, description, date } = req.body;
     let imageUrl = req.body.image || existingItem.image;
+    const showOnHome = parseShowOnHome(req.body.showOnHome, existingItem.showOnHome !== false);
 
     if (req.file) {
       try {
@@ -136,7 +122,8 @@ const updateGalleryItem = async (req, res) => {
         title: title ?? existingItem.title,
         image: imageUrl,
         description: description ?? existingItem.description,
-        date: date ?? existingItem.date
+        date: date ?? existingItem.date,
+        showOnHome
       },
       { new: true }
     );

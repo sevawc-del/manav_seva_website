@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getEventBySlug } from '../utils/api';
 import Loader from '../components/Loader';
+import MarkdownContent from '../components/MarkdownContent';
 
 const EventDetail = () => {
   const { slug } = useParams();
@@ -70,7 +71,7 @@ const EventDetail = () => {
               </a>
             </p>
           )}
-          <p className="text-gray-700 whitespace-pre-line">{eventItem.content || ''}</p>
+          <MarkdownContent content={eventItem.content || ''} />
         </div>
       </article>
     </div>

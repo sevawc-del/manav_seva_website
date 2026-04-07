@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import DataTable from '../components/DataTable';
 import { getUsers, createUser, updateUser, deleteUser } from '../utils/api';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContextValue';
 
 const Users = () => {
   const { user } = useContext(AuthContext);

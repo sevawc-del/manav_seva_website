@@ -14,7 +14,7 @@ const ManageSliders = () => {
     image: '',
     order: 0,
     buttonText: 'Learn More',
-    buttonLink: '/about',
+    buttonLink: '/about/about-us',
     isActive: true
   });
 
@@ -59,7 +59,7 @@ const ManageSliders = () => {
       payload.append('subtitle', formData.subtitle);
       payload.append('order', formData.order ?? 0);
       payload.append('buttonText', formData.buttonText || 'Learn More');
-      payload.append('buttonLink', formData.buttonLink || '/about');
+      payload.append('buttonLink', formData.buttonLink || '/about/about-us');
       payload.append('isActive', formData.isActive ? 'true' : 'false');
       
       // image can be a File or a URL string
@@ -119,7 +119,7 @@ const ManageSliders = () => {
       image: '',
       order: 0,
       buttonText: 'Learn More',
-      buttonLink: '/about',
+      buttonLink: '/about/about-us',
       isActive: true
     });
     setPreview('');
@@ -218,7 +218,7 @@ const ManageSliders = () => {
             value={formData.buttonLink}
             onChange={(e) => setFormData(prev => ({ ...prev, buttonLink: e.target.value }))}
             className="w-full border rounded px-3 py-2"
-            placeholder="e.g., /about"
+            placeholder="e.g., /about/about-us"
           />
         </div>
 

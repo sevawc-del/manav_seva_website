@@ -5,7 +5,7 @@ import { getGallery, createGalleryItem, updateGalleryItem, deleteGalleryItem } f
 const ManageGallery = () => {
   const [gallery, setGallery] = useState([]);
   const [submitting, setSubmitting] = useState(false);
-  const [formData, setFormData] = useState({ title: '', image: '', description: '' });
+  const [formData, setFormData] = useState({ title: '', image: '', description: '', showOnHome: true });
   const [editing, setEditing] = useState(null);
   const [selectedFileName, setSelectedFileName] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -36,6 +36,7 @@ const ManageGallery = () => {
       const payload = new FormData();
       payload.append('title', formData.title);
       payload.append('description', formData.description);
+      payload.append('showOnHome', String(formData.showOnHome));
       if (formData.image) {
         payload.append('image', formData.image);
       }
@@ -53,7 +54,7 @@ const ManageGallery = () => {
         }
         await createGalleryItem(payload);
       }
-      setFormData({ title: '', image: '', description: '' });
+      setFormData({ title: '', image: '', description: '', showOnHome: true });
       setEditing(null);
       setSelectedFile(null);
       setSelectedFileName('');
@@ -69,7 +70,12 @@ const ManageGallery = () => {
   };
 
   const handleEdit = (item) => {
-    setFormData({ title: item.title, image: item.image, description: item.description });
+    setFormData({
+      title: item.title,
+      image: item.image,
+      description: item.description || '',
+      showOnHome: item.showOnHome !== false
+    });
     setEditing(item);
     setSelectedFile(null);
     setSelectedFileName('');
@@ -98,8 +104,14 @@ const ManageGallery = () => {
   const columns = [
     { header: 'Title', key: 'title' },
     { header: 'Description', key: 'description' },
+    { header: 'Show on Home', key: 'showOnHomeLabel' },
     { header: 'Date', key: 'date' },
   ];
+
+  const tableData = gallery.map((item) => ({
+    ...item,
+    showOnHomeLabel: item.showOnHome !== false ? 'Yes' : 'No'
+  }));
 
   return (
     <div className="p-6">
@@ -150,6 +162,14 @@ const ManageGallery = () => {
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           className="w-full p-2 mb-4 border rounded"
         />
+        <label className="mb-4 flex items-center gap-2 text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={formData.showOnHome}
+            onChange={(e) => setFormData({ ...formData, showOnHome: e.target.checked })}
+          />
+          Show this image on Home page
+        </label>
         <button
           type="submit"
           disabled={submitting}
@@ -158,7 +178,7 @@ const ManageGallery = () => {
           {submitting ? 'Saving...' : editing ? 'Update' : 'Add'} Gallery Item
         </button>
       </form>
-      <DataTable data={gallery} columns={columns} onEdit={handleEdit} onDelete={handleDelete} />
+      <DataTable data={tableData} columns={columns} onEdit={handleEdit} onDelete={handleDelete} />
     </div>
   );
 };

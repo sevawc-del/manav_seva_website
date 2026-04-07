@@ -1,20 +1,46 @@
 import React, { useEffect, useRef, useState } from "react";
-import * as d3 from "d3";
+import { json } from "d3-fetch";
+import { geoMercator, geoPath } from "d3-geo";
+import { select } from "d3-selection";
 import { feature } from "topojson-client";
 
 const DISTRICT_TOPO = "/maps/india-districts.json";
 const STATE_TOPO = "/maps/INDIA_STATES.json";
+const MAP_WIDTH = 900;
+const LANDSCAPE_HEIGHT = 620;
+const PORTRAIT_MOBILE_HEIGHT = 540;
+const PORTRAIT_TABLET_HEIGHT = 520;
+
+const getResponsiveMapHeight = () => {
+  if (typeof window === "undefined") return LANDSCAPE_HEIGHT;
+
+  const isPortrait = window.innerHeight > window.innerWidth;
+  if (!isPortrait) return LANDSCAPE_HEIGHT;
+
+  return window.innerWidth < 768 ? PORTRAIT_MOBILE_HEIGHT : PORTRAIT_TABLET_HEIGHT;
+};
 
 const IndiaMap = ({ selectedDistricts = [] }) => {
   const svgRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
+  const [mapHeight, setMapHeight] = useState(getResponsiveMapHeight);
 
   useEffect(() => {
-    const svg = d3.select(svgRef.current);
+    const handleResize = () => {
+      setMapHeight(getResponsiveMapHeight());
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    const svg = select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const width = 900;
-    const height = 700;
+    const width = MAP_WIDTH;
+    const height = mapHeight;
 
     svg
       .attr("viewBox", `0 0 ${width} ${height}`)
@@ -22,8 +48,8 @@ const IndiaMap = ({ selectedDistricts = [] }) => {
       .style("height", "auto");
 
     Promise.all([
-      d3.json(DISTRICT_TOPO),
-      d3.json(STATE_TOPO),
+      json(DISTRICT_TOPO),
+      json(STATE_TOPO),
     ]).then(([districtTopo, stateTopo]) => {
       const districtKey = Object.keys(districtTopo.objects)[0];
       const stateKey = Object.keys(stateTopo.objects)[0];
@@ -38,11 +64,10 @@ const IndiaMap = ({ selectedDistricts = [] }) => {
         stateTopo.objects[stateKey]
       );
 
-      const projection = d3
-        .geoMercator()
+      const projection = geoMercator()
         .fitSize([width, height], states);
 
-      const path = d3.geoPath(projection);
+      const path = geoPath(projection);
 
       const selectedSet = new Set(
         selectedDistricts.map((d) => d.toLowerCase())
@@ -85,10 +110,10 @@ const IndiaMap = ({ selectedDistricts = [] }) => {
         .attr("stroke-width", 0.5)
         .attr("pointer-events", "none");
     });
-  }, [selectedDistricts]);
+  }, [selectedDistricts, mapHeight]);
 
   return (
-    <div className="relative bg-white p-4 rounded-lg shadow">
+    <div className="relative overflow-hidden bg-white p-3 sm:p-4 rounded-lg shadow">
       <svg ref={svgRef} />
 
       {tooltip && (

@@ -1,6 +1,7 @@
 const Slider = require('../models/Slider');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs/promises');
+const { deleteCloudinaryAsset } = require('../utils/cloudinaryAsset');
 
 const cleanupTempUpload = async (filePath) => {
   if (!filePath) return;
@@ -13,35 +14,12 @@ const cleanupTempUpload = async (filePath) => {
   }
 };
 
-const extractCloudinaryPublicId = (imageUrl) => {
-  if (!imageUrl || typeof imageUrl !== 'string') return null;
-
-  try {
-    const parsedUrl = new URL(imageUrl);
-    if (!parsedUrl.hostname.includes('res.cloudinary.com')) return null;
-
-    const uploadIndex = parsedUrl.pathname.indexOf('/upload/');
-    if (uploadIndex === -1) return null;
-
-    const pathAfterUpload = parsedUrl.pathname.slice(uploadIndex + '/upload/'.length);
-    const segments = pathAfterUpload.split('/').filter(Boolean);
-    const versionIndex = segments.findIndex((segment) => /^v\d+$/.test(segment));
-    if (versionIndex === -1 || versionIndex >= segments.length - 1) return null;
-
-    const publicIdWithExtension = segments.slice(versionIndex + 1).join('/');
-    return publicIdWithExtension.replace(/\.[^/.]+$/, '');
-  } catch (error) {
-    return null;
-  }
-};
-
 const deleteCloudinaryImage = async (imageUrl) => {
-  const publicId = extractCloudinaryPublicId(imageUrl);
-  if (!publicId) return;
-
   try {
-    await cloudinary.uploader.destroy(publicId, {
-      resource_type: 'image',
+    await deleteCloudinaryAsset({
+      assetUrl: imageUrl,
+      resourceType: 'image',
+      fallbackResourceTypes: ['image'],
       invalidate: true
     });
   } catch (error) {
@@ -118,7 +96,7 @@ const createSlider = async (req, res) => {
       image: imageUrl,
       order: order || 0,
       buttonText: buttonText || 'Learn More',
-      buttonLink: buttonLink || '/about',
+      buttonLink: buttonLink || '/about/about-us',
       isActive: isActive !== 'false' && isActive !== false
     });
 

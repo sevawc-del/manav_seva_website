@@ -2,6 +2,7 @@
 const News = require('../models/News');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs/promises');
+const { deleteCloudinaryAsset } = require('../utils/cloudinaryAsset');
 
 const cleanupTempUpload = async (filePath) => {
   if (!filePath) return;
@@ -45,6 +46,19 @@ const pickNewsFields = (body = {}) => ({
   date: body.date,
   image: body.image
 });
+
+const deleteCloudinaryImage = async (imageUrl) => {
+  try {
+    await deleteCloudinaryAsset({
+      assetUrl: imageUrl,
+      resourceType: 'image',
+      fallbackResourceTypes: ['image'],
+      invalidate: true
+    });
+  } catch (error) {
+    console.error('Cloudinary delete error:', error.message);
+  }
+};
 
 const getAllNews = async (req, res) => {
   try {
@@ -135,9 +149,34 @@ const updateNews = async (req, res) => {
       { new: true }
     );
     if (!updatedNews) return res.status(404).json({ message: 'News not found' });
+
+    if (updatedNews.image && existingNews.image && updatedNews.image !== existingNews.image) {
+      await deleteCloudinaryImage(existingNews.image);
+    }
+
     res.json(updatedNews);
   } catch (error) {
     res.status(400).json({ message: 'Invalid request data' });
+  }
+};
+
+const uploadNewsImage = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'Image file is required' });
+  }
+
+  try {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'manav-seva/news',
+      resource_type: 'image'
+    });
+
+    await cleanupTempUpload(req.file.path);
+    return res.status(200).json({ imageUrl: result.secure_url });
+  } catch (error) {
+    await cleanupTempUpload(req.file.path);
+    console.error('News inline image upload error:', error.message);
+    return res.status(500).json({ message: 'Failed to upload image' });
   }
 };
 
@@ -145,6 +184,9 @@ const deleteNews = async (req, res) => {
   try {
     const deletedNews = await News.findByIdAndDelete(req.params.id);
     if (!deletedNews) return res.status(404).json({ message: 'News not found' });
+
+    await deleteCloudinaryImage(deletedNews.image);
+
     res.json({ message: 'News deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Internal Server Error' });
@@ -156,6 +198,7 @@ module.exports = {
   getNewsById,
   getNewsBySlug,
   createNews,
+  uploadNewsImage,
   updateNews,
   deleteNews,
 };

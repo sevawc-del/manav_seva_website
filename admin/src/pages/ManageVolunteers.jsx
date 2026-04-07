@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import DataTable from '../components/DataTable';
 import { getAllVolunteers, createVolunteer, updateVolunteer, deleteVolunteer } from '../utils/api';
 
@@ -15,18 +15,24 @@ const ManageVolunteers = () => {
   });
   const [editing, setEditing] = useState(null);
 
-  const fetchVolunteers = async () => {
+  const fetchVolunteers = useCallback(async () => {
     try {
       const res = await getAllVolunteers();
       setVolunteers(res.data);
     } catch (error) {
       console.error('Error fetching volunteers:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchVolunteers();
-  }, []);
+    const timeoutId = window.setTimeout(() => {
+      fetchVolunteers();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [fetchVolunteers]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

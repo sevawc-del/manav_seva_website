@@ -9,6 +9,7 @@ const ManageJourneys = () => {
   const [editingJourney, setEditingJourney] = useState(null);
   const [formData, setFormData] = useState({
     year: '',
+    summary: '',
     milestones: [''],
     order: 0
   });
@@ -33,6 +34,7 @@ const ManageJourneys = () => {
     try {
       const data = {
         ...formData,
+        summary: String(formData.summary || '').trim(),
         milestones: formData.milestones.filter(m => m.trim() !== '')
       };
 
@@ -53,6 +55,7 @@ const ManageJourneys = () => {
     setEditingJourney(journey);
     setFormData({
       year: journey.year,
+      summary: journey.summary || '',
       milestones: journey.milestones.length > 0 ? journey.milestones : [''],
       order: journey.order
     });
@@ -73,6 +76,7 @@ const ManageJourneys = () => {
   const resetForm = () => {
     setFormData({
       year: '',
+      summary: '',
       milestones: [''],
       order: 0
     });
@@ -106,8 +110,12 @@ const ManageJourneys = () => {
     }
   };
 
+  const truncateText = (value = '', maxLength = 80) =>
+    value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
+
   const columns = [
     { key: 'year', label: 'Year' },
+    { key: 'summary', label: 'Summary', render: (value) => truncateText(String(value || '')) },
     { key: 'milestones', label: 'Milestones', render: (value) => value.join(', ') },
     { key: 'order', label: 'Order' }
   ];
@@ -141,6 +149,18 @@ const ManageJourneys = () => {
                 value={formData.year}
                 onChange={(e) => setFormData({ ...formData, year: e.target.value })}
                 className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Summary</label>
+              <textarea
+                value={formData.summary}
+                onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+                className="w-full p-2 border rounded"
+                placeholder="Short summary shown by default on the website"
+                rows={3}
                 required
               />
             </div>
@@ -181,7 +201,10 @@ const ManageJourneys = () => {
               <input
                 type="number"
                 value={formData.order}
-                onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
+                onChange={(e) => {
+                  const parsedOrder = Number.parseInt(e.target.value, 10);
+                  setFormData({ ...formData, order: Number.isFinite(parsedOrder) ? parsedOrder : 0 });
+                }}
                 className="w-full p-2 border rounded"
               />
             </div>

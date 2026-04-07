@@ -27,10 +27,16 @@ const getJourneyById = async (req, res) => {
 // Create journey (admin)
 const createJourney = async (req, res) => {
   try {
-    const { year, milestones, order } = req.body;
+    const { year, summary, milestones, order } = req.body;
+    const normalizedMilestones = Array.isArray(milestones)
+      ? milestones.map((item) => String(item || '').trim()).filter(Boolean)
+      : [];
+    const normalizedSummary = String(summary || '').trim() || normalizedMilestones[0] || '';
+
     const journey = new Journey({
       year,
-      milestones,
+      summary: normalizedSummary,
+      milestones: normalizedMilestones,
       order: order || 0
     });
     await journey.save();
@@ -44,10 +50,22 @@ const createJourney = async (req, res) => {
 const updateJourney = async (req, res) => {
   try {
     const { id } = req.params;
-    const { year, milestones, isActive, order } = req.body;
+    const { year, summary, milestones, isActive, order } = req.body;
+    const normalizedMilestones = Array.isArray(milestones)
+      ? milestones.map((item) => String(item || '').trim()).filter(Boolean)
+      : [];
+    const normalizedSummary = String(summary || '').trim() || normalizedMilestones[0] || '';
+
     const journey = await Journey.findByIdAndUpdate(
       id,
-      { year, milestones, isActive, order, updatedAt: Date.now() },
+      {
+        year,
+        summary: normalizedSummary,
+        milestones: normalizedMilestones,
+        isActive,
+        order,
+        updatedAt: Date.now()
+      },
       { new: true }
     );
     if (!journey) {

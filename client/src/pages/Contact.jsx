@@ -23,21 +23,23 @@ const Contact = () => {
   const [feedbackError, setFeedbackError] = useState('');
   const [feedbackSuccess, setFeedbackSuccess] = useState('');
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setLoading(true);
     setError('');
     setSuccess('');
+
     try {
       await sendContactMessage(formData);
-      setSuccess('Thank you for your message! We will get back to you soon.');
+      setSuccess('We will get back to you soon.');
       setFormData({ name: '', email: '', message: '' });
     } catch {
       setError('Failed to send message. Please try again.');
@@ -46,16 +48,16 @@ const Contact = () => {
     }
   };
 
-  const handleFeedbackChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const handleFeedbackChange = (event) => {
+    const { name, value, type, checked } = event.target;
     setFeedbackData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
   };
 
-  const handleFeedbackSubmit = async (e) => {
-    e.preventDefault();
+  const handleFeedbackSubmit = async (event) => {
+    event.preventDefault();
     setFeedbackLoading(true);
     setFeedbackError('');
     setFeedbackSuccess('');
@@ -80,148 +82,208 @@ const Contact = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-8">Contact Us</h1>
-
-      <div className="max-w-2xl mx-auto mb-12">
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        {success && <p className="text-green-500 mb-4">{success}</p>}
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-          <div className="mb-4">
-            <label htmlFor="name" className="block text-gray-700 font-bold mb-2">Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 font-bold mb-2">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="message" className="block text-gray-700 font-bold mb-2">Message</label>
-            <textarea
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              rows="5"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            {loading ? 'Sending...' : 'Send Message'}
-          </button>
-        </form>
+      <div className="mb-8 rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 px-6 py-7 text-white shadow-lg">
+        <h1 className="text-3xl text-center font-bold md:text-left md:text-4xl">Contact Us</h1>
+        <p className="mt-2 text-sm text-center text-sky-100 md:text-left md:text-base">
+          Reach out for support, collaboration, or any questions about our programs.
+        </p>
       </div>
 
-      <div className="max-w-2xl mx-auto">
-        <h2 className="text-2xl font-bold text-center mb-4">Share Your Feedback</h2>
-        {feedbackError && <p className="text-red-500 mb-4">{feedbackError}</p>}
-        {feedbackSuccess && <p className="text-green-500 mb-4">{feedbackSuccess}</p>}
-
-        <form onSubmit={handleFeedbackSubmit} className="bg-white p-6 rounded-lg shadow-md">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label htmlFor="feedbackName" className="block text-gray-700 font-bold mb-2">Name</label>
-              <input
-                type="text"
-                id="feedbackName"
-                name="name"
-                value={feedbackData.name}
-                onChange={handleFeedbackChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="feedbackEmail" className="block text-gray-700 font-bold mb-2">Email</label>
-              <input
-                type="email"
-                id="feedbackEmail"
-                name="email"
-                value={feedbackData.email}
-                onChange={handleFeedbackChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="feedbackDesignation" className="block text-gray-700 font-bold mb-2">Designation</label>
-              <input
-                type="text"
-                id="feedbackDesignation"
-                name="designation"
-                value={feedbackData.designation}
-                onChange={handleFeedbackChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              />
-            </div>
-            <div>
-              <label htmlFor="feedbackLocation" className="block text-gray-700 font-bold mb-2">Location</label>
-              <input
-                type="text"
-                id="feedbackLocation"
-                name="location"
-                value={feedbackData.location}
-                onChange={handleFeedbackChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              />
-            </div>
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <section className="overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-md">
+          <div className="bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-4">
+            <h2 className="text-xl font-semibold text-white">Send a Message</h2>
+            <p className="mt-1 text-sm text-white/90">Tell us how we can help.</p>
           </div>
 
-          <div className="mb-4">
-            <label htmlFor="feedbackQuote" className="block text-gray-700 font-bold mb-2">Feedback</label>
-            <textarea
-              id="feedbackQuote"
-              name="quote"
-              value={feedbackData.quote}
-              onChange={handleFeedbackChange}
-              rows="4"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              required
-            />
+          <div className="space-y-4 p-4 md:p-5">
+            {error ? (
+              <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                {error}
+              </div>
+            ) : null}
+            {success ? (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                {success}
+              </div>
+            ) : null}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="name" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="message" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Message
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows={6}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {loading ? 'Sending...' : 'Send Message'}
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <section className="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-md">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-500 px-5 py-4">
+            <h2 className="text-xl font-semibold text-white">Share Your Feedback</h2>
+            <p className="mt-1 text-sm text-white/90">Your feedback helps us improve and inspire others.</p>
           </div>
 
-          <div className="mb-4">
-            <label className="flex items-start gap-2 text-sm text-gray-700">
-              <input
-                type="checkbox"
-                name="consentToPublish"
-                checked={feedbackData.consentToPublish}
-                onChange={handleFeedbackChange}
-                className="mt-1"
-                required
-              />
-              I consent to publish my feedback on the website after admin review.
-            </label>
-          </div>
+          <div className="space-y-4 p-4 md:p-5">
+            {feedbackError ? (
+              <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                {feedbackError}
+              </div>
+            ) : null}
+            {feedbackSuccess ? (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                {feedbackSuccess}
+              </div>
+            ) : null}
 
-          <button
-            type="submit"
-            disabled={feedbackLoading}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 disabled:opacity-50"
-          >
-            {feedbackLoading ? 'Submitting...' : 'Submit Feedback'}
-          </button>
-        </form>
+            <form onSubmit={handleFeedbackSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="feedbackName" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="feedbackName"
+                    name="name"
+                    value={feedbackData.name}
+                    onChange={handleFeedbackChange}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="feedbackEmail" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="feedbackEmail"
+                    name="email"
+                    value={feedbackData.email}
+                    onChange={handleFeedbackChange}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="feedbackDesignation" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Designation
+                  </label>
+                  <input
+                    type="text"
+                    id="feedbackDesignation"
+                    name="designation"
+                    value={feedbackData.designation}
+                    onChange={handleFeedbackChange}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="feedbackLocation" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    id="feedbackLocation"
+                    name="location"
+                    value={feedbackData.location}
+                    onChange={handleFeedbackChange}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="feedbackQuote" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Feedback
+                </label>
+                <textarea
+                  id="feedbackQuote"
+                  name="quote"
+                  value={feedbackData.quote}
+                  onChange={handleFeedbackChange}
+                  rows={6}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                  required
+                />
+              </div>
+
+              
+
+              <button
+                type="submit"
+                disabled={feedbackLoading}
+                className="inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {feedbackLoading ? 'Submitting...' : 'Submit Feedback'}
+              </button>
+
+              <label className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  name="consentToPublish"
+                  checked={feedbackData.consentToPublish}
+                  onChange={handleFeedbackChange}
+                  className="mt-1"
+                  required
+                />
+                I consent to publish my feedback.
+              </label>
+
+            </form>
+          </div>
+        </section>
       </div>
     </div>
   );

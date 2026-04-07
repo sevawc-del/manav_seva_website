@@ -5,6 +5,7 @@ const {
   getAllEventsAdmin,
   getEventBySlug,
   createEvent,
+  uploadEventImage,
   updateEvent,
   deleteEvent
 } = require('../controllers/eventController');
@@ -23,6 +24,7 @@ const handleUploadError = (req, res, next) => {
 router.get('/', getPublicEvents);
 router.get('/slug/:slug', getEventBySlug);
 router.get('/admin', protect, admin, getAllEventsAdmin);
+router.post('/admin/upload-image', protect, admin, handleUploadError, uploadEventImage);
 router.post('/admin', protect, admin, handleUploadError, createEvent);
 router.put('/admin/:id', protect, admin, handleUploadError, updateEvent);
 router.delete('/admin/:id', protect, admin, deleteEvent);

@@ -10,7 +10,8 @@ const {
 const handleUploadError = (req, res, next) => {
   upload.fields([
     { name: 'logoFile', maxCount: 1 },
-    { name: 'chairpersonImageFile', maxCount: 1 }
+    { name: 'chairpersonImageFile', maxCount: 1 },
+    { name: 'homeWhoRightImageFile', maxCount: 1 }
   ])(req, res, (err) => {
     if (err) {
       console.warn('Upload warning (non-fatal):', err.message);

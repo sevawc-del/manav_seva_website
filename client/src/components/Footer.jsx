@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { HiOutlineMail } from "react-icons/hi";
-import { getSiteSettings } from "../utils/api";
+import { getSiteSettingsCached } from "../utils/api";
 
 const DEFAULT_SITE_SETTINGS = {
   footerAboutTitle: "Manav Seva India",
@@ -36,7 +36,7 @@ const Footer = () => {
 
     const fetchSiteSettings = async () => {
       try {
-        const response = await getSiteSettings();
+        const response = await getSiteSettingsCached();
         if (!isMounted || !response?.data) return;
         setSiteSettings((prev) => ({
           ...prev,
@@ -77,7 +77,7 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-gray-300 pt-12 pb-6 mt-12">
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-5 gap-10">
-        <div>
+        <div className="text-center md:text-left">
           <h2 className="text-xl font-semibold mb-4 text-white">
             {siteSettings.footerAboutTitle || DEFAULT_SITE_SETTINGS.footerAboutTitle}
           </h2>
@@ -85,7 +85,7 @@ const Footer = () => {
             {siteSettings.footerAboutText || DEFAULT_SITE_SETTINGS.footerAboutText}
           </p>
 
-          <div className="flex gap-4 mt-4">
+          <div className="flex justify-center md:justify-start gap-4 mt-4">
             {socialLinks.map((item) => (
               <a
                 key={item.label}
@@ -101,7 +101,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div>
+        <div className="text-center md:text-left">
           <h3 className="text-lg font-semibold mb-4 text-white">
             Quick Links
           </h3>
@@ -115,7 +115,7 @@ const Footer = () => {
           </ul>
         </div>
 
-        <div>
+        <div className="text-center md:text-left">
           <h3 className="text-lg font-semibold mb-4 text-white">
             Information
           </h3>
@@ -128,16 +128,16 @@ const Footer = () => {
           </ul>
         </div>
 
-        <div>
+        <div className="text-center md:text-left">
           <h3 className="text-lg font-semibold mb-4 text-white">
             Contact
           </h3>
 
-          <p className="flex items-start gap-3 text-sm">
+          <p className="flex items-center md:items-start justify-center md:justify-start gap-3 text-sm">
             <FaPhoneAlt className="mt-1" /> {siteSettings.footerPhone || DEFAULT_SITE_SETTINGS.footerPhone}
           </p>
 
-          <p className="flex items-start gap-3 text-sm mt-2">
+          <p className="flex items-center md:items-start justify-center md:justify-start gap-3 text-sm mt-2">
             <HiOutlineMail className="mt-1" /> {siteSettings.footerEmail || DEFAULT_SITE_SETTINGS.footerEmail}
           </p>
 
@@ -153,7 +153,7 @@ const Footer = () => {
           </p>
         </div>
 
-        <div>
+        <div className="text-center md:text-left">
           <h3 className="text-lg font-semibold mb-4 text-white">
             Chairperson
           </h3>
@@ -161,10 +161,10 @@ const Footer = () => {
             <img
               src={siteSettings.chairpersonImageUrl}
               alt={siteSettings.chairpersonName || DEFAULT_SITE_SETTINGS.chairpersonName}
-              className="w-20 h-20 rounded-full object-cover border border-gray-700"
+              className="w-20 h-20 rounded-full object-cover border border-gray-700 mx-auto md:mx-0"
             />
           ) : (
-            <div className="w-20 h-20 rounded-full border border-dashed border-gray-600" />
+            <div className="w-20 h-20 rounded-full border border-dashed border-gray-600 mx-auto md:mx-0" />
           )}
           <p className="mt-3 text-sm text-gray-200">
             {siteSettings.chairpersonName || DEFAULT_SITE_SETTINGS.chairpersonName}

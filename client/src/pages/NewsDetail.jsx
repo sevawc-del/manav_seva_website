@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getNewsById, getNewsBySlug } from '../utils/api';
 import Loader from '../components/Loader';
+import MarkdownContent from '../components/MarkdownContent';
 
 const NewsDetail = () => {
   const { slug } = useParams();
@@ -15,7 +16,7 @@ const NewsDetail = () => {
         let response;
         try {
           response = await getNewsBySlug(slug);
-        } catch (slugError) {
+        } catch {
           response = await getNewsById(slug);
         }
         setNewsItem(response.data);
@@ -69,7 +70,7 @@ const NewsDetail = () => {
             {displayDate ? new Date(displayDate).toLocaleDateString() : 'Date not available'}
           </p>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{newsItem.title}</h1>
-          <p className="text-gray-700 whitespace-pre-line">{newsItem.content || ''}</p>
+          <MarkdownContent content={newsItem.content || ''} />
         </div>
       </article>
     </div>

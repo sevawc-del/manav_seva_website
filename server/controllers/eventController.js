@@ -1,6 +1,7 @@
 const Event = require('../models/Event');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs/promises');
+const { deleteCloudinaryAsset } = require('../utils/cloudinaryAsset');
 
 const cleanupTempUpload = async (filePath) => {
   if (!filePath) return;
@@ -51,6 +52,19 @@ const normalizeEventPayload = (body = {}) => ({
   isPublished: body.isPublished === undefined ? true : (body.isPublished === true || body.isPublished === 'true'),
   isFeatured: body.isFeatured === true || body.isFeatured === 'true'
 });
+
+const deleteCloudinaryImage = async (imageUrl) => {
+  try {
+    await deleteCloudinaryAsset({
+      assetUrl: imageUrl,
+      resourceType: 'image',
+      fallbackResourceTypes: ['image'],
+      invalidate: true
+    });
+  } catch (error) {
+    console.error('Cloudinary delete error:', error.message);
+  }
+};
 
 const getPublicEvents = async (req, res) => {
   try {
@@ -107,6 +121,26 @@ const createEvent = async (req, res) => {
   }
 };
 
+const uploadEventImage = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'Image file is required' });
+  }
+
+  try {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'manav-seva/events',
+      resource_type: 'image'
+    });
+
+    await cleanupTempUpload(req.file.path);
+    return res.status(200).json({ imageUrl: result.secure_url });
+  } catch (error) {
+    await cleanupTempUpload(req.file.path);
+    console.error('Event inline image upload error:', error.message);
+    return res.status(500).json({ message: 'Failed to upload image' });
+  }
+};
+
 const updateEvent = async (req, res) => {
   try {
     const existingEvent = await Event.findById(req.params.id);
@@ -136,6 +170,11 @@ const updateEvent = async (req, res) => {
     payload.updatedAt = Date.now();
 
     const updatedEvent = await Event.findByIdAndUpdate(req.params.id, payload, { new: true });
+
+    if (updatedEvent?.image && existingEvent.image && updatedEvent.image !== existingEvent.image) {
+      await deleteCloudinaryImage(existingEvent.image);
+    }
+
     res.json(updatedEvent);
   } catch (error) {
     res.status(400).json({ message: 'Invalid request data' });
@@ -146,6 +185,9 @@ const deleteEvent = async (req, res) => {
   try {
     const deletedEvent = await Event.findByIdAndDelete(req.params.id);
     if (!deletedEvent) return res.status(404).json({ message: 'Event not found' });
+
+    await deleteCloudinaryImage(deletedEvent.image);
+
     res.json({ message: 'Event deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Internal Server Error' });
@@ -157,6 +199,7 @@ module.exports = {
   getAllEventsAdmin,
   getEventBySlug,
   createEvent,
+  uploadEventImage,
   updateEvent,
   deleteEvent
 };

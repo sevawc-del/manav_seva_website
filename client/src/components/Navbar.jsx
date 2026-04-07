@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { Menu, X, ChevronDown, Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { Menu, X, ChevronDown } from "lucide-react";
+import { FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { getSiteSettings } from "../utils/api";
+import { getSiteSettingsCached } from "../utils/api";
 
 const DEFAULT_SITE_SETTINGS = {
   organizationName: "Manav Seva Sansthan SEVA",
@@ -22,6 +23,7 @@ const Navbar = () => {
   const [isMediaOpen, setIsMediaOpen] = useState(false);
   const [isGetInvolvedOpen, setIsGetInvolvedOpen] = useState(false);
   const [siteSettings, setSiteSettings] = useState(DEFAULT_SITE_SETTINGS);
+  const location = useLocation();
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -53,7 +55,7 @@ const Navbar = () => {
 
     const fetchSiteSettings = async () => {
       try {
-        const response = await getSiteSettings();
+        const response = await getSiteSettingsCached();
         if (!isMounted || !response?.data) return;
         setSiteSettings((prev) => ({
           ...prev,
@@ -71,14 +73,34 @@ const Navbar = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key !== "Escape") return;
+      setIsOpen(false);
+      setIsAboutOpen(false);
+      setIsMediaOpen(false);
+      setIsGetInvolvedOpen(false);
+    };
+
+    window.addEventListener("keydown", handleEscapeKey);
+    return () => window.removeEventListener("keydown", handleEscapeKey);
+  }, []);
+
+  useEffect(() => {
+    setIsOpen(false);
+    setIsAboutOpen(false);
+    setIsMediaOpen(false);
+    setIsGetInvolvedOpen(false);
+  }, [location.pathname]);
+
   const socialLinks = useMemo(
     () =>
       [
-        { name: "Facebook", href: siteSettings.facebookUrl, icon: Facebook },
-        { name: "Instagram", href: siteSettings.instagramUrl, icon: Instagram },
-        { name: "LinkedIn", href: siteSettings.linkedinUrl, icon: Linkedin },
-        { name: "Twitter", href: siteSettings.twitterUrl, icon: FaXTwitter },
-        { name: "YouTube", href: siteSettings.youtubeUrl, icon: Youtube },
+        { name: "Facebook", href: siteSettings.facebookUrl, icon: FaFacebookF, iconClass: "text-[#1877F2]" },
+        { name: "Instagram", href: siteSettings.instagramUrl, icon: FaInstagram, iconClass: "text-[#E4405F]" },
+        { name: "LinkedIn", href: siteSettings.linkedinUrl, icon: FaLinkedinIn, iconClass: "text-[#0A66C2]" },
+        { name: "Twitter", href: siteSettings.twitterUrl, icon: FaXTwitter, iconClass: "text-[#111827]" },
+        { name: "YouTube", href: siteSettings.youtubeUrl, icon: FaYoutube, iconClass: "text-[#FF0000]" },
       ].filter((link) => String(link.href || "").trim()),
     [
       siteSettings.facebookUrl,
@@ -102,9 +124,9 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 w-full z-50 shadow-md">
-      <div className="bg-blue-700 text-white">
+      <div className="bg-gradient-to-l from-blue-700 via-emerald-100 via-sky-700 to-blue-800 text-white border-b border-white/20">
         <div className="container mx-auto px-4 py-2 flex items-center justify-between gap-3">
-          <p className="text-xs sm:text-sm font-medium truncate">
+          <p className="text-xs sm:text-sm font-medium text-white/95 truncate">
             {siteSettings.supportMessage || DEFAULT_SITE_SETTINGS.supportMessage}
           </p>
 
@@ -117,18 +139,18 @@ const Navbar = () => {
                     key={item.name}
                     href={item.href}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     aria-label={item.name}
-                    className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 transition"
+                    className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/95 hover:bg-white shadow-sm ring-1 ring-white/50 transition"
                   >
-                    <IconComponent size={15} />
+                    <IconComponent size={15} className={item.iconClass} />
                   </a>
                 );
               })}
             </div>
             <Link
               to="/donate"
-              className="app-btn app-btn-primary !py-1.5 !px-3 sm:!px-4 !text-xs sm:!text-sm"
+              className="inline-flex items-center justify-center rounded-full px-3 py-1.5 sm:px-4 text-xs sm:text-sm font-extrabold bg-gradient-to-r from-amber-300 via-orange-300 to-amber-400 text-slate-900 border border-amber-100 shadow-[0_4px_12px_rgba(217,119,6,0.35)] hover:from-amber-200 hover:via-orange-200 hover:to-amber-300 transition"
             >
               Donate Now
             </Link>
@@ -136,7 +158,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      <nav className="bg-white w-full">
+      <nav className="bg-white w-full" aria-label="Primary">
       <div className="container mx-auto px-4 py-4 md:py-3 flex items-center justify-between">
         
         {/* LOGO */}
@@ -144,14 +166,14 @@ const Navbar = () => {
           <img
             src={siteSettings.logoUrl || DEFAULT_SITE_SETTINGS.logoUrl}
             alt={organizationLabel || "Logo"}
-            className="w-16 h-16 md:w-20 md:h-20 object-contain shrink-0"
+            className="w-16 h-16 md:w-15 md:h-15 object-contain shrink-0"
           />
           <div className="leading-none min-w-0">
-            <p className="font-bold text-base sm:text-lg md:text-xl text-green-700 truncate">
+            <p className="font-bold text-base sm:text-lg md:text-xl text-orange-600 truncate">
               {primaryName}
             </p>
             {derivedSubline && (
-              <p className="font-semibold text-[11px] sm:text-xs md:text-sm text-orange-500 tracking-wide truncate">
+              <p className="font-semibold text-[11px] sm:text-xs md:text-sm text-black-500 tracking-wide truncate">
                 {derivedSubline}
               </p>
             )}
@@ -174,19 +196,29 @@ const Navbar = () => {
             </NavLink>
           </li>
           {/* About Dropdown */}
-          <li className="relative">
+          <li
+            className="relative"
+            onMouseEnter={() => setIsAboutOpen(true)}
+            onMouseLeave={() => setIsAboutOpen(false)}
+          >
             <button
-              onMouseEnter={() => setIsAboutOpen(true)}
-              onMouseLeave={() => setIsAboutOpen(false)}
+              type="button"
+              onClick={() => {
+                setIsAboutOpen((prev) => !prev);
+                setIsMediaOpen(false);
+                setIsGetInvolvedOpen(false);
+              }}
+              aria-haspopup="true"
+              aria-expanded={isAboutOpen}
+              aria-controls="desktop-about-menu"
               className="text-gray-700 hover:text-blue-600 transition flex items-center gap-1"
             >
               About <ChevronDown size={16} />
             </button>
             {isAboutOpen && (
               <ul
+                id="desktop-about-menu"
                 className="absolute top-full left-0 bg-white shadow-lg rounded-md py-2 min-w-[200px] z-50"
-                onMouseEnter={() => setIsAboutOpen(true)}
-                onMouseLeave={() => setIsAboutOpen(false)}
               >
                 {aboutItems.map((item) => (
                   <li key={item.path}>
@@ -206,19 +238,29 @@ const Navbar = () => {
             )}
           </li>
           {/* Media Center Dropdown */}
-          <li className="relative">
+          <li
+            className="relative"
+            onMouseEnter={() => setIsMediaOpen(true)}
+            onMouseLeave={() => setIsMediaOpen(false)}
+          >
             <button
-              onMouseEnter={() => setIsMediaOpen(true)}
-              onMouseLeave={() => setIsMediaOpen(false)}
+              type="button"
+              onClick={() => {
+                setIsMediaOpen((prev) => !prev);
+                setIsAboutOpen(false);
+                setIsGetInvolvedOpen(false);
+              }}
+              aria-haspopup="true"
+              aria-expanded={isMediaOpen}
+              aria-controls="desktop-media-menu"
               className="text-gray-700 hover:text-blue-600 transition flex items-center gap-1"
             >
               Media Center <ChevronDown size={16} />
             </button>
             {isMediaOpen && (
               <ul
+                id="desktop-media-menu"
                 className="absolute top-full left-0 bg-white shadow-lg rounded-md py-2 min-w-[200px] z-50"
-                onMouseEnter={() => setIsMediaOpen(true)}
-                onMouseLeave={() => setIsMediaOpen(false)}
               >
                 {mediaItems.map((item) => (
                   <li key={item.path}>
@@ -251,19 +293,29 @@ const Navbar = () => {
             </NavLink>
           </li>
           {/* Get Involved Dropdown */}
-          <li className="relative">
+          <li
+            className="relative"
+            onMouseEnter={() => setIsGetInvolvedOpen(true)}
+            onMouseLeave={() => setIsGetInvolvedOpen(false)}
+          >
             <button
-              onMouseEnter={() => setIsGetInvolvedOpen(true)}
-              onMouseLeave={() => setIsGetInvolvedOpen(false)}
+              type="button"
+              onClick={() => {
+                setIsGetInvolvedOpen((prev) => !prev);
+                setIsAboutOpen(false);
+                setIsMediaOpen(false);
+              }}
+              aria-haspopup="true"
+              aria-expanded={isGetInvolvedOpen}
+              aria-controls="desktop-get-involved-menu"
               className="text-gray-700 hover:text-blue-600 transition flex items-center gap-1"
             >
               Get Involved <ChevronDown size={16} />
             </button>
             {isGetInvolvedOpen && (
               <ul
+                id="desktop-get-involved-menu"
                 className="absolute top-full left-0 bg-white shadow-lg rounded-md py-2 min-w-[200px] z-50"
-                onMouseEnter={() => setIsGetInvolvedOpen(true)}
-                onMouseLeave={() => setIsGetInvolvedOpen(false)}
               >
                 {getInvolvedItems.map((item) => (
                   <li key={item.path}>
@@ -301,8 +353,12 @@ const Navbar = () => {
 
         {/* Mobile Toggle */}
         <button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
           className="md:hidden text-gray-700"
+          aria-expanded={isOpen}
+          aria-controls="mobile-main-menu"
+          aria-label={isOpen ? "Close main menu" : "Open main menu"}
         >
           {isOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
@@ -310,7 +366,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-white shadow-inner px-4 py-4">
+        <div id="mobile-main-menu" className="md:hidden bg-white shadow-inner px-4 py-4">
           <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
             <div className="flex items-center gap-2">
               {socialLinks.map((item) => {
@@ -320,18 +376,18 @@ const Navbar = () => {
                     key={item.name}
                     href={item.href}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     aria-label={item.name}
-                    className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-sm border border-gray-200 hover:bg-gray-50 transition"
                   >
-                    <IconComponent size={15} />
+                    <IconComponent size={15} className={item.iconClass} />
                   </a>
                 );
               })}
             </div>
             <Link
               to="/donate"
-              className="app-btn app-btn-primary !py-1.5 !px-3 !text-xs"
+              className="inline-flex items-center justify-center rounded-full px-3 py-1.5 text-xs font-extrabold bg-gradient-to-r from-amber-300 via-orange-300 to-amber-400 text-slate-900 border border-amber-100 shadow-[0_4px_12px_rgba(217,119,6,0.25)] hover:from-amber-200 hover:via-orange-200 hover:to-amber-300 transition"
               onClick={() => setIsOpen(false)}
             >
               Donate Now
@@ -356,13 +412,16 @@ const Navbar = () => {
             {/* About Dropdown */}
             <li>
               <button
+                type="button"
                 onClick={() => setIsAboutOpen(!isAboutOpen)}
+                aria-expanded={isAboutOpen}
+                aria-controls="mobile-about-menu"
                 className="text-gray-700 hover:text-blue-600 transition flex items-center gap-1 w-full text-left"
               >
                 About <ChevronDown size={16} className={`transform transition-transform ${isAboutOpen ? 'rotate-180' : ''}`} />
               </button>
               {isAboutOpen && (
-                <ul className="ml-4 mt-2 space-y-2">
+                <ul id="mobile-about-menu" className="ml-4 mt-2 space-y-2">
                   {aboutItems.map((item) => (
                     <li key={item.path}>
                       <NavLink
@@ -384,13 +443,16 @@ const Navbar = () => {
             {/* Media Center Dropdown */}
             <li>
               <button
+                type="button"
                 onClick={() => setIsMediaOpen(!isMediaOpen)}
+                aria-expanded={isMediaOpen}
+                aria-controls="mobile-media-menu"
                 className="text-gray-700 hover:text-blue-600 transition flex items-center gap-1 w-full text-left"
               >
                 Media Center <ChevronDown size={16} className={`transform transition-transform ${isMediaOpen ? 'rotate-180' : ''}`} />
               </button>
               {isMediaOpen && (
-                <ul className="ml-4 mt-2 space-y-2">
+                <ul id="mobile-media-menu" className="ml-4 mt-2 space-y-2">
                   {mediaItems.map((item) => (
                     <li key={item.path}>
                       <NavLink
@@ -426,13 +488,16 @@ const Navbar = () => {
             {/* Get Involved Dropdown */}
             <li>
               <button
+                type="button"
                 onClick={() => setIsGetInvolvedOpen(!isGetInvolvedOpen)}
+                aria-expanded={isGetInvolvedOpen}
+                aria-controls="mobile-get-involved-menu"
                 className="text-gray-700 hover:text-blue-600 transition flex items-center gap-1 w-full text-left"
               >
                 Get Involved <ChevronDown size={16} className={`transform transition-transform ${isGetInvolvedOpen ? 'rotate-180' : ''}`} />
               </button>
               {isGetInvolvedOpen && (
-                <ul className="ml-4 mt-2 space-y-2">
+                <ul id="mobile-get-involved-menu" className="ml-4 mt-2 space-y-2">
                   {getInvolvedItems.map((item) => (
                     <li key={item.path}>
                       <NavLink

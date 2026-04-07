@@ -6,6 +6,7 @@ const gallerySchema = new mongoose.Schema({
   image: { type: String, required: true },
   description: { type: String },
   date: { type: Date, default: Date.now },
+  showOnHome: { type: Boolean, default: true }
 });
 
 module.exports = mongoose.model('Gallery', gallerySchema);

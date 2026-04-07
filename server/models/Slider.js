@@ -7,7 +7,7 @@ const sliderSchema = new mongoose.Schema({
   order: { type: Number, default: 0 }, // For sorting
   isActive: { type: Boolean, default: true },
   buttonText: { type: String, default: 'Learn More' },
-  buttonLink: { type: String, default: '/about' },
+  buttonLink: { type: String, default: '/about/about-us' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

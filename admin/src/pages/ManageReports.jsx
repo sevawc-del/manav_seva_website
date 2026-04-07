@@ -5,46 +5,87 @@ import {
   createReport,
   updateReport,
   deleteReport,
-  uploadReportFile
+  uploadReportFile,
+  getReportAccessRequests,
+  updateReportAccessRequestStatus
 } from '../utils/api';
 
 const ManageReports = () => {
   const [reports, setReports] = useState([]);
-  const [formData, setFormData] = useState({ title: '', content: '', year: '', file: '' });
+  const [accessRequests, setAccessRequests] = useState([]);
+  const [formData, setFormData] = useState({
+    title: '',
+    category: 'General',
+    visibility: 'public',
+    content: '',
+    year: '',
+    file: '',
+    filePublicId: '',
+    fileResourceType: '',
+    fileFormat: ''
+  });
   const [editing, setEditing] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedFileName, setSelectedFileName] = useState('');
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [updatingRequestId, setUpdatingRequestId] = useState('');
   const fileInputRef = useRef(null);
 
   const fetchReports = async () => {
     try {
       const res = await getReports();
-      setReports(res.data);
+      const normalized = (res.data || []).map((report) => ({
+        ...report,
+        category: String(report?.category || '').trim() || 'General',
+        visibility: String(report?.visibility || '').trim().toLowerCase() === 'protected' ? 'protected' : 'public'
+      }));
+      setReports(normalized);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchAccessRequests = async () => {
+    try {
+      const response = await getReportAccessRequests();
+      setAccessRequests(response.data || []);
     } catch (error) {
       console.error(error);
     }
   };
 
   useEffect(() => {
-    const loadReports = async () => {
-      await fetchReports();
+    const loadData = async () => {
+      await Promise.all([fetchReports(), fetchAccessRequests()]);
     };
-    loadReports();
+    loadData();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let payload = { ...formData };
+      let payload = {
+        ...formData,
+        category: String(formData.category || 'General').trim() || 'General',
+        visibility: formData.visibility === 'protected' ? 'protected' : 'public'
+      };
       if (selectedFile) {
         setUploadingFile(true);
         const response = await uploadReportFile(selectedFile);
         const fileUrl = response?.data?.fileUrl || '';
+        const filePublicId = response?.data?.filePublicId || '';
+        const fileResourceType = response?.data?.fileResourceType || '';
+        const fileFormat = response?.data?.fileFormat || '';
         if (!fileUrl) {
           throw new Error('Upload succeeded but no file URL returned');
         }
-        payload = { ...payload, file: fileUrl };
+        payload = {
+          ...payload,
+          file: fileUrl,
+          filePublicId,
+          fileResourceType,
+          fileFormat
+        };
       }
 
       if (editing) {
@@ -52,7 +93,17 @@ const ManageReports = () => {
       } else {
         await createReport(payload);
       }
-      setFormData({ title: '', content: '', year: '', file: '' });
+      setFormData({
+        title: '',
+        category: 'General',
+        visibility: 'public',
+        content: '',
+        year: '',
+        file: '',
+        filePublicId: '',
+        fileResourceType: '',
+        fileFormat: ''
+      });
       setEditing(null);
       setSelectedFile(null);
       setSelectedFileName('');
@@ -69,7 +120,17 @@ const ManageReports = () => {
   };
 
   const handleEdit = (item) => {
-    setFormData({ title: item.title, content: item.content, year: item.year, file: item.file });
+    setFormData({
+      title: item.title || '',
+      category: item.category || 'General',
+      visibility: item.visibility || 'public',
+      content: item.content || '',
+      year: item.year || '',
+      file: item.file || item.fileUrl || '',
+      filePublicId: item.filePublicId || '',
+      fileResourceType: item.fileResourceType || '',
+      fileFormat: item.fileFormat || ''
+    });
     setEditing(item);
     setSelectedFile(null);
     setSelectedFileName('');
@@ -89,9 +150,28 @@ const ManageReports = () => {
 
   const columns = [
     { header: 'Title', key: 'title' },
+    { header: 'Category', key: 'category' },
+    { header: 'Visibility', key: 'visibility' },
     { header: 'Year', key: 'year' },
     { header: 'Content', key: 'content' },
   ];
+
+  const handleUpdateRequestStatus = async (requestId, status) => {
+    if (!requestId) return;
+    try {
+      setUpdatingRequestId(requestId);
+      await updateReportAccessRequestStatus(requestId, {
+        status,
+        expiresInDays: status === 'approved' ? 1 : undefined
+      });
+      await fetchAccessRequests();
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.message || 'Failed to update access request status');
+    } finally {
+      setUpdatingRequestId('');
+    }
+  };
 
   return (
     <div className="p-6">
@@ -105,6 +185,22 @@ const ManageReports = () => {
           className="w-full p-2 mb-4 border rounded"
           required
         />
+        <input
+          type="text"
+          placeholder="Category (e.g. Annual Report, Financial, Program)"
+          value={formData.category}
+          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+          className="w-full p-2 mb-4 border rounded"
+          required
+        />
+        <select
+          value={formData.visibility}
+          onChange={(e) => setFormData({ ...formData, visibility: e.target.value })}
+          className="w-full p-2 mb-4 border rounded"
+        >
+          <option value="public">Public</option>
+          <option value="protected">Protected (requires permission)</option>
+        </select>
         <textarea
           placeholder="Content"
           value={formData.content}
@@ -160,6 +256,85 @@ const ManageReports = () => {
         </button>
       </form>
       <DataTable data={reports} columns={columns} onEdit={handleEdit} onDelete={handleDelete} />
+
+      <div className="mt-10">
+        <h2 className="text-2xl font-bold mb-4">Protected Report Access Requests</h2>
+        {accessRequests.length === 0 ? (
+          <p className="text-gray-600">No access requests yet.</p>
+        ) : (
+          <div className="overflow-x-auto bg-white border border-gray-200 rounded-lg">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 text-left">
+                  <th className="py-3 px-4 border-b">Report</th>
+                  <th className="py-3 px-4 border-b">Requester</th>
+                  <th className="py-3 px-4 border-b">Purpose</th>
+                  <th className="py-3 px-4 border-b">Status</th>
+                  <th className="py-3 px-4 border-b">Created</th>
+                  <th className="py-3 px-4 border-b">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {accessRequests.map((item) => {
+                  const isUpdating = updatingRequestId === item._id;
+                  const status = item.status || 'pending';
+                  const statusClass =
+                    status === 'approved'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : status === 'rejected'
+                        ? 'bg-rose-100 text-rose-800'
+                        : 'bg-amber-100 text-amber-800';
+
+                  return (
+                    <tr key={item._id}>
+                      <td className="py-3 px-4 border-b align-top">
+                        <p className="font-semibold text-gray-900">{item.reportId?.title || 'Unknown Report'}</p>
+                        <p className="text-xs text-gray-500">
+                          {[item.reportId?.category || 'General', item.reportId?.year].filter(Boolean).join(' | ')}
+                        </p>
+                      </td>
+                      <td className="py-3 px-4 border-b align-top">
+                        <p className="font-medium text-gray-900">{item.requesterName}</p>
+                        <p className="text-xs text-gray-600">{item.requesterEmail}</p>
+                        {item.requesterPhone ? <p className="text-xs text-gray-500">{item.requesterPhone}</p> : null}
+                      </td>
+                      <td className="py-3 px-4 border-b align-top text-gray-700">{item.purpose}</td>
+                      <td className="py-3 px-4 border-b align-top">
+                        <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass}`}>
+                          {status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 border-b align-top text-gray-600">
+                        {item.createdAt ? new Date(item.createdAt).toLocaleString() : '-'}
+                      </td>
+                      <td className="py-3 px-4 border-b align-top">
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            disabled={isUpdating || status === 'approved'}
+                            onClick={() => handleUpdateRequestStatus(item._id, 'approved')}
+                            className="px-3 py-1.5 rounded bg-emerald-600 text-white disabled:bg-gray-300"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isUpdating || status === 'rejected'}
+                            onClick={() => handleUpdateRequestStatus(item._id, 'rejected')}
+                            className="px-3 py-1.5 rounded bg-rose-600 text-white disabled:bg-gray-300"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

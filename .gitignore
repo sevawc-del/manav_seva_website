@@ -80,7 +80,14 @@ dist
 # Gatsby files
 .cache/
 public
+
+# Keep only intentional SEO/static assets from client/public tracked
+!client/public/
+client/public/*
 !client/public/maps/
+!client/public/maps/**
+!client/public/robots.txt
+!client/public/sitemap.xml
 
 # Storybook build outputs
 .out

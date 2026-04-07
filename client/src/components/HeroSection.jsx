@@ -1,23 +1,27 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getSliders } from "../utils/api";
+import { optimizeCloudinaryImage } from "../utils/imageUrl";
+
+const HERO_SECTION_CLASS =
+  "relative w-full overflow-hidden h-[clamp(20rem,58svh,34rem)] md:h-[clamp(26rem,70svh,46rem)] xl:h-[clamp(30rem,80svh,56rem)]";
+
+const DEFAULT_SLIDERS = [
+  {
+    _id: "1",
+    title: "Empowering Communities, Transforming Lives",
+    subtitle:
+      "Manav Seva India works to uplift vulnerable communities through healthcare, education, social protection, and humanitarian initiatives.",
+    image: "/images/hero1.jpg",
+    buttonText: "Learn More",
+    buttonLink: "/about/about-us"
+  }
+];
 
 const HeroSection = () => {
   const [sliders, setSliders] = useState([]);
   const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(true);
-
-  // Default fallback sliders (for when API is unavailable)
-  const defaultSliders = [
-    {
-      _id: '1',
-      title: 'Empowering Communities, Transforming Lives',
-      subtitle: 'Manav Seva India works to uplift vulnerable communities through healthcare, education, social protection, and humanitarian initiatives.',
-      image: '/images/hero1.jpg',
-      buttonText: 'Learn More',
-      buttonLink: '/about'
-    }
-  ];
 
   useEffect(() => {
     const fetchSliders = async () => {
@@ -26,11 +30,11 @@ const HeroSection = () => {
         if (response.data && response.data.length > 0) {
           setSliders(response.data);
         } else {
-          setSliders(defaultSliders);
+          setSliders(DEFAULT_SLIDERS);
         }
       } catch (error) {
-        console.error('Failed to fetch sliders:', error);
-        setSliders(defaultSliders);
+        console.error("Failed to fetch sliders:", error);
+        setSliders(DEFAULT_SLIDERS);
       } finally {
         setLoading(false);
       }
@@ -39,15 +43,14 @@ const HeroSection = () => {
     fetchSliders();
   }, []);
 
-  // Auto-slide every 5 seconds
   useEffect(() => {
     if (sliders.length === 0) return;
     const interval = setInterval(() => {
-      nextSlide();
+      setCurrent((prev) => (prev === sliders.length - 1 ? 0 : prev + 1));
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [current, sliders.length]);
+  }, [sliders.length]);
 
   const nextSlide = () => {
     setCurrent((prev) => (prev === sliders.length - 1 ? 0 : prev + 1));
@@ -59,7 +62,7 @@ const HeroSection = () => {
 
   if (loading) {
     return (
-      <section className="relative w-full h-[80vh] md:h-[90vh] overflow-hidden bg-gray-200">
+      <section className={`${HERO_SECTION_CLASS} bg-gray-200`}>
         <div className="absolute inset-0 flex items-center justify-center">
           <p className="text-gray-600">Loading...</p>
         </div>
@@ -72,9 +75,7 @@ const HeroSection = () => {
   }
 
   return (
-    <section className="relative w-full h-[80vh] md:h-[90vh] overflow-hidden">
-
-      {/* SLIDES */}
+    <section className={HERO_SECTION_CLASS}>
       {sliders.map((slider, index) => (
         <div
           key={slider._id || index}
@@ -83,67 +84,72 @@ const HeroSection = () => {
           }`}
         >
           <img
-            src={slider.image}
-            alt={slider.title}
+            src={optimizeCloudinaryImage(slider.image, { width: 1920, height: 1080, crop: "fill" }) || slider.image}
+            alt={slider.title || "Home slider image"}
             className="w-full h-full object-cover"
+            loading={index === current ? "eager" : "lazy"}
+            decoding="async"
+            fetchPriority={index === current ? "high" : "auto"}
           />
-          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="absolute inset-0 bg-black/50" />
         </div>
       ))}
 
-      {/* CONTENT */}
-      <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white px-4 z-10">
-        <h1 className="text-3xl md:text-5xl font-bold leading-tight drop-shadow-lg animate-fadeIn">
+      <div className="absolute inset-0 flex flex-col justify-end md:justify-center items-center text-center text-white px-4 pb-20 md:pb-0 z-10">
+        <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold leading-tight drop-shadow-lg animate-fadeIn">
           {sliders[current]?.title}
         </h1>
 
-        <p className="mt-4 text-sm md:text-lg max-w-2xl opacity-90 animate-fadeIn delay-200">
+        <p className="mt-3 md:mt-4 text-sm md:text-lg max-w-xl md:max-w-2xl opacity-90 animate-fadeIn delay-200">
           {sliders[current]?.subtitle}
         </p>
 
-        <div className="mt-6 flex gap-4 animate-fadeIn delay-300">
+        <div className="mt-5 md:mt-6 flex flex-wrap justify-center gap-3 md:gap-4 animate-fadeIn delay-300">
           <Link
-            to={sliders[current]?.buttonLink || '/about'}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition"
+            to={sliders[current]?.buttonLink || "/about/about-us"}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-blue-700"
           >
-            {sliders[current]?.buttonText || 'Learn More'}
+            {sliders[current]?.buttonText || "Learn More"}
           </Link>
 
           <Link
             to="/contact"
-            className="px-6 py-3 border-2 border-white hover:bg-white hover:text-black rounded-lg transition"
+            className="px-6 py-3 border-2 border-white hover:bg-white hover:text-black rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/20"
           >
             Contact Us
           </Link>
         </div>
       </div>
 
-      {/* LEFT BUTTON */}
       <button
+        type="button"
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-black/40 hover:bg-black/70 p-3 rounded-full z-20"
+        className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-black/40 hover:bg-black/70 p-3 rounded-full z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/20"
+        aria-label="Previous slide"
       >
-        ❮
+        {"<"}
       </button>
 
-      {/* RIGHT BUTTON */}
       <button
+        type="button"
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/40 hover:bg-black/70 p-3 rounded-full z-20"
+        className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/40 hover:bg-black/70 p-3 rounded-full z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/20"
+        aria-label="Next slide"
       >
-        ❯
+        {">"}
       </button>
 
-      {/* DOTS */}
       <div className="absolute bottom-6 flex justify-center w-full gap-2 z-20">
         {sliders.map((_, index) => (
-          <div
+          <button
             key={index}
-            className={`w-3 h-3 rounded-full cursor-pointer transition-all ${
-              index === current ? "bg-white w-8" : "bg-white/50"
+            type="button"
+            className={`h-3 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/20 ${
+              index === current ? "bg-white w-8" : "bg-white/50 w-3"
             }`}
             onClick={() => setCurrent(index)}
-          ></div>
+            aria-label={`Go to slide ${index + 1}`}
+          />
         ))}
       </div>
     </section>

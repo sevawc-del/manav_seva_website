@@ -15,6 +15,14 @@ import {
   getGeographicActivities,
 } from '../utils/api';
 
+const DEFAULT_ABOUT_US_FORM = {
+  title: '',
+  content: '',
+  image: '',
+  mission: '',
+  vision: ''
+};
+
 // Indian States and Districts data
 const indianStatesAndDistricts = {
   'Andhra Pradesh': ['Anantapur', 'Chittoor', 'East Godavari', 'Guntur', 'Krishna', 'Kurnool', 'Nellore', 'Prakasam', 'Srikakulam', 'Visakhapatnam', 'Vizianagaram', 'West Godavari'],
@@ -184,7 +192,14 @@ const ManageAbout = () => {
             } else {
               setFormData((prev) => ({
                 ...prev,
-                [activeTabData.key]: { title: data?.title || '', content: data?.content || '', image: data?.image || '' }
+                [activeTabData.key]: {
+                  ...DEFAULT_ABOUT_US_FORM,
+                  title: data?.title || '',
+                  content: data?.content || '',
+                  image: data?.image || '',
+                  mission: data?.mission || '',
+                  vision: data?.vision || ''
+                }
               }));
             }
           }).finally(() => setLoading(false));
@@ -259,7 +274,14 @@ const ManageAbout = () => {
           const updatedData = await fetchData(activeTabData);
           setFormData((prev) => ({
             ...prev,
-            [activeTabData.key]: { title: updatedData?.title || '', content: updatedData?.content || '', image: updatedData?.image || '' }
+            [activeTabData.key]: {
+              ...DEFAULT_ABOUT_US_FORM,
+              title: updatedData?.title || '',
+              content: updatedData?.content || '',
+              image: updatedData?.image || '',
+              mission: updatedData?.mission || '',
+              vision: updatedData?.vision || ''
+            }
           }));
         }
 
@@ -620,6 +642,9 @@ const ManageAbout = () => {
 
           <div className="mb-4">
             <h3 className="text-lg font-semibold mb-2">Organizational Hierarchy</h3>
+            <p className="mb-3 text-sm text-gray-600">
+              Add each person with their role and photo. You can upload an image or paste a direct image URL.
+            </p>
             <HierarchyForm
               hierarchy={governanceFormData.hierarchy}
               onUploadImage={uploadAboutImage}
@@ -692,6 +717,24 @@ const ManageAbout = () => {
             className="w-full p-2 mb-4 border rounded"
             required
           />
+          {activeTab === 'about-us' && (
+            <>
+              <textarea
+                placeholder="Mission"
+                value={formData[activeTab]?.mission || ''}
+                onChange={(e) => setFormData((prev) => ({ ...prev, [activeTab]: { ...prev[activeTab], mission: e.target.value } }))}
+                className="w-full p-2 mb-4 border rounded"
+                rows={3}
+              />
+              <textarea
+                placeholder="Vision"
+                value={formData[activeTab]?.vision || ''}
+                onChange={(e) => setFormData((prev) => ({ ...prev, [activeTab]: { ...prev[activeTab], vision: e.target.value } }))}
+                className="w-full p-2 mb-4 border rounded"
+                rows={3}
+              />
+            </>
+          )}
           <input
             type="text"
             placeholder="Image URL"

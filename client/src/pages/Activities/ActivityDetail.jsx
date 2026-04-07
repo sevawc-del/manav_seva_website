@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { getAdminActivityBySlug } from '../../utils/api';
 import Loader from '../../components/Loader';
+import MarkdownContent from '../../components/MarkdownContent';
 
 const ActivityDetail = () => {
   const { slug, id } = useParams();
@@ -80,10 +81,7 @@ const ActivityDetail = () => {
           <p className="text-xl text-gray-600">{activity.description}</p>
         </header>
 
-        <div
-          className="prose prose-lg max-w-none"
-          dangerouslySetInnerHTML={{ __html: activity.content }}
-        />
+        <MarkdownContent content={activity.content || ''} className="max-w-none" />
       </article>
     </div>
   );

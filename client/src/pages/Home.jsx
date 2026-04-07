@@ -1,19 +1,197 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import AutoCarousel from '../components/AutoCarousel';
 import HeroSection from '../components/HeroSection';
+import Journey from '../components/home/Journey';
+import Testimonials from '../components/home/Testimonials';
+import Sponsors from '../components/home/Sponsors';
+import OfficesMap from '../components/home/OfficesMap';
+import ActivitySelector from '../components/ActivitySelector';
+import ActivityDetails from '../components/ActivityDetails';
 import {
+  getAboutUs,
   getAdminActivities,
   getEvents,
   getGallery,
+  getGeographicActivities,
+  getGeographicActivityPresence,
   getJourneys,
   getNews,
+  getSiteSettingsCached,
   getSponsors,
   getTestimonials
 } from '../utils/api';
+import { stripRichText } from '../utils/richContent';
+import { optimizeCloudinaryImage } from '../utils/imageUrl';
+
+const IndiaMap = lazy(() => import('../components/IndiaMap'));
+
+const HOME_ACTIVITIES_LIMIT = 6;
+const HOME_ACTIVITIES_LIMIT_TABLET = 4;
+const HOME_ACTIVITIES_LIMIT_MOBILE = 3;
+const HOME_NEWS_LIMIT = 4;
+const HOME_EVENTS_LIMIT = 4;
+const HOME_GALLERY_ITEMS_PER_ROW = 10;
+
+const truncateText = (text = '', maxLength = 90) => {
+  if (!text) return '';
+  return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+};
+
+const parseSafeDate = (value) => {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const formatDate = (value, options) => {
+  const parsed = parseSafeDate(value);
+  return parsed ? parsed.toLocaleDateString('en-IN', options) : 'Date not available';
+};
+
+const formatDateTime = (value) => {
+  const parsed = parseSafeDate(value);
+  return parsed ? parsed.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Date not available';
+};
+
+const getNumericImpact = (impactValue = '') => {
+  const normalized = String(impactValue).replace(/,/g, '').replace(/[^\d.]/g, '');
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const getActivityProblem = (activity) => {
+  const problem = stripRichText(activity?.problem || activity?.description || '');
+  return truncateText(problem || 'A local challenge was identified by our team.', 90);
+};
+
+const getActivityAction = (activity) => {
+  const action = stripRichText(activity?.action || activity?.content || activity?.description || '');
+  return truncateText(action || 'Local volunteers and staff delivered focused interventions.', 90);
+};
+
+const getActivityResult = (activity) => {
+  if (activity?.impactNumber) {
+    return truncateText(`${activity.impactNumber} people directly supported through this initiative.`, 90);
+  }
+  return 'Impact figures are being updated as the program continues.';
+};
+
+const DEFAULT_HOME_WHO_SETTINGS = {
+  chairpersonName: 'Chairperson',
+  chairpersonImageUrl: '',
+  homeWhoTitle: 'Who are we?',
+  homeWhoLeftText:
+    'Manav Seva Sansthan SEVA is a not-for-profit organization working for inclusive socio-economic development across vulnerable communities.',
+  homeWhoRightTitle: 'In Focus',
+  homeWhoRightText:
+    'Our programs and collaborations are designed to create long-term impact through community-led action.',
+  homeWhoRightImageUrl: ''
+};
+
+const DEFAULT_HOME_OFFICES = [
+  {
+    id: 'gorakhpur-head-office',
+    name: 'Head Office',
+    city: 'Gorakhpur',
+    address: 'Vikas Nagar Colony, Bargadwa, P.O. Fertilizer, Gorakhpur-273007 (U.P.), India',
+    lat: 26.8050913,
+    lng: 83.3548241,
+    googleMapsUrl:
+      'https://www.google.com/maps/place/Manav+Seva+Sansthan+SEVA/@26.8047121,83.3523656,18z/data=!4m6!3m5!1s0x39914a4000000007:0x7650ce5dac4123f2!8m2!3d26.8050913!4d83.3548241!16s%2Fg%2F11c1xczdgj?entry=ttu&g_ep=EgoyMDI2MDMzMC4wIKXMDSoASAFQAw'
+  },
+  {
+    id: 'new-delhi-branch-office',
+    name: 'Branch Office',
+    city: 'New Delhi',
+    address: 'K68 BK dutt Colony, Jor Bagh, New Delhi, 110003',
+    lat: 28.5839672,
+    lng: 77.2168207,
+    googleMapsUrl:
+      'https://www.google.com/maps/place/K-82+B.K.+Dutt+Colony,+Jor+Bagh/@28.5839791,77.2140859,17z/data=!3m1!4b1!4m6!3m5!1s0x390ce3ae76a5fe45:0x6ac91b5de8746a68!8m2!3d28.5839791!4d77.2166608!16s%2Fg%2F11kpvr3p49?entry=ttu&g_ep=EgoyMDI2MDMzMC4wIKXMDSoASAFQAw%3D%3D'
+  }
+];
+
+const GalleryAutoRow = ({ items, direction = 'left' }) => {
+  const [isPaused, setIsPaused] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const hasLoop = items.length > 1;
+  const shouldAnimate = hasLoop && !prefersReducedMotion;
+  const durationSeconds = Math.max(36, items.length * 4.8);
+  const animationName = direction === 'right' ? 'gallery-marquee-right' : 'gallery-marquee-left';
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return undefined;
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const syncPreference = () => setPrefersReducedMotion(mediaQuery.matches);
+    syncPreference();
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', syncPreference);
+      return () => mediaQuery.removeEventListener('change', syncPreference);
+    }
+
+    mediaQuery.addListener(syncPreference);
+    return () => mediaQuery.removeListener(syncPreference);
+  }, []);
+
+  if (!items.length) return null;
+
+  return (
+    <div
+      className={`pb-2 ${shouldAnimate ? 'overflow-hidden' : 'overflow-x-auto no-scrollbar'}`}
+      onMouseEnter={() => shouldAnimate && setIsPaused(true)}
+      onMouseLeave={() => shouldAnimate && setIsPaused(false)}
+      onTouchStart={() => shouldAnimate && setIsPaused(true)}
+      onTouchEnd={() => shouldAnimate && setIsPaused(false)}
+      onTouchCancel={() => shouldAnimate && setIsPaused(false)}
+    >
+      <div
+        className="flex w-max gap-0"
+        style={{
+          animation: shouldAnimate ? `${animationName} ${durationSeconds}s linear infinite` : 'none',
+          animationPlayState: isPaused ? 'paused' : 'running'
+        }}
+      >
+        {(shouldAnimate ? [0, 1] : [0]).map((copyIndex) => (
+          <div key={`gallery-copy-${copyIndex}`} className="flex gap-4 pr-4">
+            {items.map((item, index) => (
+              <Link
+                key={`${item._id || item.image || 'gallery'}-${copyIndex}-${index}`}
+                to={`/gallery/${item._id}`}
+                state={{ from: 'home' }}
+                className="group relative block w-[19rem] sm:w-[21rem] md:w-[24rem] lg:w-[26rem] xl:w-[30rem] 2xl:w-[33rem] aspect-[16/10] shrink-0 overflow-hidden rounded-xl border border-gray-200 shadow-sm transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              >
+                <img
+                  src={optimizeCloudinaryImage(item.image, { width: 1200, height: 750, crop: 'fill' }) || 'https://via.placeholder.com/640x420?text=Image+Not+Available'}
+                  alt={item.title || 'Gallery image'}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                  decoding="async"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/640x420?text=Image+Not+Available';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 p-3 text-white">
+                  <h4 className="text-sm font-semibold leading-tight">{item.title || 'Gallery Image'}</h4>
+                  <p className="mt-1 text-xs text-gray-200">
+                    {truncateText(item.description || formatDate(item.date || item.createdAt), 44)}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const Home = () => {
-  const HOME_ACTIVITIES_LIMIT = 6;
+  const [aboutUs, setAboutUs] = useState(null);
+  const [aboutLoading, setAboutLoading] = useState(true);
+  const [siteSettings, setSiteSettings] = useState(DEFAULT_HOME_WHO_SETTINGS);
+  const [siteSettingsLoading, setSiteSettingsLoading] = useState(true);
   const [activities, setActivities] = useState([]);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
   const [journeys, setJourneys] = useState([]);
@@ -28,8 +206,39 @@ const Home = () => {
   const [testimonialsLoading, setTestimonialsLoading] = useState(true);
   const [sponsors, setSponsors] = useState([]);
   const [sponsorsLoading, setSponsorsLoading] = useState(true);
+  const [geographicActivities, setGeographicActivities] = useState([]);
+  const [geographicLoading, setGeographicLoading] = useState(true);
+  const [selectedGeographicActivity, setSelectedGeographicActivity] = useState(null);
+  const [selectedGeographicDistricts, setSelectedGeographicDistricts] = useState([]);
+  const [activitySort, setActivitySort] = useState('priority');
+  const [activitiesLimit, setActivitiesLimit] = useState(HOME_ACTIVITIES_LIMIT);
+  const [expandedActivityId, setExpandedActivityId] = useState(null);
+  const [mobileFeedTab, setMobileFeedTab] = useState('news');
+  const [selectedOfficeId, setSelectedOfficeId] = useState('all');
 
   useEffect(() => {
+    const fetchSiteSettingsData = async () => {
+      try {
+        const response = await getSiteSettingsCached();
+        setSiteSettings({ ...DEFAULT_HOME_WHO_SETTINGS, ...(response.data || {}) });
+      } catch (error) {
+        console.error('Error fetching site settings:', error);
+      } finally {
+        setSiteSettingsLoading(false);
+      }
+    };
+
+    const fetchAboutSection = async () => {
+      try {
+        const response = await getAboutUs();
+        setAboutUs(response.data || null);
+      } catch (error) {
+        console.error('Error fetching about section:', error);
+      } finally {
+        setAboutLoading(false);
+      }
+    };
+
     const fetchActivities = async () => {
       try {
         const response = await getAdminActivities();
@@ -107,6 +316,25 @@ const Home = () => {
       }
     };
 
+    const fetchGeographicActivities = async () => {
+      try {
+        const response = await getGeographicActivities();
+        const fetchedGeographicActivities = response.data || [];
+        setGeographicActivities(fetchedGeographicActivities);
+
+        const defaultActivityId = fetchedGeographicActivities[0]?._id;
+        if (defaultActivityId) {
+          await handleGeographicActivitySelect(defaultActivityId);
+        }
+      } catch (error) {
+        console.error('Error fetching geographic activities:', error);
+      } finally {
+        setGeographicLoading(false);
+      }
+    };
+
+    fetchSiteSettingsData();
+    fetchAboutSection();
     fetchActivities();
     fetchJourneys();
     fetchGallery();
@@ -114,44 +342,182 @@ const Home = () => {
     fetchNewsItems();
     fetchTestimonials();
     fetchSponsors();
+    fetchGeographicActivities();
   }, []);
 
-  const featuredActivities = useMemo(() => {
-    return [...activities]
-      .sort((a, b) => {
+  useEffect(() => {
+    const updateActivitiesLimit = () => {
+      if (window.innerWidth < 640) {
+        setActivitiesLimit(HOME_ACTIVITIES_LIMIT_MOBILE);
+        return;
+      }
+      if (window.innerWidth < 1024) {
+        setActivitiesLimit(HOME_ACTIVITIES_LIMIT_TABLET);
+        return;
+      }
+      setActivitiesLimit(HOME_ACTIVITIES_LIMIT);
+    };
+
+    updateActivitiesLimit();
+    window.addEventListener('resize', updateActivitiesLimit);
+    return () => window.removeEventListener('resize', updateActivitiesLimit);
+  }, []);
+
+  const handleGeographicActivitySelect = async (activityId) => {
+    if (!activityId) {
+      setSelectedGeographicActivity(null);
+      setSelectedGeographicDistricts([]);
+      return;
+    }
+
+    try {
+      const response = await getGeographicActivityPresence(activityId);
+      const data = response.data || {};
+      setSelectedGeographicActivity(data.activity || null);
+      setSelectedGeographicDistricts((data.presence || []).map((presence) => `${presence.stateCode}-${presence.districtCode}`));
+    } catch (error) {
+      console.error('Failed to load geographic activity presence:', error);
+    }
+  };
+
+  const impactShowcaseActivities = useMemo(() => {
+    const sorted = [...activities];
+
+    if (activitySort === 'latest') {
+      sorted.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    } else if (activitySort === 'highest-impact') {
+      sorted.sort((a, b) => getNumericImpact(b.impactNumber) - getNumericImpact(a.impactNumber));
+    } else if (activitySort === 'a-z') {
+      sorted.sort((a, b) => (a?.name || '').localeCompare(b?.name || ''));
+    } else {
+      sorted.sort((a, b) => {
         const orderA = Number.isFinite(Number(a?.order)) ? Number(a.order) : 0;
         const orderB = Number.isFinite(Number(b?.order)) ? Number(b.order) : 0;
         if (orderA !== orderB) return orderA - orderB;
         const timeA = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
         const timeB = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
         return timeB - timeA;
-      })
-      .slice(0, HOME_ACTIVITIES_LIMIT);
-  }, [activities]);
+      });
+    }
+
+    return sorted.slice(0, activitiesLimit);
+  }, [activities, activitySort, activitiesLimit]);
+
+  const activitySortOptions = [
+    { id: 'priority', label: 'Priority' },
+    { id: 'latest', label: 'Latest' },
+    { id: 'highest-impact', label: 'Highest Impact' },
+    { id: 'a-z', label: 'A-Z' }
+  ];
+
+  const homeGalleryRows = useMemo(() => {
+    const selectedItems = [...galleryItems]
+      .filter((item) => item?.showOnHome !== false)
+      .sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0))
+      .slice(0, HOME_GALLERY_ITEMS_PER_ROW * 2);
+
+    return [
+      selectedItems.slice(0, HOME_GALLERY_ITEMS_PER_ROW),
+      selectedItems.slice(HOME_GALLERY_ITEMS_PER_ROW, HOME_GALLERY_ITEMS_PER_ROW * 2)
+    ];
+  }, [galleryItems]);
 
   const upcomingEvents = useMemo(() => {
     const now = Date.now();
     return [...eventItems]
       .filter((item) => item.startDateTime && new Date(item.startDateTime).getTime() >= now)
       .sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime))
-      .slice(0, 3);
+      .slice(0, HOME_EVENTS_LIMIT);
   }, [eventItems]);
 
   const latestNews = useMemo(() => {
     return [...newsItems]
       .sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0))
-      .slice(0, 3);
+      .slice(0, HOME_NEWS_LIMIT);
   }, [newsItems]);
+
+  const featuredNews = latestNews[0];
+  const sideNews = latestNews.slice(1);
+  const leftSummary = truncateText(
+    stripRichText(siteSettings.homeWhoLeftText || aboutUs?.content || ''),
+    420
+  );
+  const rightSummary = truncateText(
+    stripRichText(siteSettings.homeWhoRightText || aboutUs?.content || ''),
+    160
+  );
+  const whoSectionTitle = siteSettings.homeWhoTitle || DEFAULT_HOME_WHO_SETTINGS.homeWhoTitle;
+  const rightCardTitle = siteSettings.homeWhoRightTitle || DEFAULT_HOME_WHO_SETTINGS.homeWhoRightTitle;
+  const chairpersonName = siteSettings.chairpersonName || DEFAULT_HOME_WHO_SETTINGS.chairpersonName;
+  const leftImageUrl = siteSettings.chairpersonImageUrl || aboutUs?.image || '';
+  const rightImageUrl = siteSettings.homeWhoRightImageUrl || aboutUs?.image || '';
+  const isWhoSectionLoading = aboutLoading || siteSettingsLoading;
+  const officeLocations = useMemo(() => {
+    const source = Array.isArray(siteSettings?.homeOfficeLocations)
+      ? siteSettings.homeOfficeLocations
+      : DEFAULT_HOME_OFFICES;
+
+    const normalized = source
+      .map((office, index) => {
+        const rawId = String(office?.id || '').trim();
+        const safeId = rawId && rawId.toLowerCase() !== 'all' ? rawId : `office-${index + 1}`;
+
+        return {
+          id: safeId,
+          name: String(office?.name || '').trim(),
+          city: String(office?.city || '').trim(),
+          address: String(office?.address || '').trim(),
+          lat: Number(office?.lat),
+          lng: Number(office?.lng),
+          googleMapsUrl: String(office?.googleMapsUrl || '').trim()
+        };
+      })
+      .filter((office) => office.name && office.city && Number.isFinite(office.lat) && Number.isFinite(office.lng));
+
+    return normalized.length > 0 ? normalized : DEFAULT_HOME_OFFICES;
+  }, [siteSettings?.homeOfficeLocations]);
+
+  useEffect(() => {
+    if (selectedOfficeId === 'all') return;
+    const officeExists = officeLocations.some((office) => office.id === selectedOfficeId);
+    if (!officeExists) {
+      setSelectedOfficeId('all');
+    }
+  }, [officeLocations, selectedOfficeId]);
 
   return (
     <div>
       <HeroSection />
       <div className="container mx-auto px-4 py-8">
         <div className="bg-gradient-to-br from-blue-50 via-white to-indigo-50 rounded-2xl p-6 md:p-8 border border-blue-100 shadow-sm">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold text-center">Welcome to Manav Seva Sansthan Seva</h2>
-            <div className="mt-3 flex justify-end">
-              <Link to="/activities" className="app-btn app-btn-outline">
+          <div className="mb-6 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-5 md:px-6">
+            <div>
+              <h2 className="text-3xl font-bold text-center text-white md:text-left">Welcome to Manav Seva Sansthan Seva</h2>
+              <p className="mt-2 text-sm text-white/90 text-center md:text-left">
+                Explore each initiative through problem-action-result snapshots to understand how every program creates measurable change.
+              </p>
+            </div>
+            <div className="mt-4 flex flex-wrap justify-center md:justify-between items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {activitySortOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setActivitySort(option.id)}
+                    className={`px-3 py-1.5 rounded-full border text-sm font-medium transition ${
+                      activitySort === option.id
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                        : 'bg-white text-blue-800 border-white hover:bg-blue-50'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              <Link
+                to="/activities"
+                className="inline-flex items-center rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+              >
                 See More
               </Link>
             </div>
@@ -159,318 +525,451 @@ const Home = () => {
 
           {activitiesLoading ? (
             <div className="text-center">Loading activities...</div>
-          ) : featuredActivities.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredActivities.map((activity) => (
-                <Link
-                  key={activity._id || activity.slug}
-                  to={`/activities/${activity.slug}`}
-                  state={{ from: 'home' }}
-                  className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow"
-                >
-                  <img
-                    src={activity.image || 'https://via.placeholder.com/600x360?text=Activity+Image'}
-                    alt={activity.name}
-                    className="w-full h-48 object-cover"
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/600x360?text=Activity+Image';
-                    }}
-                  />
-                  <div className="p-4">
-                    <p className="text-xs uppercase tracking-wide text-blue-600 font-semibold mb-1">Impact</p>
-                    <p className="text-2xl font-extrabold text-gray-900 mb-2">{activity.impactNumber || '-'}</p>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{activity.name}</h3>
-                    <p className="text-sm text-gray-600">
-                      {activity.description
-                        ? `${activity.description.slice(0, 90)}${activity.description.length > 90 ? '...' : ''}`
-                        : ''}
-                    </p>
-                  </div>
+          ) : impactShowcaseActivities.length > 0 ? (
+            <div className="space-y-5">
+              {impactShowcaseActivities.map((activity) => {
+                const activityKey = activity._id || activity.slug;
+                const isExpanded = expandedActivityId === activityKey;
+
+                return (
+                  <React.Fragment key={activityKey}>
+                    <Link
+                      to={`/activities/${activity.slug}`}
+                      state={{ from: 'home' }}
+                      className="hidden md:block group bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    >
+                      <div className="lg:grid lg:grid-cols-[15rem_1fr]">
+                        <img
+                          src={optimizeCloudinaryImage(activity.image, { width: 960, height: 560, crop: 'fill' }) || 'https://via.placeholder.com/600x360?text=Activity+Image'}
+                          alt={activity.name}
+                          className="w-full h-56 lg:h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                          decoding="async"
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/600x360?text=Activity+Image';
+                          }}
+                        />
+                        <div className="p-5">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                              <h3 className="text-xl font-semibold text-gray-900">{activity.name}</h3>
+                              <p className="text-sm text-gray-600 mt-1">Impact Pathway</p>
+                            </div>
+                            <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 border border-blue-100">
+                              <span className="text-xs uppercase tracking-wide text-blue-700 font-semibold mr-2">Impact</span>
+                              <span className="text-sm font-bold text-blue-900">{activity.impactNumber || 'Updating'}</span>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-3">
+                              <p className="text-[11px] uppercase tracking-wide text-rose-700 font-semibold">Problem</p>
+                              <p className="mt-1 text-sm text-rose-900">{getActivityProblem(activity)}</p>
+                            </div>
+                            <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-3">
+                              <p className="text-[11px] uppercase tracking-wide text-blue-700 font-semibold">Action</p>
+                              <p className="mt-1 text-sm text-blue-900">{getActivityAction(activity)}</p>
+                            </div>
+                            <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-3">
+                              <p className="text-[11px] uppercase tracking-wide text-emerald-700 font-semibold">Result</p>
+                              <p className="mt-1 text-sm text-emerald-900">{getActivityResult(activity)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+
+                    <div className="md:hidden bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden">
+                      <img
+                        src={optimizeCloudinaryImage(activity.image, { width: 900, height: 540, crop: 'fill' }) || 'https://via.placeholder.com/600x360?text=Activity+Image'}
+                        alt={activity.name}
+                        className="w-full h-44 object-cover"
+                        loading="lazy"
+                        decoding="async"
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/600x360?text=Activity+Image';
+                        }}
+                      />
+                      <div className="p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">{activity.name}</h3>
+                            <p className="text-xs text-gray-600 mt-1">Impact Pathway</p>
+                          </div>
+                          <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 border border-blue-100">
+                            <span className="text-xs font-semibold text-blue-900">{activity.impactNumber || 'Updating'}</span>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setExpandedActivityId((prev) => (prev === activityKey ? null : activityKey))}
+                          className="mt-3 w-full py-2 rounded-lg border border-blue-200 text-blue-700 text-sm font-medium bg-blue-50/70"
+                        >
+                          {isExpanded ? 'Hide details' : 'Show details'}
+                        </button>
+
+                        {isExpanded && (
+                          <div className="mt-3 space-y-2">
+                            <div className="rounded-lg border border-rose-100 bg-rose-50/60 p-2.5">
+                              <p className="text-[11px] uppercase tracking-wide text-rose-700 font-semibold">Problem</p>
+                              <p className="mt-1 text-xs text-rose-900">{getActivityProblem(activity)}</p>
+                            </div>
+                            <div className="rounded-lg border border-blue-100 bg-blue-50/60 p-2.5">
+                              <p className="text-[11px] uppercase tracking-wide text-blue-700 font-semibold">Action</p>
+                              <p className="mt-1 text-xs text-blue-900">{getActivityAction(activity)}</p>
+                            </div>
+                            <div className="rounded-lg border border-emerald-100 bg-emerald-50/60 p-2.5">
+                              <p className="text-[11px] uppercase tracking-wide text-emerald-700 font-semibold">Result</p>
+                              <p className="mt-1 text-xs text-emerald-900">{getActivityResult(activity)}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        <Link
+                          to={`/activities/${activity.slug}`}
+                          state={{ from: 'home' }}
+                          className="mt-3 app-btn app-btn-outline w-full"
+                        >
+                          View Activity
+                        </Link>
+                      </div>
+                    </div>
+                  </React.Fragment>
+                );
+              })}
+
+              <div className="md:hidden sticky bottom-3 z-20 pt-1">
+                <Link to="/activities" className="app-btn app-btn-primary w-full shadow-lg">
+                  View All Activities
                 </Link>
-              ))}
+              </div>
             </div>
           ) : (
             <div className="text-center text-gray-500">No activities available yet.</div>
           )}
         </div>
 
-        {/* Journey Section */}
-        <div className="mt-16">
-          <h2 className="text-3xl font-bold text-center mb-10">Our Journey</h2>
-          {loading ? (
-            <div className="text-center">Loading journey...</div>
-          ) : journeys.length > 0 ? (
-            <div className="relative max-w-6xl mx-auto">
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-blue-200 md:left-1/2 md:-translate-x-1/2" />
+        {/* Who We Are Section */}
+        <div className="mt-12 overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-md">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-500 px-5 py-4">
+            <h2 className="text-3xl font-bold text-center text-white md:text-left">Who We Are</h2>
+            <p className="mt-2 text-sm text-center text-white/90 md:text-left">
+              Know our story, leadership vision, and mission.
+            </p>
+          </div>
 
-              <div className="space-y-10">
-                {journeys.map((journey, index) => {
-                  const isLeft = index % 2 === 0;
-                  return (
-                    <div key={journey._id || `${journey.year}-${index}`} className="relative md:grid md:grid-cols-2 md:gap-8">
-                      <div className={`pl-12 md:pl-0 ${isLeft ? 'md:pr-10' : 'md:col-start-2 md:pl-10'}`}>
-                        <div className="bg-white p-5 rounded-xl shadow-md border border-blue-100">
-                          <h3 className="text-xl font-bold text-blue-700 mb-3">{journey.year}</h3>
-                          <ul className="list-disc list-inside space-y-2">
-                            {(journey.milestones || []).map((milestone, mIndex) => (
-                              <li key={mIndex} className="text-gray-700">{milestone}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
+          <div className="relative bg-[#f3f3f5] p-5 md:p-8 xl:p-8">
+            <div className="absolute -left-24 top-24 h-56 w-56 rounded-full bg-[#eadfcf] opacity-80" />
+            <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-[#eadfcf] opacity-85" />
 
-                      <div className="absolute left-4 top-6 w-4 h-4 rounded-full bg-blue-600 border-4 border-white shadow md:left-1/2 md:-translate-x-1/2" />
-                    </div>
-                  );
-                })}
+            {isWhoSectionLoading ? (
+              <div className="text-center text-gray-600">Loading about section...</div>
+            ) : (
+              <div className="relative grid grid-cols-1 xl:grid-cols-[1.15fr_1.35fr] gap-6 xl:gap-6 items-start">
+                <div className="bg-white/65 backdrop-blur-[1px] border border-dashed border-gray-300 rounded-xl p-6 md:p-8 xl:px-8 xl:py-7 flex flex-col items-center text-center md:min-h-[420px] lg:min-h-[430px] xl:min-h-[500px]">
+                  <div className="h-28 w-28 xl:h-40 xl:w-40 rounded-full overflow-hidden border-4 border-white shadow-md">
+                    <img
+                      src={optimizeCloudinaryImage(leftImageUrl, { width: 480, height: 480, crop: 'fill' }) || 'https://via.placeholder.com/280x280?text=Chairperson'}
+                      alt={chairpersonName}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => {
+                        e.target.src = 'https://via.placeholder.com/280x280?text=Chairperson';
+                      }}
+                    />
+                  </div>
+                  <p className="mt-4 text-sm uppercase tracking-wide text-gray-500">{chairpersonName}</p>
+                  <h2 className="mt-3 text-4xl font-bold text-gray-900">{whoSectionTitle}</h2>
+                  <p className="mt-4 text-base leading-8 text-gray-700 max-w-md xl:max-w-lg">
+                    {leftSummary || 'We are a non-profit organization committed to community-led development and long-term social impact.'}
+                  </p>
+                  <div className="mt-6">
+                    <Link to="/about/about-us" className="app-btn app-btn-outline">
+                      Read Full Story
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="rounded-xl overflow-hidden min-h-[280px] md:min-h-[440px] lg:min-h-[450px] xl:min-h-[530px] shadow-md border border-gray-200 bg-black/5 flex flex-col">
+                  <div className="h-[70%] md:h-64 lg:h-72 xl:h-[26rem] shrink-0">
+                    <img
+                      src={optimizeCloudinaryImage(rightImageUrl, { width: 1600, height: 900, crop: 'fill' }) || 'https://via.placeholder.com/1200x700?text=Program+Highlight'}
+                      alt={rightCardTitle || 'Program highlight'}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => {
+                        e.target.src = 'https://via.placeholder.com/1200x700?text=Program+Highlight';
+                      }}
+                    />
+                  </div>
+                  <div className="h-[30%] md:h-auto flex-1 bg-white px-5 py-4 xl:px-6 xl:py-5 border-t border-gray-100">
+                    <h3 className="text-xl font-semibold text-gray-900">{rightCardTitle}</h3>
+                    <p className="mt-1 text-sm text-gray-600">{rightSummary}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="text-center text-gray-500">No journey data available yet.</div>
-          )}
+            )}
+          </div>
         </div>
+
+        {/* Journey Section */}
+        <Journey loading={loading} journeys={journeys} />
 
         {/* Gallery Section */}
         <div className="mt-16">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold text-center">Gallery</h2>
-            <div className="mt-3 flex justify-end">
-              <Link to="/gallery" className="app-btn app-btn-outline">
-                See More
-              </Link>
+          <div className="mb-6 rounded-2xl bg-gradient-to-r from-cyan-500 to-sky-500 px-5 py-4">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+              <div>
+                <h2 className="text-3xl font-bold text-center text-white md:text-left">Gallery Highlights</h2>
+                <p className="mt-2 text-sm text-white/90 text-center md:text-left">
+                  Home gallery is curated from admin with two focused rows of recent photos.
+                </p>
+              </div>
+              <div className="flex justify-center md:justify-end">
+                <Link
+                  to="/gallery"
+                  className="inline-flex items-center rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                >
+                  See More
+                </Link>
+              </div>
             </div>
           </div>
 
           {galleryLoading ? (
             <div className="text-center">Loading gallery...</div>
-          ) : galleryItems.length > 0 ? (
-            <AutoCarousel
-              items={galleryItems}
-              loading={galleryLoading}
-              emptyMessage="No gallery images available yet."
-              renderItem={(item) => (
-                <Link
-                  to={`/gallery/${item._id}`}
-                  state={{ from: 'home' }}
-                  className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow block"
-                >
-                  <img
-                    src={item.image || 'https://via.placeholder.com/400x260?text=Image+Not+Available'}
-                    alt={item.title || 'Gallery image'}
-                    className="w-full h-52 object-cover"
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/400x260?text=Image+Not+Available';
-                    }}
+          ) : homeGalleryRows.some((row) => row.length > 0) ? (
+            <div className="space-y-4">
+              {homeGalleryRows.map((row, rowIndex) => (
+                row.length > 0 ? (
+                  <GalleryAutoRow
+                    key={`home-gallery-row-${rowIndex}`}
+                    items={row}
+                    direction={rowIndex % 2 === 0 ? 'left' : 'right'}
                   />
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-1">{item.title || 'Gallery Image'}</h3>
-                    <p className="text-sm text-gray-600">
-                      {item.description ? `${item.description.slice(0, 15)}${item.description.length > 15 ? '...' : ''}` : ''}
-                    </p>
-                  </div>
-                </Link>
-              )}
-            />
+                ) : null
+              ))}
+            </div>
           ) : (
             <div className="text-center text-gray-500">No gallery images available yet.</div>
           )}
         </div>
 
-        {/* Upcoming Events Section */}
+        {/* Geographic Focus Section */}
         <div className="mt-16">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold text-center">Upcoming Events</h2>
-            <div className="mt-3 flex justify-end">
-              <Link to="/news-events?tab=events" className="app-btn app-btn-outline">
-                See More
-              </Link>
+          <div className="mb-6 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 px-5 py-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h2 className="text-3xl font-bold text-center text-white md:text-left">Geographic Focus</h2>
+                <p className="mt-2 text-sm text-white/90 text-center md:text-left">
+                  Select an activity from the dropdown to view its district-wise presence.
+                </p>
+              </div>
+              <div className="flex justify-center md:justify-end">
+                <Link
+                  to="/about/geographic-focus"
+                  className="inline-flex items-center rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                >
+                  View Full Focus
+                </Link>
+              </div>
             </div>
           </div>
-          {eventsLoading ? (
-            <div className="text-center">Loading events...</div>
-          ) : upcomingEvents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.map((item) => (
-                <Link
-                  key={item._id}
-                  to={`/events/${item.slug}`}
-                  className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow block"
-                >
-                  <img
-                    src={item.image || 'https://via.placeholder.com/400x260?text=Event+Image'}
-                    alt={item.title}
-                    className="w-full h-52 object-cover"
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/400x260?text=Event+Image';
-                    }}
-                  />
-                  <div className="p-4">
-                    <p className="text-sm text-gray-500 mb-1">{item.startDateTime ? new Date(item.startDateTime).toLocaleString() : 'Date not available'}</p>
-                    <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
-                    <p className="text-sm text-gray-600">{item.description ? `${item.description.slice(0, 80)}${item.description.length > 80 ? '...' : ''}` : ''}</p>
-                  </div>
-                </Link>
-              ))}
+
+          {geographicLoading ? (
+            <div className="text-center text-gray-600">Loading geographic focus...</div>
+          ) : geographicActivities.length > 0 ? (
+            <div className="space-y-6">
+              <ActivitySelector
+                activities={geographicActivities}
+                onActivitySelect={handleGeographicActivitySelect}
+                selectedActivityId={selectedGeographicActivity?._id || ''}
+              />
+              <div className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-6 items-start">
+                <ActivityDetails activity={selectedGeographicActivity} />
+                <Suspense fallback={<div className="rounded-lg bg-white p-4 text-sm text-gray-600">Loading map...</div>}>
+                  <IndiaMap selectedDistricts={selectedGeographicDistricts} />
+                </Suspense>
+              </div>
             </div>
           ) : (
-            <div className="text-center text-gray-500">No upcoming events available.</div>
+            <div className="text-center text-gray-500">No geographic activities available yet.</div>
           )}
         </div>
 
-        {/* Latest News Section */}
+        {/* News and Events Section */}
         <div className="mt-16">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold text-center">Latest News</h2>
-            <div className="mt-3 flex justify-end">
-              <Link to="/news-events?tab=news" className="app-btn app-btn-outline">
-                See More
-              </Link>
+          <div className="mb-6 rounded-2xl bg-gradient-to-r from-rose-600 to-red-500 px-5 py-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h2 className="text-3xl font-bold text-center text-white md:text-left">News & Events</h2>
+                <p className="mt-2 text-sm text-white/90 text-center md:text-left">
+                  Read the latest updates on the left and track upcoming events on the right.
+                </p>
+              </div>
+              <div className="hidden md:flex flex-wrap justify-center md:justify-end gap-2">
+                <Link
+                  to="/news-events?tab=news"
+                  className="inline-flex items-center rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                >
+                  All News
+                </Link>
+                <Link
+                  to="/news-events?tab=events"
+                  className="inline-flex items-center rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                >
+                  All Events
+                </Link>
+              </div>
             </div>
           </div>
-          {newsLoading ? (
-            <div className="text-center">Loading news...</div>
-          ) : latestNews.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {latestNews.map((item) => (
-                <Link
-                  key={item._id}
-                  to={`/news-events/${item.slug || item._id}`}
-                  className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow block"
-                >
-                  <img
-                    src={item.image || 'https://via.placeholder.com/400x260?text=News+Image'}
-                    alt={item.title}
-                    className="w-full h-52 object-cover"
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/400x260?text=News+Image';
-                    }}
-                  />
-                  <div className="p-4">
-                    <p className="text-sm text-gray-500 mb-1">{(item.date || item.createdAt) ? new Date(item.date || item.createdAt).toLocaleDateString() : 'Date not available'}</p>
-                    <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
-                    <p className="text-sm text-gray-600">{item.content ? `${item.content.slice(0, 80)}${item.content.length > 80 ? '...' : ''}` : ''}</p>
-                  </div>
-                </Link>
-              ))}
+
+          <div className="md:hidden mb-4 flex items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMobileFeedTab('news')}
+              className={`px-4 py-2 rounded-full text-sm font-semibold border transition ${
+                mobileFeedTab === 'news'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-blue-700 border-blue-200'
+              }`}
+            >
+              News
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileFeedTab('events')}
+              className={`px-4 py-2 rounded-full text-sm font-semibold border transition ${
+                mobileFeedTab === 'events'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-blue-700 border-blue-200'
+              }`}
+            >
+              Events
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6">
+            <div className={`${mobileFeedTab === 'news' ? 'block' : 'hidden'} md:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden`}>
+              <div className="px-5 py-4 border-b border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900">Latest News</h3>
+              </div>
+              {newsLoading ? (
+                <div className="p-5 text-gray-600">Loading news...</div>
+              ) : latestNews.length > 0 ? (
+                <div>
+                  {featuredNews && (
+                    <Link
+                      to={`/news-events/${featuredNews.slug || featuredNews._id}`}
+                      className="block group"
+                    >
+                      <div className="relative">
+                        <img
+                          src={optimizeCloudinaryImage(featuredNews.image, { width: 1280, height: 720, crop: 'fill' }) || 'https://via.placeholder.com/720x360?text=News+Image'}
+                          alt={featuredNews.title}
+                          className="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                          decoding="async"
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/720x360?text=News+Image';
+                          }}
+                        />
+                        <div className="absolute top-3 left-3 bg-white/90 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">
+                          Featured
+                        </div>
+                      </div>
+                      <div className="p-5">
+                        <p className="text-xs uppercase tracking-wide text-gray-500">
+                          {formatDate(featuredNews.date || featuredNews.createdAt)}
+                        </p>
+                        <h4 className="mt-1 text-xl font-semibold text-gray-900">{featuredNews.title}</h4>
+                        <p className="mt-2 text-sm text-gray-600">{truncateText(stripRichText(featuredNews.content || ''), 130)}</p>
+                      </div>
+                    </Link>
+                  )}
+
+                  {sideNews.length > 0 && (
+                    <div className="border-t border-gray-100">
+                      {sideNews.map((item) => (
+                        <Link
+                          key={item._id}
+                          to={`/news-events/${item.slug || item._id}`}
+                          className="flex items-start gap-3 px-5 py-4 hover:bg-blue-50/40 transition-colors border-b border-gray-100 last:border-b-0"
+                        >
+                          <div className="w-2 h-2 rounded-full bg-blue-600 mt-2 shrink-0" />
+                          <div>
+                            <p className="text-xs uppercase tracking-wide text-gray-500">
+                              {formatDate(item.date || item.createdAt)}
+                            </p>
+                            <h5 className="text-sm font-semibold text-gray-900">{item.title}</h5>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-5 text-gray-500">No news available.</div>
+              )}
             </div>
-          ) : (
-            <div className="text-center text-gray-500">No news available.</div>
-          )}
+
+            <div className={`${mobileFeedTab === 'events' ? 'block' : 'hidden'} md:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden`}>
+              <div className="px-5 py-4 border-b border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900">Upcoming Events</h3>
+              </div>
+              {eventsLoading ? (
+                <div className="p-5 text-gray-600">Loading events...</div>
+              ) : upcomingEvents.length > 0 ? (
+                <div className="p-4 space-y-3">
+                  {upcomingEvents.map((item) => {
+                    const parsedDate = parseSafeDate(item.startDateTime);
+                    const day = parsedDate ? parsedDate.toLocaleDateString('en-IN', { day: '2-digit' }) : '--';
+                    const month = parsedDate ? parsedDate.toLocaleDateString('en-IN', { month: 'short' }).toUpperCase() : 'TBA';
+                    const eventLink = item.slug ? `/events/${item.slug}` : '/news-events?tab=events';
+
+                    return (
+                      <Link
+                        key={item._id}
+                        to={eventLink}
+                        className="flex items-start gap-3 rounded-xl border border-gray-200 p-3 hover:border-blue-200 hover:bg-blue-50/30 transition-colors"
+                      >
+                        <div className="w-14 shrink-0 rounded-lg bg-blue-50 border border-blue-100 text-center py-2">
+                          <p className="text-lg font-bold leading-none text-blue-900">{day}</p>
+                          <p className="text-[11px] font-semibold tracking-wide text-blue-700">{month}</p>
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-sm font-semibold text-gray-900">{item.title}</h4>
+                          <p className="text-xs text-gray-500 mt-1">{formatDateTime(item.startDateTime)}</p>
+                          <p className="text-xs text-gray-600 mt-1">
+                            {truncateText(item.location || item.description || 'Details available on event page.', 70)}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-5 text-gray-500">No upcoming events scheduled.</div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Testimonials Section */}
-        <div className="mt-16">
-          <h2 className="text-3xl font-bold text-center mb-6">What People Say</h2>
-          {testimonialsLoading ? (
-            <div className="text-center">Loading testimonials...</div>
-          ) : testimonials.length > 0 ? (
-            <AutoCarousel
-              items={testimonials}
-              loading={testimonialsLoading}
-              emptyMessage="No testimonials available yet."
-              intervalMs={4500}
-              renderItem={(item) => (
-                <div className="bg-white rounded-xl shadow-md border border-gray-100 p-5 h-full">
-                  <p className="text-gray-700 mb-4 italic">"{item.quote}"</p>
-                  <h3 className="font-semibold text-gray-900">{item.name}</h3>
-                  <p className="text-sm text-gray-600">
-                    {[item.designation, item.location].filter(Boolean).join(', ')}
-                  </p>
-                </div>
-              )}
-            />
-          ) : (
-            <div className="text-center text-gray-500">No testimonials available yet.</div>
-          )}
-        </div>
+        <Testimonials loading={testimonialsLoading} testimonials={testimonials} />
 
         {/* Sponsors Section */}
-        <div className="mt-16">
-          <h2 className="text-3xl font-bold text-center mb-6">Our Sponsors</h2>
-          {sponsorsLoading ? (
-            <div className="text-center">Loading sponsors...</div>
-          ) : sponsors.length > 0 ? (
-            <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {sponsors.map((item) => (
-                  item.website ? (
-                    <a
-                      key={item._id}
-                      href={item.website}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="h-24 bg-white border border-gray-200 rounded-xl shadow-sm p-4 flex items-center justify-center transition hover:shadow-md"
-                    >
-                      <img
-                        src={item.logo}
-                        alt={item.name}
-                        className="max-h-12 w-full object-contain grayscale hover:grayscale-0 transition"
-                        onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/220x80?text=Sponsor';
-                        }}
-                      />
-                    </a>
-                  ) : (
-                    <div
-                      key={item._id}
-                      className="h-24 bg-white border border-gray-200 rounded-xl shadow-sm p-4 flex items-center justify-center"
-                    >
-                      <img
-                        src={item.logo}
-                        alt={item.name}
-                        className="max-h-12 w-full object-contain grayscale"
-                        onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/220x80?text=Sponsor';
-                        }}
-                      />
-                    </div>
-                  )
-                ))}
-              </div>
+        <Sponsors loading={sponsorsLoading} sponsors={sponsors} />
 
-              {sponsors.length > 6 && (
-                <div className="mt-8">
-                  <AutoCarousel
-                    items={sponsors}
-                    intervalMs={3200}
-                    renderItem={(item) => (
-                      item.website ? (
-                        <a
-                          href={item.website}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="h-24 bg-white border border-gray-200 rounded-xl shadow-sm p-4 flex items-center justify-center"
-                        >
-                          <img
-                            src={item.logo}
-                            alt={item.name}
-                            className="max-h-12 w-full object-contain grayscale hover:grayscale-0 transition"
-                            onError={(e) => {
-                              e.target.src = 'https://via.placeholder.com/220x80?text=Sponsor';
-                            }}
-                          />
-                        </a>
-                      ) : (
-                        <div className="h-24 bg-white border border-gray-200 rounded-xl shadow-sm p-4 flex items-center justify-center">
-                          <img
-                            src={item.logo}
-                            alt={item.name}
-                            className="max-h-12 w-full object-contain grayscale"
-                            onError={(e) => {
-                              e.target.src = 'https://via.placeholder.com/220x80?text=Sponsor';
-                            }}
-                          />
-                        </div>
-                      )
-                    )}
-                  />
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center text-gray-500">No sponsors available yet.</div>
-          )}
-        </div>
+        {/* Offices Map Section */}
+        <OfficesMap
+          officeLocations={officeLocations}
+          selectedOfficeId={selectedOfficeId}
+          onSelectedOfficeIdChange={setSelectedOfficeId}
+        />
       </div>
     </div>
   );

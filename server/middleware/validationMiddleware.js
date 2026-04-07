@@ -1,5 +1,4 @@
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const objectIdPattern = /^[a-fA-F0-9]{24}$/;
 
 const isNonEmptyString = (value, min = 1, max = 2000) =>
   typeof value === 'string' && value.trim().length >= min && value.trim().length <= max;
@@ -43,20 +42,33 @@ const validateContact = (req, res, next) => {
   next();
 };
 
-const validateVolunteerApplication = (req, res, next) => {
-  const { volunteerId, name, email, phone } = req.body;
-  if (!isNonEmptyString(volunteerId, 24, 24) || !objectIdPattern.test(volunteerId)) {
-    return res.status(400).json({ message: 'A valid volunteerId is required' });
-  }
+const validateTestimonial = (req, res, next) => {
+  const { name, email, quote, designation, location, consentToPublish } = req.body;
+
   if (!isNonEmptyString(name, 2, 100)) {
     return res.status(400).json({ message: 'Name must be between 2 and 100 characters' });
   }
+
   if (!isNonEmptyString(email, 5, 254) || !emailPattern.test(email)) {
     return res.status(400).json({ message: 'A valid email is required' });
   }
-  if (!isNonEmptyString(phone, 7, 20)) {
-    return res.status(400).json({ message: 'Phone must be between 7 and 20 characters' });
+
+  if (!isNonEmptyString(quote, 5, 3000)) {
+    return res.status(400).json({ message: 'Feedback must be between 5 and 3000 characters' });
   }
+
+  if (designation && !isNonEmptyString(designation, 2, 120)) {
+    return res.status(400).json({ message: 'Designation must be between 2 and 120 characters' });
+  }
+
+  if (location && !isNonEmptyString(location, 2, 120)) {
+    return res.status(400).json({ message: 'Location must be between 2 and 120 characters' });
+  }
+
+  if (!(consentToPublish === true || consentToPublish === 'true')) {
+    return res.status(400).json({ message: 'Consent to publish is required' });
+  }
+
   next();
 };
 
@@ -64,5 +76,5 @@ module.exports = {
   validateRegister,
   validateLogin,
   validateContact,
-  validateVolunteerApplication
+  validateTestimonial
 };

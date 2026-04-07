@@ -51,12 +51,22 @@ export const getNews = () => api.get('/news');
 export const createNews = (data) => api.post('/news', data);
 export const updateNews = (id, data) => api.put(`/news/${id}`, data);
 export const deleteNews = (id) => api.delete(`/news/${id}`);
+export const uploadNewsImage = (file) => {
+  const payload = new FormData();
+  payload.append('imageFile', file);
+  return api.post('/news/upload-image', payload);
+};
 
 // Events
 export const getEvents = () => api.get('/events/admin');
 export const createEvent = (data) => api.post('/events/admin', data);
 export const updateEvent = (id, data) => api.put(`/events/admin/${id}`, data);
 export const deleteEvent = (id) => api.delete(`/events/admin/${id}`);
+export const uploadEventImage = (file) => {
+  const payload = new FormData();
+  payload.append('imageFile', file);
+  return api.post('/events/admin/upload-image', payload);
+};
 
 // Testimonials
 export const getTestimonialsAdmin = () => api.get('/testimonials/admin');
@@ -94,10 +104,13 @@ export const updateGalleryItem = (id, data) => api.put(`/gallery/${id}`, data);
 export const deleteGalleryItem = (id) => api.delete(`/gallery/${id}`);
 
 // Reports
-export const getReports = () => api.get('/reports');
+export const getReports = () => api.get('/reports/admin');
 export const createReport = (data) => api.post('/reports', data);
 export const updateReport = (id, data) => api.put(`/reports/${id}`, data);
 export const deleteReport = (id) => api.delete(`/reports/${id}`);
+export const getReportAccessRequests = () => api.get('/reports/access-requests');
+export const updateReportAccessRequestStatus = (id, data) =>
+  api.put(`/reports/access-requests/${id}/status`, data);
 export const uploadReportFile = (file) => {
   const payload = new FormData();
   payload.append('file', file);
@@ -111,10 +124,6 @@ export const getVolunteerById = (id) => api.get(`/volunteers/public/${id}`);
 export const createVolunteer = (data) => api.post('/volunteers', data);
 export const updateVolunteer = (id, data) => api.put(`/volunteers/${id}`, data);
 export const deleteVolunteer = (id) => api.delete(`/volunteers/${id}`);
-
-// Volunteer Applications
-export const getAllVolunteerApplications = () => api.get('/volunteers/applications');
-export const updateVolunteerApplicationStatus = (id, status) => api.put(`/volunteers/applications/${id}`, { status });
 
 // About
 export const getAboutUs = () => api.get('/about/about-us');
@@ -155,6 +164,11 @@ export const getAdminActivities = () => api.get('/admin-activities');
 export const createAdminActivity = (data) => api.post('/admin/admin-activities', data);
 export const updateAdminActivity = (id, data) => api.put(`/admin/admin-activities/${id}`, data);
 export const deleteAdminActivity = (id) => api.delete(`/admin/admin-activities/${id}`);
+export const uploadAdminActivityImage = (file) => {
+  const payload = new FormData();
+  payload.append('imageFile', file);
+  return api.post('/admin/admin-activities/upload-image', payload);
+};
 
 // Sliders
 export const getSliders = () => api.get('/sliders');
@@ -165,9 +179,9 @@ export const deleteSlider = (id) => api.delete(`/sliders/admin/${id}`);
 
 // Journeys
 export const getJourneys = () => api.get('/journeys');
-export const createJourney = (data) => api.post('/journeys', data);
-export const updateJourney = (id, data) => api.put(`/journeys/${id}`, data);
-export const deleteJourney = (id) => api.delete(`/journeys/${id}`);
+export const createJourney = (data) => api.post('/journeys/admin', data);
+export const updateJourney = (id, data) => api.put(`/journeys/admin/${id}`, data);
+export const deleteJourney = (id) => api.delete(`/journeys/admin/${id}`);
 
 // Jobs
 export const getJobs = () => api.get('/jobs');

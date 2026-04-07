@@ -6,6 +6,7 @@ const {
   getNewsById,
   getNewsBySlug,
   createNews,
+  uploadNewsImage,
   updateNews,
   deleteNews,
 } = require('../controllers/newsController');
@@ -23,6 +24,7 @@ const handleUploadError = (req, res, next) => {
 
 router.get('/', getAllNews);
 router.get('/slug/:slug', getNewsBySlug);
+router.post('/upload-image', protect, admin, handleUploadError, uploadNewsImage);
 router.get('/:id', getNewsById);
 router.post('/', protect, admin, handleUploadError, createNews);
 router.put('/:id', protect, admin, handleUploadError, updateNews);

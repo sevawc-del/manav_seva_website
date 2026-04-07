@@ -1,6 +1,6 @@
 import React, { createContext, useState } from 'react';
 
-export const GlobalContext = createContext();
+const AppGlobalContext = createContext();
 
 const GlobalProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
@@ -46,9 +46,9 @@ const GlobalProvider = ({ children }) => {
   };
 
   return (
-    <GlobalContext.Provider value={value}>
+    <AppGlobalContext.Provider value={value}>
       {children}
-    </GlobalContext.Provider>
+    </AppGlobalContext.Provider>
   );
 };
 

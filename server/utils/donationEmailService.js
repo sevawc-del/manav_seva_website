@@ -1,31 +1,4 @@
-const nodemailer = require('nodemailer');
-
-let transporter;
-
-const getTransporter = () => {
-  if (transporter) return transporter;
-
-  const { SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS } = process.env;
-  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
-    throw new Error('SMTP_HOST, SMTP_PORT, SMTP_USER and SMTP_PASS are required');
-  }
-
-  transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT),
-    secure: String(SMTP_SECURE || 'false') === 'true',
-    auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS
-    }
-  });
-
-  return transporter;
-};
-
-const getFromAddress = () => {
-  return process.env.SMTP_FROM || process.env.SMTP_USER;
-};
+const { getFromAddress, getTransporter } = require('./mailer');
 
 const sendDonationNotificationToNgo = async ({ ngoEmail, donation }) => {
   const mailer = getTransporter();

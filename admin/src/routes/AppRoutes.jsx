@@ -5,6 +5,7 @@ import Dashboard from '../pages/Dashboard';
 import ManageNews from '../pages/ManageNews';
 import ManageGallery from '../pages/ManageGallery';
 import ManageReports from '../pages/ManageReports';
+import ManageMediaCenter from '../pages/ManageMediaCenter';
 import ManageTenders from '../pages/ManageTenders';
 import ManageAbout from '../pages/ManageAbout';
 import ManageActivities from '../pages/ManageActivities';
@@ -14,7 +15,6 @@ import ManageHomepage from '../pages/ManageHomepage';
 import ManageJobs from '../pages/ManageJobs';
 import ManageGetInvolved from '../pages/ManageGetInvolved';
 import ManageVolunteers from '../pages/ManageVolunteers';
-import ManageVolunteerApplications from '../pages/ManageVolunteerApplications';
 import Users from '../pages/Users';
 import Settings from '../pages/Settings';
 import Sidebar from '../components/Sidebar';
@@ -33,6 +33,7 @@ const AppRoutes = () => {
               <Navbar />
               <Routes>
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/manage-media-center" element={<ManageMediaCenter />} />
                 <Route path="/manage-news" element={<ManageNews />} />
                 <Route path="/manage-gallery" element={<ManageGallery />} />
                 <Route path="/manage-reports" element={<ManageReports />} />
@@ -45,7 +46,6 @@ const AppRoutes = () => {
                 <Route path="/manage-jobs" element={<ManageJobs />} />
                 <Route path="/manage-get-involved" element={<ManageGetInvolved />} />
                 <Route path="/manage-volunteers" element={<ManageVolunteers />} />
-                <Route path="/manage-volunteer-applications" element={<ManageVolunteerApplications />} />
                 <Route path="/users" element={
                   <ProtectedRoute adminOnly={true}>
                     <Users />

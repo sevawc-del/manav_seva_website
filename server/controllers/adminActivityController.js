@@ -40,7 +40,7 @@ const getAdminActivityBySlug = async (req, res) => {
 // Create admin activity (admin)
 const createAdminActivity = async (req, res) => {
   try {
-    const { name, slug, description, content, impactNumber } = req.body;
+    const { name, slug, description, content, impactNumber, problem, action } = req.body;
     const order = Number.isFinite(Number(req.body.order)) ? Number(req.body.order) : 0;
     let imageUrl = req.body.image;
 
@@ -67,6 +67,8 @@ const createAdminActivity = async (req, res) => {
       name,
       slug,
       description,
+      problem: problem || '',
+      action: action || '',
       content,
       image: imageUrl || '',
       impactNumber: impactNumber || '',
@@ -77,6 +79,26 @@ const createAdminActivity = async (req, res) => {
     res.json(activity);
   } catch (error) {
     res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+const uploadAdminActivityImage = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'Image file is required' });
+  }
+
+  try {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'manav-seva/activities',
+      resource_type: 'image'
+    });
+
+    await cleanupTempUpload(req.file.path);
+    return res.status(200).json({ imageUrl: result.secure_url });
+  } catch (error) {
+    await cleanupTempUpload(req.file.path);
+    console.error('Activity inline image upload error:', error.message);
+    return res.status(500).json({ message: 'Failed to upload image' });
   }
 };
 
@@ -109,7 +131,7 @@ const updateAdminActivity = async (req, res) => {
       ? existingActivity.isActive
       : (req.body.isActive === 'true' || req.body.isActive === true);
     const order = Number.isFinite(Number(req.body.order)) ? Number(req.body.order) : existingActivity.order;
-    const { name, slug, description, content, impactNumber } = req.body;
+    const { name, slug, description, content, impactNumber, problem, action } = req.body;
 
     const activity = await AdminActivity.findByIdAndUpdate(
       id,
@@ -117,6 +139,8 @@ const updateAdminActivity = async (req, res) => {
         name,
         slug,
         description,
+        problem: problem || '',
+        action: action || '',
         content,
         image: imageUrl || '',
         impactNumber: impactNumber || '',
@@ -147,5 +171,12 @@ const deleteAdminActivity = async (req, res) => {
   }
 };
 
-module.exports = { getAdminActivities, getAdminActivityBySlug, createAdminActivity, updateAdminActivity, deleteAdminActivity };
+module.exports = {
+  getAdminActivities,
+  getAdminActivityBySlug,
+  createAdminActivity,
+  uploadAdminActivityImage,
+  updateAdminActivity,
+  deleteAdminActivity
+};
 

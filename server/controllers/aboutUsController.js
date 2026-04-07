@@ -1,4 +1,5 @@
 const fs = require('fs/promises');
+const sanitizeHtml = require('sanitize-html');
 const cloudinary = require('../config/cloudinary');
 const AboutUs = require('../models/AboutUs');
 
@@ -13,6 +14,63 @@ const cleanupTempUpload = async (filePath) => {
   }
 };
 
+const sanitizeAboutContent = (value = '') =>
+  sanitizeHtml(String(value || ''), {
+    allowedTags: [
+      'p',
+      'br',
+      'strong',
+      'em',
+      'b',
+      'i',
+      'u',
+      'ul',
+      'ol',
+      'li',
+      'blockquote',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'a',
+      'img',
+      'table',
+      'thead',
+      'tbody',
+      'tr',
+      'th',
+      'td',
+      'hr',
+      'code',
+      'pre'
+    ],
+    allowedAttributes: {
+      a: ['href', 'title', 'target', 'rel'],
+      img: ['src', 'alt', 'title', 'width', 'height', 'loading']
+    },
+    allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+    disallowedTagsMode: 'discard'
+  });
+
+const sanitizeImageUrl = (value = '') => {
+  const candidate = String(value || '').trim();
+  if (!candidate) return '';
+  if (candidate.startsWith('/')) return candidate;
+
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return parsed.toString();
+    }
+  } catch (error) {
+    return '';
+  }
+
+  return '';
+};
+
 // Get AboutUs
 const getAboutUs = async (req, res) => {
   try {
@@ -22,7 +80,11 @@ const getAboutUs = async (req, res) => {
       aboutUs = {
         title: 'About Us',
         content: 'Welcome to Manav Seva, a dedicated organization committed to serving humanity through various charitable activities. Our mission is to provide support and assistance to those in need, focusing on health, education, and empowerment initiatives. Through our programs, we strive to make a positive impact on communities and individuals, fostering a better future for all.',
-        image: ''
+        image: '',
+        mission:
+          'To provide comprehensive healthcare and education services to underserved communities, empowering individuals and families to lead healthier, more productive lives.',
+        vision:
+          'A world where every individual has access to quality healthcare and education, regardless of their socioeconomic status.'
       };
     }
     res.json(aboutUs);
@@ -34,15 +96,33 @@ const getAboutUs = async (req, res) => {
 // Create or Update AboutUs
 const createOrUpdateAboutUs = async (req, res) => {
   try {
-    const { title, content, image } = req.body;
+    const { title, content, image, mission, vision } = req.body;
+    const sanitizedTitle = String(title || '').trim();
+    const sanitizedContent = sanitizeAboutContent(content);
+    const sanitizedImage = sanitizeImageUrl(image);
+    const sanitizedMission = sanitizeAboutContent(mission);
+    const sanitizedVision = sanitizeAboutContent(vision);
+
+    if (!sanitizedTitle || !sanitizedContent.trim()) {
+      return res.status(400).json({ message: 'Title and content are required' });
+    }
+
     let aboutUs = await AboutUs.findOne();
     if (aboutUs) {
-      aboutUs.title = title;
-      aboutUs.content = content;
-      aboutUs.image = image;
+      aboutUs.title = sanitizedTitle;
+      aboutUs.content = sanitizedContent;
+      aboutUs.image = sanitizedImage;
+      aboutUs.mission = sanitizedMission;
+      aboutUs.vision = sanitizedVision;
       await aboutUs.save();
     } else {
-      aboutUs = new AboutUs({ title, content, image });
+      aboutUs = new AboutUs({
+        title: sanitizedTitle,
+        content: sanitizedContent,
+        image: sanitizedImage,
+        mission: sanitizedMission,
+        vision: sanitizedVision
+      });
       await aboutUs.save();
     }
     res.json(aboutUs);

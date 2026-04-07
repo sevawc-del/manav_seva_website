@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import DataTable from '../components/DataTable';
 import { getAllJobs, createJob, updateJob, deleteJob } from '../utils/api';
 
@@ -15,18 +15,24 @@ const ManageJobs = () => {
   });
   const [editing, setEditing] = useState(null);
 
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     try {
       const res = await getAllJobs();
       setJobs(res.data);
     } catch (error) {
       console.error('Error fetching jobs:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchJobs();
-  }, []);
+    const timeoutId = window.setTimeout(() => {
+      fetchJobs();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [fetchJobs]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

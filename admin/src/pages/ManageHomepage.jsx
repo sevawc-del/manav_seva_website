@@ -5,6 +5,8 @@ import ManageTestimonials from './ManageTestimonials';
 import ManageSponsors from './ManageSponsors';
 import ManageDonationSettings from './ManageDonationSettings';
 import ManageDonations from './ManageDonations';
+import ManageWhoWeAre from './ManageWhoWeAre';
+import ManageOfficeLocations from './ManageOfficeLocations';
 
 const ManageHomepage = () => {
   const [activeTab, setActiveTab] = useState('sliders');
@@ -80,6 +82,28 @@ const ManageHomepage = () => {
           >
             Donations
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('who-we-are')}
+            className={`px-4 py-2 rounded ${
+              activeTab === 'who-we-are'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+            }`}
+          >
+            Who We Are
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('office-locations')}
+            className={`px-4 py-2 rounded ${
+              activeTab === 'office-locations'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+            }`}
+          >
+            Office Locations
+          </button>
         </div>
       </div>
 
@@ -89,6 +113,8 @@ const ManageHomepage = () => {
       {activeTab === 'sponsors' && <ManageSponsors />}
       {activeTab === 'donation' && <ManageDonationSettings />}
       {activeTab === 'donations' && <ManageDonations />}
+      {activeTab === 'who-we-are' && <ManageWhoWeAre />}
+      {activeTab === 'office-locations' && <ManageOfficeLocations />}
     </div>
   );
 };

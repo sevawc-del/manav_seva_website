@@ -16,7 +16,7 @@ const GalleryDetail = () => {
       try {
         const response = await getGalleryItemById(id);
         setItem(response.data);
-      } catch (err) {
+      } catch {
         setError('Failed to load gallery image');
       } finally {
         setLoading(false);

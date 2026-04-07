@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import MDEditor from '@uiw/react-md-editor';
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
@@ -6,8 +6,10 @@ import {
   getAdminActivities,
   createAdminActivity,
   updateAdminActivity,
-  deleteAdminActivity
+  deleteAdminActivity,
+  uploadAdminActivityImage
 } from '../utils/api';
+import { createMarkdownImageCommandFilter } from '../utils/markdownImageUpload';
 
 const ManageActivities = () => {
   const [activities, setActivities] = useState([]);
@@ -17,10 +19,16 @@ const ManageActivities = () => {
   const [selectedFileName, setSelectedFileName] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
+  const activityEditorCommandFilter = useMemo(
+    () => createMarkdownImageCommandFilter({ uploadImage: uploadAdminActivityImage }),
+    []
+  );
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
     description: '',
+    problem: '',
+    action: '',
     impactNumber: '',
     content: '',
     image: '',
@@ -52,6 +60,8 @@ const ManageActivities = () => {
       payload.append('name', formData.name);
       payload.append('slug', formData.slug);
       payload.append('description', formData.description);
+      payload.append('problem', formData.problem || '');
+      payload.append('action', formData.action || '');
       payload.append('impactNumber', formData.impactNumber || '');
       payload.append('content', formData.content || '');
       payload.append('image', formData.image || '');
@@ -82,6 +92,8 @@ const ManageActivities = () => {
       name: activity.name,
       slug: activity.slug,
       description: activity.description,
+      problem: activity.problem || '',
+      action: activity.action || '',
       impactNumber: activity.impactNumber || '',
       content: activity.content,
       image: activity.image || '',
@@ -113,6 +125,8 @@ const ManageActivities = () => {
       name: '',
       slug: '',
       description: '',
+      problem: '',
+      action: '',
       impactNumber: '',
       content: '',
       image: '',
@@ -193,6 +207,29 @@ const ManageActivities = () => {
           />
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Problem (Home section)</label>
+            <textarea
+              value={formData.problem}
+              onChange={(e) => setFormData(prev => ({ ...prev, problem: e.target.value }))}
+              className="w-full p-2 border rounded"
+              rows="3"
+              placeholder="Short problem statement shown on Home page"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Action (Home section)</label>
+            <textarea
+              value={formData.action}
+              onChange={(e) => setFormData(prev => ({ ...prev, action: e.target.value }))}
+              className="w-full p-2 border rounded"
+              rows="3"
+              placeholder="Short action statement shown on Home page"
+            />
+          </div>
+        </div>
+
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1">Impact Number</label>
           <input
@@ -212,6 +249,7 @@ const ManageActivities = () => {
             preview="edit"
             hideToolbar={false}
             height={300}
+            commandsFilter={activityEditorCommandFilter}
           />
         </div>
 

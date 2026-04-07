@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import MDEditor from '@uiw/react-md-editor';
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
@@ -11,8 +11,11 @@ import {
   getEvents,
   createEvent,
   updateEvent,
-  deleteEvent
+  deleteEvent,
+  uploadNewsImage,
+  uploadEventImage
 } from '../utils/api';
+import { createMarkdownImageCommandFilter } from '../utils/markdownImageUpload';
 
 const toSlug = (value) =>
   String(value || '')
@@ -52,6 +55,15 @@ const ManageNews = () => {
   const [eventSelectedFile, setEventSelectedFile] = useState(null);
   const [eventSelectedFileName, setEventSelectedFileName] = useState('');
   const eventFileInputRef = useRef(null);
+
+  const newsEditorCommandFilter = useMemo(
+    () => createMarkdownImageCommandFilter({ uploadImage: uploadNewsImage }),
+    []
+  );
+  const eventEditorCommandFilter = useMemo(
+    () => createMarkdownImageCommandFilter({ uploadImage: uploadEventImage }),
+    []
+  );
 
   const fetchNewsItems = async () => {
     const res = await getNews();
@@ -240,7 +252,13 @@ const ManageNews = () => {
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">Body *</label>
-              <MDEditor value={newsForm.content} onChange={(value) => setNewsForm((prev) => ({ ...prev, content: value || '' }))} preview="edit" height={300} />
+              <MDEditor
+                value={newsForm.content}
+                onChange={(value) => setNewsForm((prev) => ({ ...prev, content: value || '' }))}
+                preview="edit"
+                height={300}
+                commandsFilter={newsEditorCommandFilter}
+              />
             </div>
             <button type="submit" disabled={newsSubmitting} className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-400">
               {newsSubmitting ? 'Saving...' : editingNews ? 'Update' : 'Add'} News
@@ -349,7 +367,13 @@ const ManageNews = () => {
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">Body *</label>
-              <MDEditor value={eventForm.content} onChange={(value) => setEventForm((prev) => ({ ...prev, content: value || '' }))} preview="edit" height={300} />
+              <MDEditor
+                value={eventForm.content}
+                onChange={(value) => setEventForm((prev) => ({ ...prev, content: value || '' }))}
+                preview="edit"
+                height={300}
+                commandsFilter={eventEditorCommandFilter}
+              />
             </div>
             <button type="submit" disabled={eventSubmitting} className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-400">
               {eventSubmitting ? 'Saving...' : editingEvent ? 'Update' : 'Add'} Event
