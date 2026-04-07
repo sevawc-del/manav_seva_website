@@ -5,8 +5,12 @@ const helmet = require('helmet');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
+const dns = require('dns');
 
 dotenv.config();
+
+// Prefer IPv4 on platforms without IPv6 routing (e.g., Render)
+dns.setDefaultResultOrder('ipv4first');
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads');
