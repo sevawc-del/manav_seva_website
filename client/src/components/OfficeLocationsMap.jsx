@@ -181,7 +181,8 @@ const OfficeLocationsMap = ({ offices = [], selectedOfficeId = 'all', onSelectOf
     }, 0);
   }, [offices, selectedOffice, selectedOfficeId, onSelectOffice]);
 
-  return <div ref={mapContainerRef} className={className} />;
+  const resolvedClassName = ["relative z-0", className].filter(Boolean).join(" ");
+  return <div ref={mapContainerRef} className={resolvedClassName} />;
 };
 
 export default OfficeLocationsMap;

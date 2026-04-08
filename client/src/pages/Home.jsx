@@ -653,7 +653,7 @@ const Home = () => {
         {/* Who We Are Section */}
         <div className="mt-12 overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-md">
           <div className="bg-gradient-to-r from-emerald-600 to-teal-500 px-5 py-4">
-            <h2 className="text-3xl font-bold text-center text-white md:text-left">Who We Are</h2>
+            <h2 className="text-3xl font-bold text-center text-white md:text-left">Our Identity</h2>
             <p className="mt-2 text-sm text-center text-white/90 md:text-left">
               Know our story, leadership vision, and mission.
             </p>
@@ -725,7 +725,6 @@ const Home = () => {
               <div>
                 <h2 className="text-3xl font-bold text-center text-white md:text-left">Gallery Highlights</h2>
                 <p className="mt-2 text-sm text-white/90 text-center md:text-left">
-                  Home gallery is curated from admin with two focused rows of recent photos.
                 </p>
               </div>
               <div className="flex justify-center md:justify-end">

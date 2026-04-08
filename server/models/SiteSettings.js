@@ -3,19 +3,25 @@ const mongoose = require('mongoose');
 const siteSettingsSchema = new mongoose.Schema(
   {
     organizationName: { type: String, default: 'Manav Seva Sansthan SEVA', trim: true },
-    organizationSubline: { type: String, default: 'Sansthan SEVA', trim: true },
+    organizationSubline: { type: String, default: 'Society for Eco-development Voluntary Action', trim: true },
     logoUrl: { type: String, default: '/images/logo.png', trim: true },
     supportMessage: { type: String, default: 'Support our mission to transform lives.', trim: true },
     footerAboutTitle: { type: String, default: 'Manav Seva India', trim: true },
     footerAboutText: {
       type: String,
       default:
-        'Manav Seva India works towards sustainable community development, focusing on education, healthcare, women empowerment and social protection programs across India.',
+        'Manav Seva Sansthan SEVA, is a not for profit organization established in 1988, working in North India with a mission to ensure socio-economic development of the poor and disadvantaged resembling vulnerable women and children devoid of basic rights through community based area development',
       trim: true
     },
     footerPhone: { type: String, default: '+91 99999 88888', trim: true },
     footerEmail: { type: String, default: 'info@manavsevaindia.org', trim: true },
-    footerAddress: { type: String, default: 'Manav Seva India, Uttar Pradesh, India.', trim: true },
+    footerSecondaryEmail: { type: String, default: 'executive.director@manavsevaindia.org', trim: true },
+    footerWebsite: { type: String, default: 'www.manavsevaindia.org', trim: true },
+    footerAddress: {
+      type: String,
+      default: 'LIG 198, Vikas Nagar, P.O. Fertilizer, Bargadwa, Gorakhpur',
+      trim: true
+    },
     footerCopyrightText: { type: String, default: 'Manav Seva India. All rights reserved.', trim: true },
     chairpersonName: { type: String, default: 'Chairperson', trim: true },
     chairpersonImageUrl: { type: String, default: '', trim: true },

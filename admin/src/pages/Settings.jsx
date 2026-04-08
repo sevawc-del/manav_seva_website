@@ -10,6 +10,8 @@ const initialForm = {
   footerAboutText: '',
   footerPhone: '',
   footerEmail: '',
+  footerSecondaryEmail: '',
+  footerWebsite: '',
   footerAddress: '',
   footerCopyrightText: '',
   facebookUrl: '',
@@ -67,6 +69,8 @@ const Settings = () => {
       payload.append('footerAboutText', formData.footerAboutText || '');
       payload.append('footerPhone', formData.footerPhone || '');
       payload.append('footerEmail', formData.footerEmail || '');
+      payload.append('footerSecondaryEmail', formData.footerSecondaryEmail || '');
+      payload.append('footerWebsite', formData.footerWebsite || '');
       payload.append('footerAddress', formData.footerAddress || '');
       payload.append('footerCopyrightText', formData.footerCopyrightText || '');
       payload.append('facebookUrl', formData.facebookUrl || '');
@@ -126,7 +130,7 @@ const Settings = () => {
               value={formData.organizationSubline || ''}
               onChange={handleChange}
               className="w-full p-2 border rounded"
-              placeholder="Sansthan SEVA"
+              placeholder="Society for Eco-development Voluntary Action"
             />
           </div>
           <div className="md:col-span-2">
@@ -238,6 +242,27 @@ const Settings = () => {
               value={formData.footerEmail || ''}
               onChange={handleChange}
               className="w-full p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Footer Secondary Email</label>
+            <input
+              type="email"
+              name="footerSecondaryEmail"
+              value={formData.footerSecondaryEmail || ''}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Footer Website</label>
+            <input
+              type="text"
+              name="footerWebsite"
+              value={formData.footerWebsite || ''}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              placeholder="www.manavsevaindia.org"
             />
           </div>
           <div className="md:col-span-2">

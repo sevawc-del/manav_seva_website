@@ -106,7 +106,7 @@ const OfficesMap = ({
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_0.85fr] gap-5">
-        <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white">
+        <div className="relative z-0 rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white">
           <OfficeLocationsMap
             offices={officeLocations}
             selectedOfficeId={selectedOfficeId}

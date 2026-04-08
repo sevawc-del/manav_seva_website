@@ -7,7 +7,7 @@ import { getSiteSettingsCached } from "../utils/api";
 
 const DEFAULT_SITE_SETTINGS = {
   organizationName: "Manav Seva Sansthan SEVA",
-  organizationSubline: "Society for Eco-Development Voluntary Action",
+  organizationSubline: "Society for Eco-development Voluntary Action",
   logoUrl: "/images/logo.png",
   supportMessage: "Support our mission to transform lives.",
   facebookUrl: "https://www.facebook.com",

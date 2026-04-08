@@ -5,15 +5,17 @@ const { deleteCloudinaryAsset } = require('../utils/cloudinaryAsset');
 
 const DEFAULT_SITE_SETTINGS = {
   organizationName: 'Manav Seva Sansthan SEVA',
-  organizationSubline: 'Sansthan SEVA',
+  organizationSubline: 'Society for Eco-development Voluntary Action',
   logoUrl: '/images/logo.png',
   supportMessage: 'Support our mission to transform lives.',
   footerAboutTitle: 'Manav Seva India',
   footerAboutText:
-    'Manav Seva India works towards sustainable community development, focusing on education, healthcare, women empowerment and social protection programs across India.',
-  footerPhone: '+91 99999 88888',
+    'Manav Seva Sansthan SEVA, is a not for profit organization established in 1988, working in North India with a mission to ensure socio-economic development of the poor and disadvantaged resembling vulnerable women and children devoid of basic rights through community based area development',
+  footerPhone: '+91 - 8840221539',
   footerEmail: 'info@manavsevaindia.org',
-  footerAddress: 'Manav Seva India, Uttar Pradesh, India.',
+  footerSecondaryEmail: 'executive.director@manavsevaindia.org',
+  footerWebsite: 'www.manavsevaindia.org',
+  footerAddress: 'LIG 198, Vikas Nagar, P.O. Fertilizer, Bargadwa, Gorakhpur',
   footerCopyrightText: 'Manav Seva India. All rights reserved.',
   chairpersonName: 'Chairperson',
   chairpersonImageUrl: '',
@@ -268,6 +270,12 @@ const createOrUpdateSiteSettings = async (req, res) => {
         req.body.footerPhone ?? settings?.footerPhone ?? DEFAULT_SITE_SETTINGS.footerPhone,
       footerEmail:
         req.body.footerEmail ?? settings?.footerEmail ?? DEFAULT_SITE_SETTINGS.footerEmail,
+      footerSecondaryEmail:
+        req.body.footerSecondaryEmail ??
+        settings?.footerSecondaryEmail ??
+        DEFAULT_SITE_SETTINGS.footerSecondaryEmail,
+      footerWebsite:
+        req.body.footerWebsite ?? settings?.footerWebsite ?? DEFAULT_SITE_SETTINGS.footerWebsite,
       footerAddress:
         req.body.footerAddress ?? settings?.footerAddress ?? DEFAULT_SITE_SETTINGS.footerAddress,
       footerCopyrightText:

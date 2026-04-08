@@ -177,10 +177,13 @@ const Governance = () => {
           </div>
 
           <div className="space-y-5 p-4 md:p-5">
-            <p className="text-sm leading-7 text-slate-700 md:text-base">
-              {data?.ethicsContent ||
-                'We adhere to high standards of integrity, accountability, and transparency in all our work.'}
-            </p>
+            {data?.ethicsContent ? (
+              <p className="text-sm leading-7 text-slate-700 md:text-base">{data.ethicsContent}</p>
+            ) : (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                Ethics information is being updated.
+              </div>
+            )}
 
             {ethicsPoints.length > 0 ? (
               <div className="grid gap-3 sm:grid-cols-2">
