@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 const JOURNEY_THEMES = [
   {
     containerBorder: 'border-blue-200',
-    headerGradient: 'from-blue-600 to-sky-500',
+    headerGradient: 'from-blue-600 to-sky-400',
     countBadge: 'bg-white/25 text-white',
     dot: 'bg-blue-600'
   },
