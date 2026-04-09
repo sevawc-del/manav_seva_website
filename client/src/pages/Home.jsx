@@ -28,9 +28,12 @@ const IndiaMap = lazy(() => import('../components/IndiaMap'));
 const HOME_ACTIVITIES_LIMIT = 6;
 const HOME_ACTIVITIES_LIMIT_TABLET = 4;
 const HOME_ACTIVITIES_LIMIT_MOBILE = 3;
-const HOME_NEWS_LIMIT = 4;
 const HOME_EVENTS_LIMIT = 4;
 const HOME_GALLERY_ITEMS_PER_ROW = 10;
+const GALLERY_MARQUEE_DUPLICATE_LIMIT = 5;
+const NEWS_MARQUEE_DUPLICATE_LIMIT = 5;
+const NEWS_MARQUEE_MIN_DURATION = 8;
+const NEWS_MARQUEE_PER_ITEM_DURATION = 2;
 
 const truncateText = (text = '', maxLength = 90) => {
   if (!text) return '';
@@ -115,8 +118,9 @@ const GalleryAutoRow = ({ items, direction = 'left' }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const hasLoop = items.length > 1;
-  const shouldAnimate = hasLoop && !prefersReducedMotion;
-  const durationSeconds = Math.max(36, items.length * 4.8);
+  const canDuplicate = items.length <= GALLERY_MARQUEE_DUPLICATE_LIMIT;
+  const shouldAnimate = hasLoop && canDuplicate && !prefersReducedMotion;
+  const durationSeconds = Math.max(6, items.length * 3.8);
   const animationName = direction === 'right' ? 'gallery-marquee-right' : 'gallery-marquee-left';
 
   useEffect(() => {
@@ -180,6 +184,80 @@ const GalleryAutoRow = ({ items, direction = 'left' }) => {
                 </div>
               </Link>
             ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const VerticalNewsTicker = ({ items = [] }) => {
+  const [isPaused, setIsPaused] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const hasLoop = items.length > 1;
+  const canDuplicate = items.length <= NEWS_MARQUEE_DUPLICATE_LIMIT;
+  const shouldAnimate = hasLoop && canDuplicate && !prefersReducedMotion;
+  const durationSeconds = Math.max(
+    NEWS_MARQUEE_MIN_DURATION,
+    items.length * NEWS_MARQUEE_PER_ITEM_DURATION
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return undefined;
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const syncPreference = () => setPrefersReducedMotion(mediaQuery.matches);
+    syncPreference();
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', syncPreference);
+      return () => mediaQuery.removeEventListener('change', syncPreference);
+    }
+
+    mediaQuery.addListener(syncPreference);
+    return () => mediaQuery.removeListener(syncPreference);
+  }, []);
+
+  if (!items.length) return null;
+
+  return (
+    <div
+      className={`h-64 md:h-72 border-t border-gray-100 ${
+        shouldAnimate ? 'overflow-hidden' : 'overflow-y-auto no-scrollbar'
+      }`}
+      onMouseEnter={() => shouldAnimate && setIsPaused(true)}
+      onMouseLeave={() => shouldAnimate && setIsPaused(false)}
+      onTouchStart={() => shouldAnimate && setIsPaused(true)}
+      onTouchEnd={() => shouldAnimate && setIsPaused(false)}
+      onTouchCancel={() => shouldAnimate && setIsPaused(false)}
+    >
+      <div
+        className="flex flex-col"
+        style={{
+          animation: shouldAnimate ? `news-marquee-vertical ${durationSeconds}s linear infinite` : 'none',
+          animationPlayState: isPaused ? 'paused' : 'running'
+        }}
+      >
+        {(shouldAnimate ? [0, 1] : [0]).map((copyIndex) => (
+          <div key={`news-copy-${copyIndex}`} className="flex flex-col">
+            {items.map((item, index) => {
+              const rowIndex = copyIndex * items.length + index;
+              const rowClass = rowIndex % 2 === 0 ? 'bg-blue-50' : 'bg-white';
+              return (
+              <Link
+                key={`${item._id || item.slug || 'news'}-${copyIndex}-${index}`}
+                to={`/news-events/${item.slug || item._id}`}
+                className={`${rowClass} flex items-start gap-3 px-5 py-4 border-b border-gray-100`}
+              >
+                <div className="w-2 h-2 rounded-full bg-blue-600 mt-2 shrink-0" />
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-500">
+                    {formatDate(item.date || item.createdAt)}
+                  </p>
+                  <h5 className="text-sm font-semibold text-gray-900">{truncateText(item.title, 120)}</h5>
+                </div>
+              </Link>
+              );
+            })}
           </div>
         ))}
       </div>
@@ -430,14 +508,13 @@ const Home = () => {
       .slice(0, HOME_EVENTS_LIMIT);
   }, [eventItems]);
 
-  const latestNews = useMemo(() => {
+  const sortedNews = useMemo(() => {
     return [...newsItems]
-      .sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0))
-      .slice(0, HOME_NEWS_LIMIT);
+      .sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0));
   }, [newsItems]);
 
-  const featuredNews = latestNews[0];
-  const sideNews = latestNews.slice(1);
+  const featuredNews = sortedNews[0];
+  const sideNews = sortedNews.slice(1);
   const leftSummary = truncateText(
     stripRichText(siteSettings.homeWhoLeftText || aboutUs?.content || ''),
     420
@@ -720,7 +797,7 @@ const Home = () => {
 
         {/* Gallery Section */}
         <div className="mt-16">
-          <div className="mb-6 rounded-2xl bg-gradient-to-r from-cyan-500 to-sky-500 px-5 py-4">
+          <div className="mb-6 rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-600 px-5 py-4">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
               <div>
                 <h2 className="text-3xl font-bold text-center text-white md:text-left">Gallery Highlights</h2>
@@ -801,27 +878,13 @@ const Home = () => {
 
         {/* News and Events Section */}
         <div className="mt-16">
-          <div className="mb-6 rounded-2xl bg-gradient-to-r from-rose-600 to-red-500 px-5 py-4">
+          <div className="mb-6 rounded-2xl bg-gradient-to-r from-indigo-700 to-blue-700 px-5 py-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
                 <h2 className="text-3xl font-bold text-center text-white md:text-left">News & Events</h2>
                 <p className="mt-2 text-sm text-white/90 text-center md:text-left">
                   Read the latest updates on the left and track upcoming events on the right.
                 </p>
-              </div>
-              <div className="hidden md:flex flex-wrap justify-center md:justify-end gap-2">
-                <Link
-                  to="/news-events?tab=news"
-                  className="inline-flex items-center rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                >
-                  All News
-                </Link>
-                <Link
-                  to="/news-events?tab=events"
-                  className="inline-flex items-center rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                >
-                  All Events
-                </Link>
               </div>
             </div>
           </div>
@@ -853,12 +916,18 @@ const Home = () => {
 
           <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6">
             <div className={`${mobileFeedTab === 'news' ? 'block' : 'hidden'} md:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden`}>
-              <div className="px-5 py-4 border-b border-gray-100">
+              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
                 <h3 className="text-lg font-semibold text-gray-900">Latest News</h3>
+                <Link
+                  to="/news-events?tab=news"
+                  className="inline-flex items-center rounded-lg border border-blue-700 bg-blue-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-800"
+                >
+                  All News
+                </Link>
               </div>
               {newsLoading ? (
                 <div className="p-5 text-gray-600">Loading news...</div>
-              ) : latestNews.length > 0 ? (
+              ) : sortedNews.length > 0 ? (
                 <div>
                   {featuredNews && (
                     <Link
@@ -891,23 +960,7 @@ const Home = () => {
                   )}
 
                   {sideNews.length > 0 && (
-                    <div className="border-t border-gray-100">
-                      {sideNews.map((item) => (
-                        <Link
-                          key={item._id}
-                          to={`/news-events/${item.slug || item._id}`}
-                          className="flex items-start gap-3 px-5 py-4 hover:bg-blue-50/40 transition-colors border-b border-gray-100 last:border-b-0"
-                        >
-                          <div className="w-2 h-2 rounded-full bg-blue-600 mt-2 shrink-0" />
-                          <div>
-                            <p className="text-xs uppercase tracking-wide text-gray-500">
-                              {formatDate(item.date || item.createdAt)}
-                            </p>
-                            <h5 className="text-sm font-semibold text-gray-900">{item.title}</h5>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+                    <VerticalNewsTicker items={sideNews} />
                   )}
                 </div>
               ) : (
@@ -916,8 +969,14 @@ const Home = () => {
             </div>
 
             <div className={`${mobileFeedTab === 'events' ? 'block' : 'hidden'} md:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden`}>
-              <div className="px-5 py-4 border-b border-gray-100">
+              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
                 <h3 className="text-lg font-semibold text-gray-900">Upcoming Events</h3>
+                <Link
+                  to="/news-events?tab=events"
+                  className="inline-flex items-center rounded-lg border border-blue-700 bg-blue-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-800"
+                >
+                  All Events
+                </Link>
               </div>
               {eventsLoading ? (
                 <div className="p-5 text-gray-600">Loading events...</div>

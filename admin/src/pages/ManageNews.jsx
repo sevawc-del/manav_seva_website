@@ -24,16 +24,37 @@ const toSlug = (value) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
+const formatDateInputValue = (value) => {
+  if (!value) return '';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '';
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getTodayDateInputValue = () => formatDateInputValue(new Date());
+
+const toStableNewsDateIso = (dateInputValue) => {
+  if (!dateInputValue) return new Date().toISOString();
+  const parsed = new Date(`${dateInputValue}T12:00:00.000Z`);
+  if (Number.isNaN(parsed.getTime())) return new Date().toISOString();
+  return parsed.toISOString();
+};
+
 const ManageNews = () => {
   const [activeTab, setActiveTab] = useState('news');
 
   const [news, setNews] = useState([]);
-  const [newsForm, setNewsForm] = useState({ title: '', slug: '', content: '', image: '' });
+  const [newsForm, setNewsForm] = useState({ title: '', slug: '', content: '', image: '', date: '' });
   const [editingNews, setEditingNews] = useState(null);
   const [newsSubmitting, setNewsSubmitting] = useState(false);
   const [newsSelectedFile, setNewsSelectedFile] = useState(null);
   const [newsSelectedFileName, setNewsSelectedFileName] = useState('');
   const newsFileInputRef = useRef(null);
+  const newsDateInputRef = useRef(null);
 
   const [events, setEvents] = useState([]);
   const [eventForm, setEventForm] = useState({
@@ -87,7 +108,7 @@ const ManageNews = () => {
   }, []);
 
   const resetNewsForm = () => {
-    setNewsForm({ title: '', slug: '', content: '', image: '' });
+    setNewsForm({ title: '', slug: '', content: '', image: '', date: '' });
     setEditingNews(null);
     setNewsSelectedFile(null);
     setNewsSelectedFileName('');
@@ -115,6 +136,19 @@ const ManageNews = () => {
     if (eventFileInputRef.current) eventFileInputRef.current.value = '';
   };
 
+  const openNewsDatePicker = () => {
+    const input = newsDateInputRef.current;
+    if (!input) return;
+
+    if (typeof input.showPicker === 'function') {
+      input.showPicker();
+      return;
+    }
+
+    input.focus();
+    input.click();
+  };
+
   const handleNewsSubmit = async (e) => {
     e.preventDefault();
     if (newsSubmitting) return;
@@ -123,10 +157,12 @@ const ManageNews = () => {
     setNewsSubmitting(true);
     try {
       const payload = new FormData();
+      const effectiveNewsDate = newsForm.date || getTodayDateInputValue();
       payload.append('title', newsForm.title);
       payload.append('slug', newsForm.slug);
       payload.append('content', newsForm.content);
       payload.append('image', newsForm.image || '');
+      payload.append('date', toStableNewsDateIso(effectiveNewsDate));
       if (newsSelectedFile) payload.append('imageFile', newsSelectedFile);
 
       if (editingNews) {
@@ -233,6 +269,38 @@ const ManageNews = () => {
               className="w-full p-2 mb-4 border rounded"
               required
             />
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Date (optional)</label>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={openNewsDatePicker}
+                  aria-label="Open date picker"
+                  className="h-11 min-w-11 rounded border border-gray-300 bg-gray-100 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-200"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    className="h-5 w-5"
+                  >
+                    <rect x="3.5" y="4.5" width="17" height="16" rx="2.5" />
+                    <path d="M8 2.75v3.5M16 2.75v3.5M3.5 9.5h17" />
+                    <path d="M8.5 13h3v3h-3z" />
+                  </svg>
+                </button>
+                <input
+                  ref={newsDateInputRef}
+                  type="date"
+                  value={newsForm.date}
+                  onChange={(e) => setNewsForm({ ...newsForm, date: e.target.value })}
+                  className="date-input-no-indicator w-full rounded border p-3 text-base"
+                />
+              </div>
+              <p className="mt-1 text-xs text-gray-500">If left empty, today's date will be used.</p>
+            </div>
             <input
               type="text"
               placeholder="Cloudinary Image URL (optional if file is selected)"
@@ -270,7 +338,13 @@ const ManageNews = () => {
             columns={newsColumns}
             onEdit={(item) => {
               setEditingNews(item);
-              setNewsForm({ title: item.title, slug: item.slug || '', content: item.content || '', image: item.image || '' });
+              setNewsForm({
+                title: item.title,
+                slug: item.slug || '',
+                content: item.content || '',
+                image: item.image || '',
+                date: formatDateInputValue(item.date || item.createdAt)
+              });
               setNewsSelectedFile(null);
               setNewsSelectedFileName('');
               if (newsFileInputRef.current) newsFileInputRef.current.value = '';

@@ -1,42 +1,21 @@
-import React from 'react';
-import AutoCarousel from '../AutoCarousel';
+import React, { useEffect, useState } from 'react';
 import { optimizeCloudinaryImage } from '../../utils/imageUrl';
 
 const FALLBACK_SPONSOR_IMAGE = 'https://via.placeholder.com/220x80?text=Sponsor';
+const SPONSORS_MARQUEE_DUPLICATE_LIMIT = 12;
 
-const Sponsors = ({ loading = false, sponsors = [] }) => {
-  const renderSponsorCard = (item, allowHover = false) => {
-    const imageClassName = allowHover
-      ? 'max-h-12 w-full object-contain grayscale hover:grayscale-0 transition'
-      : 'max-h-12 w-full object-contain grayscale';
+const SponsorCard = ({ item, allowHover = false }) => {
+  const imageClassName = allowHover
+    ? 'h-12 w-auto object-contain grayscale hover:grayscale-0 transition'
+    : 'h-12 w-auto object-contain grayscale';
 
-    if (item.website) {
-      return (
-        <a
-          key={item._id}
-          href={item.website}
-          target="_blank"
-          rel="noreferrer"
-          className="h-24 bg-white border border-gray-200 rounded-xl shadow-sm p-4 flex items-center justify-center transition hover:shadow-md"
-        >
-          <img
-            src={optimizeCloudinaryImage(item.logo, { width: 440, height: 160, crop: 'fit' }) || item.logo}
-            alt={item.name}
-            className={imageClassName}
-            loading="lazy"
-            decoding="async"
-            onError={(e) => {
-              e.target.src = FALLBACK_SPONSOR_IMAGE;
-            }}
-          />
-        </a>
-      );
-    }
-
+  if (item.website) {
     return (
-      <div
-        key={item._id}
-        className="h-24 bg-white border border-gray-200 rounded-xl shadow-sm p-4 flex items-center justify-center"
+      <a
+        href={item.website}
+        target="_blank"
+        rel="noreferrer"
+        className="h-24 shrink-0 px-2 flex items-center justify-center"
       >
         <img
           src={optimizeCloudinaryImage(item.logo, { width: 440, height: 160, crop: 'fit' }) || item.logo}
@@ -48,9 +27,84 @@ const Sponsors = ({ loading = false, sponsors = [] }) => {
             e.target.src = FALLBACK_SPONSOR_IMAGE;
           }}
         />
-      </div>
+      </a>
     );
-  };
+  }
+
+  return (
+    <div className="h-24 shrink-0 px-2 flex items-center justify-center">
+      <img
+        src={optimizeCloudinaryImage(item.logo, { width: 440, height: 160, crop: 'fit' }) || item.logo}
+        alt={item.name}
+        className={imageClassName}
+        loading="lazy"
+        decoding="async"
+        onError={(e) => {
+          e.target.src = FALLBACK_SPONSOR_IMAGE;
+        }}
+      />
+    </div>
+  );
+};
+
+const SponsorsMarquee = ({ items = [] }) => {
+  const [isPaused, setIsPaused] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const hasLoop = items.length > 1;
+  const canDuplicate = items.length <= SPONSORS_MARQUEE_DUPLICATE_LIMIT;
+  const shouldAnimate = hasLoop && canDuplicate && !prefersReducedMotion;
+  const durationSeconds = Math.max(4, items.length * 2.8);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return undefined;
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const syncPreference = () => setPrefersReducedMotion(mediaQuery.matches);
+    syncPreference();
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', syncPreference);
+      return () => mediaQuery.removeEventListener('change', syncPreference);
+    }
+
+    mediaQuery.addListener(syncPreference);
+    return () => mediaQuery.removeListener(syncPreference);
+  }, []);
+
+  if (!items.length) return null;
+
+  return (
+    <div
+      className={`${shouldAnimate ? 'overflow-hidden' : 'overflow-x-auto no-scrollbar'}`}
+      onMouseEnter={() => shouldAnimate && setIsPaused(true)}
+      onMouseLeave={() => shouldAnimate && setIsPaused(false)}
+      onTouchStart={() => shouldAnimate && setIsPaused(true)}
+      onTouchEnd={() => shouldAnimate && setIsPaused(false)}
+      onTouchCancel={() => shouldAnimate && setIsPaused(false)}
+    >
+      <div
+        className="flex w-max gap-0"
+        style={{
+          animation: shouldAnimate ? `gallery-marquee-left ${durationSeconds}s linear infinite` : 'none',
+          animationPlayState: isPaused ? 'paused' : 'running'
+        }}
+      >
+        {(shouldAnimate ? [0, 1] : [0]).map((copyIndex) => (
+          <div key={`sponsors-copy-${copyIndex}`} className="flex gap-1 pr-1">
+            {items.map((item, index) => (
+              <SponsorCard
+                key={`${item?._id || item?.name || 'sponsor'}-${copyIndex}-${index}`}
+                item={item}
+                allowHover
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const Sponsors = ({ loading = false, sponsors = [] }) => {
 
   return (
     <div className="mt-16">
@@ -63,58 +117,7 @@ const Sponsors = ({ loading = false, sponsors = [] }) => {
       {loading ? (
         <div className="text-center">Loading sponsors...</div>
       ) : sponsors.length > 0 ? (
-        <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {sponsors.map((item) => renderSponsorCard(item, true))}
-          </div>
-
-          {sponsors.length > 6 && (
-            <div className="mt-8">
-              <AutoCarousel
-                items={sponsors}
-                intervalMs={3200}
-                renderItem={(item) => {
-                  if (item.website) {
-                    return (
-                      <a
-                        href={item.website}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="h-24 bg-white border border-gray-200 rounded-xl shadow-sm p-4 flex items-center justify-center"
-                      >
-                        <img
-                          src={optimizeCloudinaryImage(item.logo, { width: 440, height: 160, crop: 'fit' }) || item.logo}
-                          alt={item.name}
-                          className="max-h-12 w-full object-contain grayscale hover:grayscale-0 transition"
-                          loading="lazy"
-                          decoding="async"
-                          onError={(e) => {
-                            e.target.src = FALLBACK_SPONSOR_IMAGE;
-                          }}
-                        />
-                      </a>
-                    );
-                  }
-
-                  return (
-                    <div className="h-24 bg-white border border-gray-200 rounded-xl shadow-sm p-4 flex items-center justify-center">
-                      <img
-                        src={optimizeCloudinaryImage(item.logo, { width: 440, height: 160, crop: 'fit' }) || item.logo}
-                        alt={item.name}
-                        className="max-h-12 w-full object-contain grayscale"
-                        loading="lazy"
-                        decoding="async"
-                        onError={(e) => {
-                          e.target.src = FALLBACK_SPONSOR_IMAGE;
-                        }}
-                      />
-                    </div>
-                  );
-                }}
-              />
-            </div>
-          )}
-        </>
+        <SponsorsMarquee items={sponsors} />
       ) : (
         <div className="text-center text-gray-500">No sponsors available yet.</div>
       )}

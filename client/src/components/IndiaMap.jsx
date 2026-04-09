@@ -20,6 +20,17 @@ const getResponsiveMapHeight = () => {
   return window.innerWidth < 768 ? PORTRAIT_MOBILE_HEIGHT : PORTRAIT_TABLET_HEIGHT;
 };
 
+const shouldUsePortraitSmallCrop = () => {
+  if (typeof window === "undefined") return false;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  return isPortrait && window.innerWidth < 1024;
+};
+
+const getPortraitCropPadding = () => {
+  if (typeof window === "undefined") return 10;
+  return window.innerWidth < 768 ? 8 : 12;
+};
+
 const IndiaMap = ({ selectedDistricts = [] }) => {
   const svgRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
@@ -68,6 +79,15 @@ const IndiaMap = ({ selectedDistricts = [] }) => {
         .fitSize([width, height], states);
 
       const path = geoPath(projection);
+
+      if (shouldUsePortraitSmallCrop()) {
+        const [[x0, y0], [x1, y1]] = path.bounds(states);
+        const viewPadding = getPortraitCropPadding();
+        svg.attr(
+          "viewBox",
+          `${x0 - viewPadding} ${y0 - viewPadding} ${x1 - x0 + viewPadding * 2} ${y1 - y0 + viewPadding * 2}`
+        );
+      }
 
       const selectedSet = new Set(
         selectedDistricts.map((d) => d.toLowerCase())

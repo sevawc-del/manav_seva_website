@@ -2,3 +2,13 @@
 @tailwind components; */
 @tailwind utilities;
 @import "tailwindcss";
+
+.date-input-no-indicator::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+.date-input-no-indicator::-webkit-clear-button,
+.date-input-no-indicator::-webkit-inner-spin-button {
+  display: none;
+}

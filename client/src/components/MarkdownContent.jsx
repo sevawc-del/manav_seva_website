@@ -4,14 +4,30 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { isLikelyHtml } from '../utils/richContent';
 
-const getClassName = (className = '') => `text-gray-700 leading-7 ${className}`.trim();
+const getClassName = (className = '') => `rich-content text-gray-700 leading-7 ${className}`.trim();
+const escapeHtmlAttribute = (value = '') =>
+  String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/'/g, '&#39;');
+
+const renderMarkdownImagesInsideHtml = (value = '') =>
+  String(value).replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (_match, altText, imageUrl) => {
+    const safeAlt = escapeHtmlAttribute(altText || 'image');
+    const safeUrl = escapeHtmlAttribute(imageUrl || '');
+    if (!safeUrl) return _match;
+    return `<img src="${safeUrl}" alt="${safeAlt}" />`;
+  });
 
 const MarkdownContent = ({ content = '', className = '' }) => {
   const source = String(content || '').trim();
   if (!source) return null;
 
   if (isLikelyHtml(source)) {
-    const sanitizedSource = DOMPurify.sanitize(source, {
+    const normalizedSource = renderMarkdownImagesInsideHtml(source);
+    const sanitizedSource = DOMPurify.sanitize(normalizedSource, {
       USE_PROFILES: { html: true },
       ALLOW_DATA_ATTR: false
     });
@@ -32,6 +48,9 @@ const MarkdownContent = ({ content = '', className = '' }) => {
           h1: (props) => <h1 className="mt-8 mb-4 text-3xl font-bold text-gray-900" {...props} />,
           h2: (props) => <h2 className="mt-7 mb-4 text-2xl font-bold text-gray-900" {...props} />,
           h3: (props) => <h3 className="mt-6 mb-3 text-xl font-semibold text-gray-900" {...props} />,
+          h4: (props) => <h4 className="mt-5 mb-3 text-lg font-semibold text-gray-900" {...props} />,
+          h5: (props) => <h5 className="mt-4 mb-2 text-base font-semibold text-gray-900" {...props} />,
+          h6: (props) => <h6 className="mt-4 mb-2 text-sm font-semibold text-gray-900" {...props} />,
           p: (props) => <p className="mb-4 text-base leading-7 text-gray-700" {...props} />,
           ul: (props) => <ul className="mb-4 list-disc space-y-2 pl-6" {...props} />,
           ol: (props) => <ol className="mb-4 list-decimal space-y-2 pl-6" {...props} />,

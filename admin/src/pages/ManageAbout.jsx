@@ -23,6 +23,17 @@ const DEFAULT_ABOUT_US_FORM = {
   vision: ''
 };
 
+const createDefaultGovernanceHierarchy = () => ([
+  {
+    id: 'chairperson-root',
+    name: '',
+    position: 'Chairperson',
+    experience: '',
+    image: '',
+    children: []
+  }
+]);
+
 // Indian States and Districts data
 const indianStatesAndDistricts = {
   'Andhra Pradesh': ['Anantapur', 'Chittoor', 'East Godavari', 'Guntur', 'Krishna', 'Kurnool', 'Nellore', 'Prakasam', 'Srikakulam', 'Visakhapatnam', 'Vizianagaram', 'West Godavari'],
@@ -69,7 +80,7 @@ const ManageAbout = () => {
   const [editingMessage, setEditingMessage] = useState(null);
   const [governanceFormData, setGovernanceFormData] = useState({
     title: '',
-    hierarchy: [{ id: '1', name: '', position: '', experience: '', image: '', children: [] }],
+    hierarchy: createDefaultGovernanceHierarchy(),
     ethicsTitle: '',
     ethicsContent: '',
     ethicsPoints: [''],
@@ -174,9 +185,13 @@ const ManageAbout = () => {
         if (!formData[activeTabData.key]) {
           fetchData(activeTabData).then((data) => {
             if (activeTabData.key === 'governance') {
+              const fetchedHierarchy =
+                Array.isArray(data?.hierarchy) && data.hierarchy.length > 0
+                  ? data.hierarchy
+                  : createDefaultGovernanceHierarchy();
               setGovernanceFormData({
                 title: data?.title || '',
-                hierarchy: data?.hierarchy || [{ id: '1', name: '', position: '', experience: '', image: '', children: [] }],
+                hierarchy: fetchedHierarchy,
                 ethicsTitle: data?.ethicsTitle || '',
                 ethicsContent: data?.ethicsContent || '',
                 ethicsPoints: data?.ethicsPoints || [''],

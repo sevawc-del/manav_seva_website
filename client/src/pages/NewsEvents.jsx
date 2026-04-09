@@ -30,6 +30,11 @@ const formatDateTime = (value) => {
     : 'Date not available';
 };
 
+const getNewsSortTimestamp = (item) => {
+  const parsed = parseSafeDate(item?.date || item?.createdAt);
+  return parsed ? parsed.getTime() : 0;
+};
+
 const TAB_THEMES = {
   news: {
     containerBorder: 'border-blue-200',
@@ -92,6 +97,11 @@ const NewsEvents = () => {
       })
       .sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
   }, [eventItems]);
+
+  const sortedNewsItems = useMemo(
+    () => [...newsItems].sort((a, b) => getNewsSortTimestamp(b) - getNewsSortTimestamp(a)),
+    [newsItems]
+  );
 
   if (loading) return <Loader />;
   if (error) {
@@ -173,7 +183,7 @@ const NewsEvents = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {newsItems.map((item) => (
+                {sortedNewsItems.map((item) => (
                   <Link
                     key={item._id}
                     to={`/news-events/${item.slug || item._id}`}
