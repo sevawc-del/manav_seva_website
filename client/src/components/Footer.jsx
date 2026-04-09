@@ -205,9 +205,7 @@ const Footer = () => {
           </div>
 
           <div className="text-center md:text-left">
-            <h3 className="text-lg font-semibold mb-4 text-white">
-              Chairperson
-            </h3>
+            
             {siteSettings.chairpersonImageUrl ? (
               <img
                 src={siteSettings.chairpersonImageUrl}
@@ -220,6 +218,9 @@ const Footer = () => {
             <p className="mt-3 text-sm text-gray-200">
               {siteSettings.chairpersonName || DEFAULT_SITE_SETTINGS.chairpersonName}
             </p>
+            <h3 className="text-lg font-semibold mb-4 text-white">
+              Chairperson
+            </h3>
           </div>
         </div>
       </div>
