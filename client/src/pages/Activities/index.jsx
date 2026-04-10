@@ -21,13 +21,8 @@ const getActivityAction = (activity) => {
 };
 
 const getActivityResult = (activity) => {
-  if (activity?.impactNumber) {
-    return truncateText(
-      `${activity.impactNumber} people directly supported through this initiative.`,
-      110
-    );
-  }
-  return 'Impact figures are being updated as the program continues.';
+  const result = stripRichText(activity?.result || '');
+  return truncateText(result || 'Impact summary is being updated as the program continues.', 110);
 };
 
 const ACTIVITY_THEMES = [
@@ -106,6 +101,7 @@ const Activities = () => {
         impactNumber: '',
         problem: '',
         action: '',
+        result: '',
         content: ''
       },
       {
@@ -115,6 +111,7 @@ const Activities = () => {
         impactNumber: '',
         problem: '',
         action: '',
+        result: '',
         content: ''
       },
       {
@@ -124,6 +121,7 @@ const Activities = () => {
         impactNumber: '',
         problem: '',
         action: '',
+        result: '',
         content: ''
       },
       {
@@ -133,6 +131,7 @@ const Activities = () => {
         impactNumber: '',
         problem: '',
         action: '',
+        result: '',
         content: ''
       }
     ],

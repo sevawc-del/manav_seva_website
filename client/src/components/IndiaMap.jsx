@@ -33,6 +33,7 @@ const getPortraitCropPadding = () => {
 
 const IndiaMap = ({ selectedDistricts = [] }) => {
   const svgRef = useRef(null);
+  const drawSequenceRef = useRef(0);
   const [tooltip, setTooltip] = useState(null);
   const [mapHeight, setMapHeight] = useState(getResponsiveMapHeight);
 
@@ -47,6 +48,7 @@ const IndiaMap = ({ selectedDistricts = [] }) => {
   }, []);
 
   useEffect(() => {
+    const drawSequence = ++drawSequenceRef.current;
     const svg = select(svgRef.current);
     svg.selectAll("*").remove();
 
@@ -62,6 +64,7 @@ const IndiaMap = ({ selectedDistricts = [] }) => {
       json(DISTRICT_TOPO),
       json(STATE_TOPO),
     ]).then(([districtTopo, stateTopo]) => {
+      if (drawSequence !== drawSequenceRef.current || !svgRef.current) return;
       const districtKey = Object.keys(districtTopo.objects)[0];
       const stateKey = Object.keys(stateTopo.objects)[0];
 
@@ -129,6 +132,9 @@ const IndiaMap = ({ selectedDistricts = [] }) => {
         .attr("stroke", "#111827")
         .attr("stroke-width", 0.5)
         .attr("pointer-events", "none");
+    }).catch((error) => {
+      if (drawSequence !== drawSequenceRef.current) return;
+      console.error("Failed to render India map:", error);
     });
   }, [selectedDistricts, mapHeight]);
 

@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { getGeographicActivities, getGeographicActivityPresence } from '../../utils/api';
 import Loader from '../../components/Loader';
+import { optimizeCloudinaryImage } from '../../utils/imageUrl';
 
 const IndiaMap = lazy(() => import('../../components/IndiaMap'));
 
@@ -138,13 +139,6 @@ const GeographicFocus = () => {
               </select>
             </div>
 
-            {selectedActivity?.description ? (
-              <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-4">
-                <p className="text-sm leading-7 text-slate-700 whitespace-pre-line">
-                  {selectedActivity.description}
-                </p>
-              </div>
-            ) : null}
           </div>
         </section>
 
@@ -157,6 +151,19 @@ const GeographicFocus = () => {
               {selectedActivity ? (
                 <div className="space-y-3">
                   <h3 className="text-lg font-semibold text-slate-900">{selectedActivity.name}</h3>
+                  <img
+                    src={
+                      optimizeCloudinaryImage(selectedActivity.image, { width: 960, height: 540, crop: 'fill' }) ||
+                      'https://via.placeholder.com/960x540?text=Activity+Image'
+                    }
+                    alt={selectedActivity.name}
+                    className="h-52 w-full rounded-lg border border-slate-200 object-cover"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(event) => {
+                      event.target.src = 'https://via.placeholder.com/960x540?text=Activity+Image';
+                    }}
+                  />
                   <p className="text-sm leading-7 text-slate-700 whitespace-pre-line">
                     {selectedActivity.description || 'Description not available.'}
                   </p>

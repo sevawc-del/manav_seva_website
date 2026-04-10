@@ -8,6 +8,11 @@ const getGovernance = async (req, res) => {
       return res.json({
         title: '',
         hierarchy: [],
+        needTitle: '',
+        needContent: '',
+        policyTitle: '',
+        policyIntro: '',
+        policyTiers: [],
         ethicsTitle: '',
         ethicsContent: '',
         ethicsPoints: []

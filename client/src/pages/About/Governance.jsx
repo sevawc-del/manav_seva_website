@@ -20,6 +20,13 @@ const countHierarchyMembers = (nodes = []) =>
     0
   );
 
+const DEFAULT_POLICY_TIER_TITLES = [
+  'Governing Board',
+  'Advisory Council',
+  'Executive Board',
+  'Departments & Divisions'
+];
+
 const GovernanceTreeNode = ({ node, level = 0 }) => {
   const hasChildren = Array.isArray(node?.children) && node.children.length > 0;
   const name = String(node?.name || '').trim();
@@ -122,9 +129,35 @@ const Governance = () => {
   }
 
   const hierarchy = Array.isArray(data?.hierarchy) ? data.hierarchy : [];
-  const ethicsPoints = Array.isArray(data?.ethicsPoints)
-    ? data.ethicsPoints.map((point) => String(point || '').trim()).filter(Boolean)
+  const needTitle = String(data?.needTitle || data?.ethicsTitle || 'Need Of Governance').trim();
+  const needContent = String(data?.needContent || data?.ethicsContent || '').trim();
+  const policyTitle = String(data?.policyTitle || 'Making Policies & Decisions').trim();
+  const policyIntro = String(data?.policyIntro || '').trim();
+  const legacyPolicyTiers = Array.isArray(data?.ethicsPoints)
+    ? data.ethicsPoints
+      .map((point, index) => {
+        const fallbackCode = index < 26 ? `${String.fromCharCode(65 + index)}.)` : `${index + 1}.`;
+        return {
+          code: fallbackCode,
+          title: DEFAULT_POLICY_TIER_TITLES[index] || '',
+          content: String(point || '').trim()
+        };
+      })
+      .filter((tier) => tier.content)
     : [];
+  const policyTiers =
+    Array.isArray(data?.policyTiers) && data.policyTiers.length > 0
+      ? data.policyTiers
+        .map((tier, index) => {
+          const fallbackCode = index < 26 ? `${String.fromCharCode(65 + index)}.)` : `${index + 1}.`;
+          return {
+            code: String(tier?.code || fallbackCode).trim(),
+            title: String(tier?.title || DEFAULT_POLICY_TIER_TITLES[index] || '').trim(),
+            content: String(tier?.content || '').trim()
+          };
+        })
+        .filter((tier) => tier.code || tier.title || tier.content)
+      : legacyPolicyTiers;
   const memberCount = countHierarchyMembers(hierarchy);
 
   return (
@@ -166,40 +199,63 @@ const Governance = () => {
 
         <section className="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-md">
           <div className="bg-gradient-to-r from-emerald-600 to-teal-500 px-5 py-4">
+            <h2 className="text-xl font-semibold text-white">
+              {needTitle || 'Need Of Governance'}
+            </h2>
+          </div>
+
+          <div className="p-4 md:p-5">
+            {needContent ? (
+              <p className="text-sm leading-7 text-slate-700 md:text-base">{needContent}</p>
+            ) : (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                Governance context is being updated.
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="overflow-hidden rounded-2xl border border-cyan-200 bg-white shadow-md">
+          <div className="bg-gradient-to-r from-cyan-600 to-sky-500 px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-xl font-semibold text-white">
-                {data?.ethicsTitle || 'Code of Ethics'}
+                {policyTitle || 'Making Policies & Decisions'}
               </h2>
               <span className="rounded-full bg-white/25 px-2.5 py-1 text-xs font-semibold text-white">
-                {ethicsPoints.length} {ethicsPoints.length === 1 ? 'Principle' : 'Principles'}
+                {policyTiers.length} {policyTiers.length === 1 ? 'Tier' : 'Tiers'}
               </span>
             </div>
           </div>
 
           <div className="space-y-5 p-4 md:p-5">
-            {data?.ethicsContent ? (
-              <p className="text-sm leading-7 text-slate-700 md:text-base">{data.ethicsContent}</p>
-            ) : (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                Ethics information is being updated.
-              </div>
-            )}
+            {policyIntro ? (
+              <p className="text-sm leading-7 text-slate-700 md:text-base">{policyIntro}</p>
+            ) : null}
 
-            {ethicsPoints.length > 0 ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {ethicsPoints.map((point, index) => (
+            {policyTiers.length > 0 ? (
+              <div className="grid gap-3">
+                {policyTiers.map((tier, index) => (
                   <div
-                    key={`ethics-point-${index}`}
-                    className="flex gap-3 rounded-xl border border-emerald-100 bg-emerald-50/40 p-4"
+                    key={`policy-tier-${index}`}
+                    className="rounded-xl border border-cyan-100 bg-cyan-50/40 p-4"
                   >
-                    <span className="mt-0.5 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-emerald-600 px-1 text-xs font-semibold text-white">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <p className="text-sm text-slate-700">{point}</p>
+                    <h3 className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-900 md:text-base">
+                      <span className="inline-flex items-center rounded-full bg-cyan-600 px-2 py-0.5 text-xs font-semibold text-white">
+                        {tier.code || `${index + 1}.`}
+                      </span>
+                      {tier.title || `Tier ${index + 1}`}
+                    </h3>
+                    {tier.content ? (
+                      <p className="mt-2 text-sm leading-6 text-slate-700">{tier.content}</p>
+                    ) : null}
                   </div>
                 ))}
               </div>
-            ) : null}
+            ) : (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                Policy and decision details are being updated.
+              </div>
+            )}
           </div>
         </section>
       </div>

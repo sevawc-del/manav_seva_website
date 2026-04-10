@@ -73,10 +73,8 @@ const getActivityAction = (activity) => {
 };
 
 const getActivityResult = (activity) => {
-  if (activity?.impactNumber) {
-    return truncateText(`${activity.impactNumber} people directly supported through this initiative.`, 90);
-  }
-  return 'Impact figures are being updated as the program continues.';
+  const result = stripRichText(activity?.result || '');
+  return truncateText(result || 'Impact summary is being updated as the program continues.', 90);
 };
 
 const DEFAULT_HOME_WHO_SETTINGS = {
@@ -119,9 +117,16 @@ const GalleryAutoRow = ({ items, direction = 'left' }) => {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const hasLoop = items.length > 1;
   const canDuplicate = items.length <= GALLERY_MARQUEE_DUPLICATE_LIMIT;
-  const shouldAnimate = hasLoop && canDuplicate && !prefersReducedMotion;
+  const shouldAnimate = hasLoop && !prefersReducedMotion;
+  const shouldDuplicate = shouldAnimate && canDuplicate;
   const durationSeconds = Math.max(6, items.length * 3.8);
-  const animationName = direction === 'right' ? 'gallery-marquee-right' : 'gallery-marquee-left';
+  const animationName = direction === 'right'
+    ? shouldDuplicate
+      ? 'gallery-marquee-right'
+      : 'gallery-marquee-right-single'
+    : shouldDuplicate
+      ? 'gallery-marquee-left'
+      : 'gallery-marquee-left-single';
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return undefined;
@@ -156,7 +161,7 @@ const GalleryAutoRow = ({ items, direction = 'left' }) => {
           animationPlayState: isPaused ? 'paused' : 'running'
         }}
       >
-        {(shouldAnimate ? [0, 1] : [0]).map((copyIndex) => (
+        {(shouldDuplicate ? [0, 1] : [0]).map((copyIndex) => (
           <div key={`gallery-copy-${copyIndex}`} className="flex gap-4 pr-4">
             {items.map((item, index) => (
               <Link
@@ -196,7 +201,8 @@ const VerticalNewsTicker = ({ items = [] }) => {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const hasLoop = items.length > 1;
   const canDuplicate = items.length <= NEWS_MARQUEE_DUPLICATE_LIMIT;
-  const shouldAnimate = hasLoop && canDuplicate && !prefersReducedMotion;
+  const shouldAnimate = hasLoop && !prefersReducedMotion;
+  const shouldDuplicate = shouldAnimate && canDuplicate;
   const durationSeconds = Math.max(
     NEWS_MARQUEE_MIN_DURATION,
     items.length * NEWS_MARQUEE_PER_ITEM_DURATION
@@ -233,11 +239,13 @@ const VerticalNewsTicker = ({ items = [] }) => {
       <div
         className="flex flex-col"
         style={{
-          animation: shouldAnimate ? `news-marquee-vertical ${durationSeconds}s linear infinite` : 'none',
+          animation: shouldAnimate
+            ? `${shouldDuplicate ? 'news-marquee-vertical' : 'news-marquee-vertical-single'} ${durationSeconds}s linear infinite`
+            : 'none',
           animationPlayState: isPaused ? 'paused' : 'running'
         }}
       >
-        {(shouldAnimate ? [0, 1] : [0]).map((copyIndex) => (
+        {(shouldDuplicate ? [0, 1] : [0]).map((copyIndex) => (
           <div key={`news-copy-${copyIndex}`} className="flex flex-col">
             {items.map((item, index) => {
               const rowIndex = copyIndex * items.length + index;

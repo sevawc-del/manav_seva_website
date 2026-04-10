@@ -6,8 +6,8 @@ const SPONSORS_MARQUEE_DUPLICATE_LIMIT = 12;
 
 const SponsorCard = ({ item, allowHover = false }) => {
   const imageClassName = allowHover
-    ? 'h-12 w-auto object-contain grayscale hover:grayscale-0 transition'
-    : 'h-12 w-auto object-contain grayscale';
+    ? 'h-14 md:h-16 w-auto object-contain transition'
+    : 'h-14 md:h-16 w-auto object-contain';
 
   if (item.website) {
     return (
@@ -15,7 +15,7 @@ const SponsorCard = ({ item, allowHover = false }) => {
         href={item.website}
         target="_blank"
         rel="noreferrer"
-        className="h-24 shrink-0 px-2 flex items-center justify-center"
+        className="h-24 shrink-0 px-5 flex items-center justify-center"
       >
         <img
           src={optimizeCloudinaryImage(item.logo, { width: 440, height: 160, crop: 'fit' }) || item.logo}
@@ -32,7 +32,7 @@ const SponsorCard = ({ item, allowHover = false }) => {
   }
 
   return (
-    <div className="h-24 shrink-0 px-2 flex items-center justify-center">
+    <div className="h-24 shrink-0 px-5 flex items-center justify-center">
       <img
         src={optimizeCloudinaryImage(item.logo, { width: 440, height: 160, crop: 'fit' }) || item.logo}
         alt={item.name}
@@ -52,7 +52,8 @@ const SponsorsMarquee = ({ items = [] }) => {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const hasLoop = items.length > 1;
   const canDuplicate = items.length <= SPONSORS_MARQUEE_DUPLICATE_LIMIT;
-  const shouldAnimate = hasLoop && canDuplicate && !prefersReducedMotion;
+  const shouldAnimate = hasLoop && !prefersReducedMotion;
+  const shouldDuplicate = shouldAnimate && canDuplicate;
   const durationSeconds = Math.max(4, items.length * 2.8);
 
   useEffect(() => {
@@ -84,12 +85,14 @@ const SponsorsMarquee = ({ items = [] }) => {
       <div
         className="flex w-max gap-0"
         style={{
-          animation: shouldAnimate ? `gallery-marquee-left ${durationSeconds}s linear infinite` : 'none',
+          animation: shouldAnimate
+            ? `${shouldDuplicate ? 'gallery-marquee-left' : 'gallery-marquee-left-single'} ${durationSeconds}s linear infinite`
+            : 'none',
           animationPlayState: isPaused ? 'paused' : 'running'
         }}
       >
-        {(shouldAnimate ? [0, 1] : [0]).map((copyIndex) => (
-          <div key={`sponsors-copy-${copyIndex}`} className="flex gap-1 pr-1">
+        {(shouldDuplicate ? [0, 1] : [0]).map((copyIndex) => (
+           <div key={`sponsors-copy-${copyIndex}`} className="flex gap-6 pr-6">
             {items.map((item, index) => (
               <SponsorCard
                 key={`${item?._id || item?.name || 'sponsor'}-${copyIndex}-${index}`}

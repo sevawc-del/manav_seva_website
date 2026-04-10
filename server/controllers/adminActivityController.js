@@ -40,17 +40,17 @@ const getAdminActivityBySlug = async (req, res) => {
 // Create admin activity (admin)
 const createAdminActivity = async (req, res) => {
   try {
-    const { name, slug, description, content, impactNumber, problem, action } = req.body;
+    const { name, slug, description, content, impactNumber, problem, action, result } = req.body;
     const order = Number.isFinite(Number(req.body.order)) ? Number(req.body.order) : 0;
     let imageUrl = req.body.image;
 
     if (req.file) {
       try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
+        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
           folder: 'manav-seva/activities',
           resource_type: 'image'
         });
-        imageUrl = result.secure_url;
+        imageUrl = uploadResult.secure_url;
         await cleanupTempUpload(req.file.path);
       } catch (uploadError) {
         await cleanupTempUpload(req.file.path);
@@ -69,6 +69,7 @@ const createAdminActivity = async (req, res) => {
       description,
       problem: problem || '',
       action: action || '',
+      result: result || '',
       content,
       image: imageUrl || '',
       impactNumber: impactNumber || '',
@@ -114,11 +115,11 @@ const updateAdminActivity = async (req, res) => {
     let imageUrl = req.body.image || existingActivity.image;
     if (req.file) {
       try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
+        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
           folder: 'manav-seva/activities',
           resource_type: 'image'
         });
-        imageUrl = result.secure_url;
+        imageUrl = uploadResult.secure_url;
         await cleanupTempUpload(req.file.path);
       } catch (uploadError) {
         await cleanupTempUpload(req.file.path);
@@ -131,7 +132,7 @@ const updateAdminActivity = async (req, res) => {
       ? existingActivity.isActive
       : (req.body.isActive === 'true' || req.body.isActive === true);
     const order = Number.isFinite(Number(req.body.order)) ? Number(req.body.order) : existingActivity.order;
-    const { name, slug, description, content, impactNumber, problem, action } = req.body;
+    const { name, slug, description, content, impactNumber, problem, action, result } = req.body;
 
     const activity = await AdminActivity.findByIdAndUpdate(
       id,
@@ -141,6 +142,7 @@ const updateAdminActivity = async (req, res) => {
         description,
         problem: problem || '',
         action: action || '',
+        result: result || '',
         content,
         image: imageUrl || '',
         impactNumber: impactNumber || '',

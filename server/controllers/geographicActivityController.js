@@ -38,8 +38,8 @@ const getGeographicActivityPresence = async (req, res) => {
 // Create GeographicActivity
 const createGeographicActivity = async (req, res) => {
   try {
-    const { name, description, districts } = req.body;
-    const activity = new GeographicActivity({ name, description });
+    const { name, description, image = '', districts = [] } = req.body;
+    const activity = new GeographicActivity({ name, description, image: image || '' });
     await activity.save();
 
     const presenceEntries = districts.map(d => ({
@@ -59,10 +59,14 @@ const createGeographicActivity = async (req, res) => {
 const updateGeographicActivity = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, districts } = req.body;
+    const { name, description, image, districts = [] } = req.body;
+    const updateFields = { name, description };
+    if (image !== undefined) {
+      updateFields.image = image || '';
+    }
 
     // Update activity
-    const activity = await GeographicActivity.findByIdAndUpdate(id, { name, description }, { new: true });
+    const activity = await GeographicActivity.findByIdAndUpdate(id, updateFields, { new: true });
     if (!activity) {
       return res.status(404).json({ message: 'Activity not found' });
     }

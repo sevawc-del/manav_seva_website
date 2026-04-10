@@ -34,6 +34,31 @@ const createDefaultGovernanceHierarchy = () => ([
   }
 ]);
 
+const DEFAULT_GOVERNANCE_POLICY_TIERS = [
+  { code: 'A.)', title: 'Governing Board', content: '' },
+  { code: 'B.)', title: 'Advisory Council', content: '' },
+  { code: 'C.)', title: 'Executive Board', content: '' },
+  { code: 'D.)', title: 'Departments & Divisions', content: '' }
+];
+
+const createDefaultGovernancePolicyTiers = () =>
+  DEFAULT_GOVERNANCE_POLICY_TIERS.map((tier) => ({ ...tier }));
+
+const normalizeGovernancePolicyTiers = (tiers) => {
+  if (!Array.isArray(tiers) || tiers.length === 0) {
+    return createDefaultGovernancePolicyTiers();
+  }
+
+  return tiers.map((tier, index) => {
+    const fallback = DEFAULT_GOVERNANCE_POLICY_TIERS[index] || { code: '', title: '', content: '' };
+    return {
+      code: String(tier?.code ?? fallback.code).trim(),
+      title: String(tier?.title ?? fallback.title).trim(),
+      content: String(tier?.content ?? '').trim()
+    };
+  });
+};
+
 // Indian States and Districts data
 const indianStatesAndDistricts = {
   'Andhra Pradesh': ['Anantapur', 'Chittoor', 'East Godavari', 'Guntur', 'Krishna', 'Kurnool', 'Nellore', 'Prakasam', 'Srikakulam', 'Visakhapatnam', 'Vizianagaram', 'West Godavari'],
@@ -81,9 +106,11 @@ const ManageAbout = () => {
   const [governanceFormData, setGovernanceFormData] = useState({
     title: '',
     hierarchy: createDefaultGovernanceHierarchy(),
-    ethicsTitle: '',
-    ethicsContent: '',
-    ethicsPoints: [''],
+    needTitle: 'Need Of Governance',
+    needContent: '',
+    policyTitle: 'Making Policies & Decisions',
+    policyIntro: '',
+    policyTiers: createDefaultGovernancePolicyTiers(),
   });
   const [geographicFocusFormData, setGeographicFocusFormData] = useState({
     title: '',
@@ -133,6 +160,37 @@ const ManageAbout = () => {
     setGeographicFocusFormData({
       ...geographicFocusFormData,
       districts: geographicFocusFormData.districts.filter(d => d !== district)
+    });
+  };
+
+  const updateGovernancePolicyTier = (index, field, value) => {
+    setGovernanceFormData((prev) => {
+      const updatedTiers = [...prev.policyTiers];
+      updatedTiers[index] = {
+        ...updatedTiers[index],
+        [field]: value
+      };
+      return {
+        ...prev,
+        policyTiers: updatedTiers
+      };
+    });
+  };
+
+  const addGovernancePolicyTier = () => {
+    setGovernanceFormData((prev) => ({
+      ...prev,
+      policyTiers: [...prev.policyTiers, { code: '', title: '', content: '' }]
+    }));
+  };
+
+  const removeGovernancePolicyTier = (index) => {
+    setGovernanceFormData((prev) => {
+      const nextTiers = prev.policyTiers.filter((_, tierIndex) => tierIndex !== index);
+      return {
+        ...prev,
+        policyTiers: nextTiers.length > 0 ? nextTiers : createDefaultGovernancePolicyTiers()
+      };
     });
   };
 
@@ -189,12 +247,36 @@ const ManageAbout = () => {
                 Array.isArray(data?.hierarchy) && data.hierarchy.length > 0
                   ? data.hierarchy
                   : createDefaultGovernanceHierarchy();
+              const legacyPolicyTiers = Array.isArray(data?.ethicsPoints)
+                ? data.ethicsPoints
+                  .map((point, index) => {
+                    const fallback = DEFAULT_GOVERNANCE_POLICY_TIERS[index] || {
+                      code: `${String.fromCharCode(65 + index)}.)`,
+                      title: '',
+                      content: ''
+                    };
+                    return {
+                      code: fallback.code,
+                      title: fallback.title,
+                      content: String(point || '').trim()
+                    };
+                  })
+                  .filter((tier) => tier.content)
+                : [];
+              const normalizedPolicyTiers =
+                Array.isArray(data?.policyTiers) && data.policyTiers.length > 0
+                  ? normalizeGovernancePolicyTiers(data.policyTiers)
+                  : legacyPolicyTiers.length > 0
+                    ? normalizeGovernancePolicyTiers(legacyPolicyTiers)
+                    : createDefaultGovernancePolicyTiers();
               setGovernanceFormData({
                 title: data?.title || '',
                 hierarchy: fetchedHierarchy,
-                ethicsTitle: data?.ethicsTitle || '',
-                ethicsContent: data?.ethicsContent || '',
-                ethicsPoints: data?.ethicsPoints || [''],
+                needTitle: data?.needTitle || data?.ethicsTitle || 'Need Of Governance',
+                needContent: data?.needContent || data?.ethicsContent || '',
+                policyTitle: data?.policyTitle || 'Making Policies & Decisions',
+                policyIntro: data?.policyIntro || '',
+                policyTiers: normalizedPolicyTiers,
               });
             } else if (activeTabData.key === 'geographic-focus') {
               setGeographicFocusFormData({
@@ -249,7 +331,30 @@ const ManageAbout = () => {
           return;
         }
         if (activeTab === 'governance') {
-          await activeTabData.update(governanceFormData);
+          const normalizedPolicyTiers = (governanceFormData.policyTiers || [])
+            .map((tier) => ({
+              code: String(tier?.code || '').trim(),
+              title: String(tier?.title || '').trim(),
+              content: String(tier?.content || '').trim()
+            }))
+            .filter((tier) => tier.code || tier.title || tier.content);
+
+          const governancePayload = {
+            ...governanceFormData,
+            needTitle: String(governanceFormData.needTitle || '').trim(),
+            needContent: String(governanceFormData.needContent || '').trim(),
+            policyTitle: String(governanceFormData.policyTitle || '').trim(),
+            policyIntro: String(governanceFormData.policyIntro || '').trim(),
+            policyTiers: normalizedPolicyTiers,
+            // Legacy fallback payload for older consumers.
+            ethicsTitle: String(governanceFormData.needTitle || '').trim(),
+            ethicsContent: String(governanceFormData.needContent || '').trim(),
+            ethicsPoints: normalizedPolicyTiers
+              .map((tier) => [tier.code, tier.title, tier.content].filter(Boolean).join(' '))
+              .filter(Boolean)
+          };
+
+          await activeTabData.update(governancePayload);
         } else if (activeTab === 'geographic-focus') {
           const districts = geographicFocusFormData.districts.map(d => {
             const [stateCode, districtCode] = d.split('-');
@@ -265,6 +370,7 @@ const ManageAbout = () => {
             await updateGeographicActivity(editingActivity._id, {
               name: geographicFocusFormData.title,
               description: geographicFocusFormData.content,
+              image: geographicFocusFormData.image || '',
               districts
             });
             setEditingActivity(null);
@@ -272,6 +378,7 @@ const ManageAbout = () => {
             await createGeographicActivity({
               name: geographicFocusFormData.title,
               description: geographicFocusFormData.content,
+              image: geographicFocusFormData.image || '',
               districts
             });
           }
@@ -667,46 +774,91 @@ const ManageAbout = () => {
             />
           </div>
 
-          <input
-            type="text"
-            placeholder="Ethics Title"
-            value={governanceFormData.ethicsTitle || ''}
-            onChange={(e) => setGovernanceFormData({ ...governanceFormData, ethicsTitle: e.target.value })}
-            className="w-full p-2 mb-4 border rounded"
-            required
-          />
-          <textarea
-            placeholder="Ethics Content"
-            value={governanceFormData.ethicsContent || ''}
-            onChange={(e) => setGovernanceFormData({ ...governanceFormData, ethicsContent: e.target.value })}
-            className="w-full p-2 mb-4 border rounded"
-            required
-          />
-          <div className="mb-4">
-            <h3 className="text-lg font-semibold mb-2">Ethics Points</h3>
-            {governanceFormData.ethicsPoints.map((point, index) => (
-              <input
-                key={index}
-                type="text"
-                placeholder="Point"
-                value={point || ''}
-                onChange={(e) => {
-                  const newPoints = [...governanceFormData.ethicsPoints];
-                  newPoints[index] = e.target.value;
-                  setGovernanceFormData({ ...governanceFormData, ethicsPoints: newPoints });
-                }}
-                className="w-full p-2 mb-2 border rounded"
-              />
-            ))}
+          <div className="mb-6 rounded border bg-gray-50 p-4">
+            <h3 className="mb-3 text-lg font-semibold">Need Of Governance</h3>
+            <input
+              type="text"
+              placeholder="Need Of Governance Title"
+              value={governanceFormData.needTitle || ''}
+              onChange={(e) => setGovernanceFormData({ ...governanceFormData, needTitle: e.target.value })}
+              className="w-full p-2 mb-3 border rounded"
+              required
+            />
+            <textarea
+              placeholder="Explain why governance is essential for development work and compliance."
+              value={governanceFormData.needContent || ''}
+              onChange={(e) => setGovernanceFormData({ ...governanceFormData, needContent: e.target.value })}
+              className="w-full p-2 border rounded"
+              rows={5}
+              required
+            />
+          </div>
+
+          <div className="mb-6 rounded border bg-gray-50 p-4">
+            <h3 className="mb-3 text-lg font-semibold">Making Policies & Decisions</h3>
+            <input
+              type="text"
+              placeholder="Section Title"
+              value={governanceFormData.policyTitle || ''}
+              onChange={(e) => setGovernanceFormData({ ...governanceFormData, policyTitle: e.target.value })}
+              className="w-full p-2 mb-3 border rounded"
+              required
+            />
+            <textarea
+              placeholder="Optional introduction for the four-tier policy and decision system."
+              value={governanceFormData.policyIntro || ''}
+              onChange={(e) => setGovernanceFormData({ ...governanceFormData, policyIntro: e.target.value })}
+              className="w-full p-2 mb-4 border rounded"
+              rows={3}
+            />
+
+            <div className="space-y-4">
+              {governanceFormData.policyTiers.map((tier, index) => (
+                <div key={`policy-tier-${index}`} className="rounded border bg-white p-3">
+                  <div className="mb-2 grid gap-2 md:grid-cols-[120px,1fr]">
+                    <input
+                      type="text"
+                      placeholder="Code (A.)"
+                      value={tier.code || ''}
+                      onChange={(e) => updateGovernancePolicyTier(index, 'code', e.target.value)}
+                      className="w-full p-2 border rounded"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Tier Title"
+                      value={tier.title || ''}
+                      onChange={(e) => updateGovernancePolicyTier(index, 'title', e.target.value)}
+                      className="w-full p-2 border rounded"
+                      required
+                    />
+                  </div>
+                  <textarea
+                    placeholder="Tier details"
+                    value={tier.content || ''}
+                    onChange={(e) => updateGovernancePolicyTier(index, 'content', e.target.value)}
+                    className="w-full p-2 border rounded"
+                    rows={4}
+                    required
+                  />
+                  {governanceFormData.policyTiers.length > 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => removeGovernancePolicyTier(index)}
+                      className="mt-2 text-sm text-red-600 hover:text-red-700"
+                    >
+                      Remove Tier
+                    </button>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+
             <button
               type="button"
-              onClick={() => setGovernanceFormData({
-                ...governanceFormData,
-                ethicsPoints: [...governanceFormData.ethicsPoints, '']
-              })}
-              className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+              onClick={addGovernancePolicyTier}
+              className="mt-4 bg-green-500 text-white px-4 py-2 rounded"
             >
-              Add Point
+              Add Tier
             </button>
           </div>
           <button type="submit" disabled={submitting} className="bg-blue-500 text-white px-4 py-2 rounded">

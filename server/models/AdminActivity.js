@@ -6,6 +6,7 @@ const adminActivitySchema = new mongoose.Schema({
   description: { type: String, required: true },
   problem: { type: String, default: '' },
   action: { type: String, default: '' },
+  result: { type: String, default: '' },
   impactNumber: { type: String, default: '' },
   content: { type: String, required: true }, // Rich text content
   image: { type: String }, // Image URL

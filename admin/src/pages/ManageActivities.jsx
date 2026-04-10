@@ -29,6 +29,7 @@ const ManageActivities = () => {
     description: '',
     problem: '',
     action: '',
+    result: '',
     impactNumber: '',
     content: '',
     image: '',
@@ -62,6 +63,7 @@ const ManageActivities = () => {
       payload.append('description', formData.description);
       payload.append('problem', formData.problem || '');
       payload.append('action', formData.action || '');
+      payload.append('result', formData.result || '');
       payload.append('impactNumber', formData.impactNumber || '');
       payload.append('content', formData.content || '');
       payload.append('image', formData.image || '');
@@ -94,6 +96,7 @@ const ManageActivities = () => {
       description: activity.description,
       problem: activity.problem || '',
       action: activity.action || '',
+      result: activity.result || '',
       impactNumber: activity.impactNumber || '',
       content: activity.content,
       image: activity.image || '',
@@ -127,6 +130,7 @@ const ManageActivities = () => {
       description: '',
       problem: '',
       action: '',
+      result: '',
       impactNumber: '',
       content: '',
       image: '',
@@ -207,7 +211,7 @@ const ManageActivities = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium mb-1">Problem (Home section)</label>
             <textarea
@@ -228,6 +232,16 @@ const ManageActivities = () => {
               placeholder="Short action statement shown on Home page"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Result (Home section)</label>
+            <textarea
+              value={formData.result}
+              onChange={(e) => setFormData(prev => ({ ...prev, result: e.target.value }))}
+              className="w-full p-2 border rounded"
+              rows="3"
+              placeholder="Short result statement shown on Home page"
+            />
+          </div>
         </div>
 
         <div className="mb-4">
@@ -237,7 +251,7 @@ const ManageActivities = () => {
             value={formData.impactNumber}
             onChange={(e) => setFormData(prev => ({ ...prev, impactNumber: e.target.value }))}
             className="w-full p-2 border rounded"
-            placeholder="e.g., 25,000+ beneficiaries"
+            placeholder="e.g., 25,000+"
           />
         </div>
 
