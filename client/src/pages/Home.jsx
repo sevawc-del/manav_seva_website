@@ -5,15 +5,11 @@ import Journey from '../components/home/Journey';
 import Testimonials from '../components/home/Testimonials';
 import Sponsors from '../components/home/Sponsors';
 import OfficesMap from '../components/home/OfficesMap';
-import ActivitySelector from '../components/ActivitySelector';
-import ActivityDetails from '../components/ActivityDetails';
 import {
   getAboutUs,
   getAdminActivities,
   getEvents,
   getGallery,
-  getGeographicActivities,
-  getGeographicActivityPresence,
   getJourneys,
   getNews,
   getSiteSettingsCached,
@@ -23,7 +19,7 @@ import {
 import { stripRichText } from '../utils/richContent';
 import { optimizeCloudinaryImage } from '../utils/imageUrl';
 
-const IndiaMap = lazy(() => import('../components/IndiaMap'));
+const HomeStateMap = lazy(() => import('../components/HomeStateMap'));
 
 const HOME_ACTIVITIES_LIMIT = 6;
 const HOME_ACTIVITIES_LIMIT_TABLET = 4;
@@ -34,6 +30,8 @@ const GALLERY_MARQUEE_DUPLICATE_LIMIT = 5;
 const NEWS_MARQUEE_DUPLICATE_LIMIT = 5;
 const NEWS_MARQUEE_MIN_DURATION = 8;
 const NEWS_MARQUEE_PER_ITEM_DURATION = 2;
+const HOME_GEO_STATUS_CURRENT = 'currently_working';
+const HOME_GEO_STATUS_PREVIOUS = 'previously_worked';
 
 const truncateText = (text = '', maxLength = 90) => {
   if (!text) return '';
@@ -77,6 +75,9 @@ const getActivityResult = (activity) => {
   return truncateText(result || 'Impact summary is being updated as the program continues.', 90);
 };
 
+const normalizeStateName = (value = '') =>
+  String(value).trim().replace(/\s+/g, ' ').toUpperCase();
+
 const DEFAULT_HOME_WHO_SETTINGS = {
   chairpersonName: 'Chairperson',
   chairpersonImageUrl: '',
@@ -86,7 +87,10 @@ const DEFAULT_HOME_WHO_SETTINGS = {
   homeWhoRightTitle: 'In Focus',
   homeWhoRightText:
     'Our programs and collaborations are designed to create long-term impact through community-led action.',
-  homeWhoRightImageUrl: ''
+  homeWhoRightImageUrl: '',
+  homeGeographicFocusStates: [],
+  homeGeographicFocusDescription:
+    'States are color-coded to reflect current and past program presence. Use the toggles to filter.'
 };
 
 const DEFAULT_HOME_OFFICES = [
@@ -292,10 +296,8 @@ const Home = () => {
   const [testimonialsLoading, setTestimonialsLoading] = useState(true);
   const [sponsors, setSponsors] = useState([]);
   const [sponsorsLoading, setSponsorsLoading] = useState(true);
-  const [geographicActivities, setGeographicActivities] = useState([]);
-  const [geographicLoading, setGeographicLoading] = useState(true);
-  const [selectedGeographicActivity, setSelectedGeographicActivity] = useState(null);
-  const [selectedGeographicDistricts, setSelectedGeographicDistricts] = useState([]);
+  const [showCurrentStates, setShowCurrentStates] = useState(true);
+  const [showPreviousStates, setShowPreviousStates] = useState(true);
   const [activitySort, setActivitySort] = useState('priority');
   const [activitiesLimit, setActivitiesLimit] = useState(HOME_ACTIVITIES_LIMIT);
   const [expandedActivityId, setExpandedActivityId] = useState(null);
@@ -402,23 +404,6 @@ const Home = () => {
       }
     };
 
-    const fetchGeographicActivities = async () => {
-      try {
-        const response = await getGeographicActivities();
-        const fetchedGeographicActivities = response.data || [];
-        setGeographicActivities(fetchedGeographicActivities);
-
-        const defaultActivityId = fetchedGeographicActivities[0]?._id;
-        if (defaultActivityId) {
-          await handleGeographicActivitySelect(defaultActivityId);
-        }
-      } catch (error) {
-        console.error('Error fetching geographic activities:', error);
-      } finally {
-        setGeographicLoading(false);
-      }
-    };
-
     fetchSiteSettingsData();
     fetchAboutSection();
     fetchActivities();
@@ -428,7 +413,6 @@ const Home = () => {
     fetchNewsItems();
     fetchTestimonials();
     fetchSponsors();
-    fetchGeographicActivities();
   }, []);
 
   useEffect(() => {
@@ -448,23 +432,6 @@ const Home = () => {
     window.addEventListener('resize', updateActivitiesLimit);
     return () => window.removeEventListener('resize', updateActivitiesLimit);
   }, []);
-
-  const handleGeographicActivitySelect = async (activityId) => {
-    if (!activityId) {
-      setSelectedGeographicActivity(null);
-      setSelectedGeographicDistricts([]);
-      return;
-    }
-
-    try {
-      const response = await getGeographicActivityPresence(activityId);
-      const data = response.data || {};
-      setSelectedGeographicActivity(data.activity || null);
-      setSelectedGeographicDistricts((data.presence || []).map((presence) => `${presence.stateCode}-${presence.districtCode}`));
-    } catch (error) {
-      console.error('Failed to load geographic activity presence:', error);
-    }
-  };
 
   const impactShowcaseActivities = useMemo(() => {
     const sorted = [...activities];
@@ -562,6 +529,47 @@ const Home = () => {
     return normalized.length > 0 ? normalized : DEFAULT_HOME_OFFICES;
   }, [siteSettings?.homeOfficeLocations]);
 
+  const homeGeographicStates = useMemo(() => {
+    const source = Array.isArray(siteSettings?.homeGeographicFocusStates)
+      ? siteSettings.homeGeographicFocusStates
+      : [];
+
+    const deduped = new Map();
+    source.forEach((item) => {
+      const state = String(item?.state || '').trim();
+      if (!state) return;
+
+      const normalizedState = normalizeStateName(state);
+      if (!normalizedState) return;
+
+      const status = item?.status === HOME_GEO_STATUS_PREVIOUS
+        ? HOME_GEO_STATUS_PREVIOUS
+        : HOME_GEO_STATUS_CURRENT;
+
+      deduped.set(normalizedState, { state, status });
+    });
+
+    return Array.from(deduped.values());
+  }, [siteSettings?.homeGeographicFocusStates]);
+
+  const filteredHomeGeographicStates = useMemo(() => (
+    homeGeographicStates.filter((item) => {
+      if (item.status === HOME_GEO_STATUS_CURRENT) return showCurrentStates;
+      if (item.status === HOME_GEO_STATUS_PREVIOUS) return showPreviousStates;
+      return false;
+    })
+  ), [homeGeographicStates, showCurrentStates, showPreviousStates]);
+
+  const currentHomeGeographicStates = useMemo(
+    () => filteredHomeGeographicStates.filter((item) => item.status === HOME_GEO_STATUS_CURRENT),
+    [filteredHomeGeographicStates]
+  );
+
+  const previousHomeGeographicStates = useMemo(
+    () => filteredHomeGeographicStates.filter((item) => item.status === HOME_GEO_STATUS_PREVIOUS),
+    [filteredHomeGeographicStates]
+  );
+
   useEffect(() => {
     if (selectedOfficeId === 'all') return;
     const officeExists = officeLocations.some((office) => office.id === selectedOfficeId);
@@ -574,7 +582,7 @@ const Home = () => {
     <div>
       <HeroSection />
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-gradient-to-br from-blue-50 via-white to-indigo-50 rounded-2xl p-6 md:p-8 border border-blue-100 shadow-sm">
+        <div>
           <div className="mb-6 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-5 md:px-6">
             <div>
               <h2 className="text-3xl font-bold text-center text-white md:text-left">Welcome to Manav Seva Sansthan Seva</h2>
@@ -736,7 +744,7 @@ const Home = () => {
         </div>
 
         {/* Who We Are Section */}
-        <div className="mt-12 overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-md">
+        <div className="mt-12 overflow-hidden rounded-2xl">
           <div className="bg-gradient-to-r from-emerald-600 to-teal-500 px-5 py-4">
             <h2 className="text-3xl font-bold text-center text-white md:text-left">Our Identity</h2>
             <p className="mt-2 text-sm text-center text-white/90 md:text-left">
@@ -845,42 +853,141 @@ const Home = () => {
         {/* Geographic Focus Section */}
         <div className="mt-16">
           <div className="mb-6 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 px-5 py-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div className="flex flex-col gap-3">
               <div>
                 <h2 className="text-3xl font-bold text-center text-white md:text-left">Geographic Focus</h2>
                 <p className="mt-2 text-sm text-white/90 text-center md:text-left">
-                  Select an activity from the dropdown to view its district-wise presence.
+                  See the states where MSS currently works or has previously worked.
                 </p>
-              </div>
-              <div className="flex justify-center md:justify-end">
-                <Link
-                  to="/about/geographic-focus"
-                  className="inline-flex items-center rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                >
-                  View Full Focus
-                </Link>
               </div>
             </div>
           </div>
 
-          {geographicLoading ? (
+          {siteSettingsLoading ? (
             <div className="text-center text-gray-600">Loading geographic focus...</div>
-          ) : geographicActivities.length > 0 ? (
+          ) : (
             <div className="space-y-6">
-              <ActivitySelector
-                activities={geographicActivities}
-                onActivitySelect={handleGeographicActivitySelect}
-                selectedActivityId={selectedGeographicActivity?._id || ''}
-              />
-              <div className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-6 items-start">
-                <ActivityDetails activity={selectedGeographicActivity} />
-                <Suspense fallback={<div className="rounded-lg bg-white p-4 text-sm text-gray-600">Loading map...</div>}>
-                  <IndiaMap selectedDistricts={selectedGeographicDistricts} />
-                </Suspense>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentStates((prev) => !prev)}
+                  className={`px-4 py-2 rounded-full border text-sm font-semibold transition ${
+                    showCurrentStates
+                      ? 'bg-emerald-600 text-white border-emerald-600'
+                      : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  }`}
+                >
+                  Currently Working
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPreviousStates((prev) => !prev)}
+                  className={`px-4 py-2 rounded-full border text-sm font-semibold transition ${
+                    showPreviousStates
+                      ? 'bg-amber-500 text-white border-amber-500'
+                      : 'bg-amber-50 text-amber-800 border-amber-200'
+                  }`}
+                >
+                  Previously Worked
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-6 items-start">
+                <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                  <Suspense fallback={<div className="rounded-lg bg-white p-4 text-sm text-gray-600">Loading map...</div>}>
+                    <HomeStateMap stateStatusEntries={filteredHomeGeographicStates} />
+                  </Suspense>
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
+                    <span className="inline-flex items-center gap-2 text-emerald-800">
+                      <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                      Currently Working
+                    </span>
+                    <span className="inline-flex items-center gap-2 text-amber-800">
+                      <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                      Previously Worked
+                    </span>
+                    <span className="inline-flex items-center gap-2 text-gray-600">
+                      <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
+                      Not Selected
+                    </span>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-900">States In Focus</h3>
+                  {showCurrentStates || showPreviousStates ? (
+                    filteredHomeGeographicStates.length > 0 ? (
+                      <div className="mt-3 max-h-[22rem] overflow-y-auto pr-1">
+                        <div className="space-y-4">
+                          {showCurrentStates ? (
+                            <div>
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                                Currently Working
+                              </p>
+                              {currentHomeGeographicStates.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                  {currentHomeGeographicStates.map((item) => (
+                                    <span
+                                      key={`${item.state}-${item.status}`}
+                                      className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800"
+                                    >
+                                      {item.state}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-xs text-gray-500">No currently working states in this filter.</p>
+                              )}
+                            </div>
+                          ) : null}
+
+                          {showPreviousStates ? (
+                            <div>
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-700">
+                                Previously Worked
+                              </p>
+                              {previousHomeGeographicStates.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                  {previousHomeGeographicStates.map((item) => (
+                                    <span
+                                      key={`${item.state}-${item.status}`}
+                                      className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800"
+                                    >
+                                      {item.state}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-xs text-gray-500">No previously worked states in this filter.</p>
+                              )}
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="mt-3 text-sm text-gray-500">
+                        {homeGeographicStates.length > 0
+                          ? 'No states match the selected filters.'
+                          : 'No states configured yet. Add them from Manage Homepage > Home Geographic Focus.'}
+                      </p>
+                    )
+                  ) : (
+                    <p className="mt-3 text-sm text-gray-500">
+                      Enable at least one toggle to display states on the map and list.
+                    </p>
+                  )}
+                  <p className="mt-4 text-sm text-gray-700">
+                    {siteSettings.homeGeographicFocusDescription || DEFAULT_HOME_WHO_SETTINGS.homeGeographicFocusDescription}
+                  </p>
+                  <Link
+                    to="/about/geographic-focus"
+                    className="mt-3 inline-flex items-center rounded-md border border-blue-700 bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-800"
+                  >
+                    See Full District & Activity Presence
+                  </Link>
+                </div>
               </div>
             </div>
-          ) : (
-            <div className="text-center text-gray-500">No geographic activities available yet.</div>
           )}
         </div>
 

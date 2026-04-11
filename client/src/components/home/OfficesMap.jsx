@@ -81,7 +81,7 @@ const OfficesMap = ({
   }, [officeLocations]);
 
   return (
-    <div className="mt-16 rounded-2xl border border-blue-100 bg-gradient-to-br from-white via-blue-50/40 to-sky-50/50 p-5 md:p-7 shadow-sm">
+    <div className="mt-16">
       <div className="mb-5 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-4">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
           <div>

@@ -75,6 +75,25 @@ const siteSettingsSchema = new mongoose.Schema(
         }
       ]
     },
+    homeGeographicFocusStates: {
+      type: [
+        {
+          state: { type: String, trim: true },
+          status: {
+            type: String,
+            enum: ['currently_working', 'previously_worked'],
+            default: 'currently_working'
+          }
+        }
+      ],
+      default: []
+    },
+    homeGeographicFocusDescription: {
+      type: String,
+      default:
+        'States are color-coded to reflect current and past program presence. Use the toggles to filter.',
+      trim: true
+    },
     facebookUrl: { type: String, default: 'https://www.facebook.com', trim: true },
     instagramUrl: { type: String, default: 'https://www.instagram.com', trim: true },
     linkedinUrl: { type: String, default: 'https://www.linkedin.com', trim: true },

@@ -7,6 +7,7 @@ import ManageDonationSettings from './ManageDonationSettings';
 import ManageDonations from './ManageDonations';
 import ManageWhoWeAre from './ManageWhoWeAre';
 import ManageOfficeLocations from './ManageOfficeLocations';
+import ManageHomeGeographicFocus from './ManageHomeGeographicFocus';
 
 const ManageHomepage = () => {
   const [activeTab, setActiveTab] = useState('sliders');
@@ -104,6 +105,17 @@ const ManageHomepage = () => {
           >
             Office Locations
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('home-geographic-focus')}
+            className={`px-4 py-2 rounded ${
+              activeTab === 'home-geographic-focus'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+            }`}
+          >
+            Home Geographic Focus
+          </button>
         </div>
       </div>
 
@@ -115,6 +127,7 @@ const ManageHomepage = () => {
       {activeTab === 'donations' && <ManageDonations />}
       {activeTab === 'who-we-are' && <ManageWhoWeAre />}
       {activeTab === 'office-locations' && <ManageOfficeLocations />}
+      {activeTab === 'home-geographic-focus' && <ManageHomeGeographicFocus />}
     </div>
   );
 };

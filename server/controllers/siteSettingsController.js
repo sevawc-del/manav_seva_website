@@ -48,6 +48,9 @@ const DEFAULT_SITE_SETTINGS = {
         'https://www.google.com/maps/place/K-82+B.K.+Dutt+Colony,+Jor+Bagh/@28.5839791,77.2140859,17z/data=!3m1!4b1!4m6!3m5!1s0x390ce3ae76a5fe45:0x6ac91b5de8746a68!8m2!3d28.5839791!4d77.2166608!16s%2Fg%2F11kpvr3p49?entry=ttu&g_ep=EgoyMDI2MDMzMC4wIKXMDSoASAFQAw%3D%3D'
     }
   ],
+  homeGeographicFocusStates: [],
+  homeGeographicFocusDescription:
+    'States are color-coded to reflect current and past program presence. Use the toggles to filter.',
   facebookUrl: 'https://www.facebook.com',
   instagramUrl: 'https://www.instagram.com',
   linkedinUrl: 'https://www.linkedin.com',
@@ -153,6 +156,43 @@ const parseOfficeLocations = (incomingValue, fallbackLocations) => {
   return normalized.length > 0 ? normalized : fallbackLocations;
 };
 
+const normalizeStateName = (value) => String(value || '').trim().replace(/\s+/g, ' ').toUpperCase();
+
+const parseHomeGeographicFocusStates = (incomingValue, fallbackStates = []) => {
+  if (incomingValue === undefined || incomingValue === null) {
+    return Array.isArray(fallbackStates) ? fallbackStates : [];
+  }
+
+  let parsed = incomingValue;
+  if (typeof incomingValue === 'string') {
+    try {
+      parsed = JSON.parse(incomingValue);
+    } catch (error) {
+      return Array.isArray(fallbackStates) ? fallbackStates : [];
+    }
+  }
+
+  if (!Array.isArray(parsed)) {
+    return Array.isArray(fallbackStates) ? fallbackStates : [];
+  }
+
+  const dedupedByState = new Map();
+  parsed.forEach((entry) => {
+    const state = String(entry?.state || '').trim();
+    if (!state) return;
+
+    const normalizedState = normalizeStateName(state);
+    if (!normalizedState) return;
+
+    const rawStatus = String(entry?.status || '').trim().toLowerCase();
+    const status = rawStatus === 'previously_worked' ? 'previously_worked' : 'currently_working';
+
+    dedupedByState.set(normalizedState, { state, status });
+  });
+
+  return Array.from(dedupedByState.values());
+};
+
 const getSiteSettings = async (req, res) => {
   try {
     const settings = await SiteSettings.findOne().lean();
@@ -254,6 +294,14 @@ const createOrUpdateSiteSettings = async (req, res) => {
         req.body.homeOfficeLocations,
         settings?.homeOfficeLocations ?? DEFAULT_SITE_SETTINGS.homeOfficeLocations
       ),
+      homeGeographicFocusStates: parseHomeGeographicFocusStates(
+        req.body.homeGeographicFocusStates,
+        settings?.homeGeographicFocusStates ?? DEFAULT_SITE_SETTINGS.homeGeographicFocusStates
+      ),
+      homeGeographicFocusDescription:
+        req.body.homeGeographicFocusDescription ??
+        settings?.homeGeographicFocusDescription ??
+        DEFAULT_SITE_SETTINGS.homeGeographicFocusDescription,
       supportMessage:
         req.body.supportMessage ??
         settings?.supportMessage ??
