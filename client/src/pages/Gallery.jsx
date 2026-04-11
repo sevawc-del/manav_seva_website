@@ -25,43 +25,43 @@ const getGalleryYear = (item) => {
 const GALLERY_THEMES = [
   {
     containerBorder: 'border-blue-200',
-    headerGradient: 'from-blue-600 to-sky-500',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/25 text-white',
     itemBorder: 'border-blue-100',
     itemHover: 'hover:border-blue-200 hover:bg-blue-50/40',
     dateBadge: 'bg-blue-100 text-blue-700'
   },
   {
-    containerBorder: 'border-emerald-200',
-    headerGradient: 'from-emerald-600 to-teal-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/25 text-white',
-    itemBorder: 'border-emerald-100',
-    itemHover: 'hover:border-emerald-200 hover:bg-emerald-50/40',
-    dateBadge: 'bg-emerald-100 text-emerald-700'
+    itemBorder: 'border-[var(--ngo-border)]',
+    itemHover: 'hover:border-[var(--ngo-border)] hover:bg-slate-50',
+    dateBadge: 'bg-slate-100 text-slate-700'
   },
   {
-    containerBorder: 'border-amber-200',
-    headerGradient: 'from-amber-500 to-yellow-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/30 text-white',
-    itemBorder: 'border-amber-100',
-    itemHover: 'hover:border-amber-200 hover:bg-amber-50/40',
-    dateBadge: 'bg-amber-100 text-amber-700'
+    itemBorder: 'border-[var(--ngo-border)]',
+    itemHover: 'hover:border-[var(--ngo-border)] hover:bg-slate-50',
+    dateBadge: 'bg-slate-100 text-slate-700'
   },
   {
-    containerBorder: 'border-cyan-200',
-    headerGradient: 'from-cyan-500 to-sky-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/25 text-white',
-    itemBorder: 'border-cyan-100',
-    itemHover: 'hover:border-cyan-200 hover:bg-cyan-50/40',
-    dateBadge: 'bg-cyan-100 text-cyan-700'
+    itemBorder: 'border-[var(--ngo-border)]',
+    itemHover: 'hover:border-slate-300 hover:bg-slate-50',
+    dateBadge: 'bg-slate-100 text-slate-700'
   },
   {
-    containerBorder: 'border-rose-200',
-    headerGradient: 'from-rose-600 to-red-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/25 text-white',
-    itemBorder: 'border-rose-100',
-    itemHover: 'hover:border-rose-200 hover:bg-rose-50/40',
-    dateBadge: 'bg-rose-100 text-rose-700'
+    itemBorder: 'border-[var(--ngo-border)]',
+    itemHover: 'hover:border-slate-300 hover:bg-slate-50',
+    dateBadge: 'bg-slate-100 text-slate-700'
   }
 ];
 
@@ -124,7 +124,7 @@ const Gallery = () => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-center text-rose-700">
+        <div className="rounded-xl border border-[var(--ngo-border)] bg-slate-50 px-5 py-4 text-center text-slate-700">
           {error}
         </div>
       </div>
@@ -133,7 +133,7 @@ const Gallery = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 px-6 py-7 text-white shadow-lg">
+      <div className="mb-8 rounded-3xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-6 py-7 text-white shadow-lg">
         <h1 className="text-3xl text-center font-bold md:text-left md:text-4xl">Gallery</h1>
         <p className="mt-2 text-sm text-center text-sky-100 md:text-left md:text-base">
           Browse moments from field programs, community events, and impact stories captured on the ground.
@@ -215,3 +215,5 @@ const Gallery = () => {
 };
 
 export default Gallery;
+
+

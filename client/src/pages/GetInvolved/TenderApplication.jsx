@@ -135,7 +135,7 @@ const TenderApplication = () => {
           <p className="mb-4 text-center text-gray-600">Loading tender details...</p>
         ) : null}
         {tenderError ? (
-          <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">{tenderError}</p>
+          <p className="mb-4 rounded-md border border-[var(--ngo-border)] bg-slate-50 px-4 py-3 text-slate-800">{tenderError}</p>
         ) : null}
         {selectedTender ? (
           <div className="mb-6 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-blue-900">
@@ -145,7 +145,7 @@ const TenderApplication = () => {
 
         {error ? <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-700">{error}</p> : null}
         {success ? (
-          <p className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">{success}</p>
+          <p className="mb-4 rounded-md border border-[var(--ngo-border)] bg-slate-50 px-4 py-3 text-slate-700">{success}</p>
         ) : null}
 
         <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -315,3 +315,4 @@ const TenderApplication = () => {
 };
 
 export default TenderApplication;
+

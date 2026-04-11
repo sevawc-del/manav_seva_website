@@ -43,14 +43,14 @@ const GovernanceTreeNode = ({ node, level = 0 }) => {
         className={`relative overflow-hidden rounded-xl border bg-white p-4 transition sm:p-5 ${
           level === 0
             ? 'border-blue-200 shadow-md'
-            : 'border-slate-200 shadow-sm hover:border-emerald-200'
+            : 'border-slate-200 shadow-sm hover:border-[var(--ngo-border)]'
         }`}
       >
         <div
           className={`absolute inset-x-0 top-0 h-1 ${
             level === 0
-              ? 'bg-gradient-to-r from-blue-600 to-sky-500'
-              : 'bg-gradient-to-r from-emerald-500 to-teal-500'
+              ? 'bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]'
+              : 'bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]'
           }`}
         />
 
@@ -59,7 +59,7 @@ const GovernanceTreeNode = ({ node, level = 0 }) => {
             {imageUrl ? (
               <img src={imageUrl} alt={name || 'Person'} className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-100 to-cyan-100 text-base font-semibold text-slate-700">
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-100 to-slate-100 text-base font-semibold text-slate-700">
                 {initials}
               </div>
             )}
@@ -71,7 +71,7 @@ const GovernanceTreeNode = ({ node, level = 0 }) => {
                 {position || 'Team Member'}
               </p>
               {level === 0 ? (
-                <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                <span className="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
                   Leadership
                 </span>
               ) : null}
@@ -121,7 +121,7 @@ const Governance = () => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-center text-rose-700">
+        <div className="rounded-xl border border-[var(--ngo-border)] bg-slate-50 px-5 py-4 text-center text-slate-700">
           {error}
         </div>
       </div>
@@ -162,7 +162,7 @@ const Governance = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 px-6 py-7 text-white shadow-lg">
+      <div className="mb-8 rounded-3xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-6 py-7 text-white shadow-lg">
         <h1 className="text-3xl text-center font-bold md:text-left md:text-4xl">
           {data?.title || 'Governance'}
         </h1>
@@ -173,7 +173,7 @@ const Governance = () => {
 
       <div className="space-y-6">
         <section className="overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-md">
-          <div className="bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-4">
+          <div className="bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-xl font-semibold text-white">Organizational Hierarchy</h2>
               <span className="rounded-full bg-white/25 px-2.5 py-1 text-xs font-semibold text-white">
@@ -190,15 +190,15 @@ const Governance = () => {
                 ))}
               </ul>
             ) : (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <div className="rounded-xl border border-[var(--ngo-border)] bg-slate-50 px-4 py-3 text-sm text-slate-800">
                 Governance hierarchy is being updated.
               </div>
             )}
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-md">
-          <div className="bg-gradient-to-r from-emerald-600 to-teal-500 px-5 py-4">
+        <section className="overflow-hidden rounded-2xl border border-[var(--ngo-border)] bg-white shadow-md">
+          <div className="bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
             <h2 className="text-xl font-semibold text-white">
               {needTitle || 'Need Of Governance'}
             </h2>
@@ -208,15 +208,15 @@ const Governance = () => {
             {needContent ? (
               <p className="text-sm leading-7 text-slate-700 md:text-base">{needContent}</p>
             ) : (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <div className="rounded-xl border border-[var(--ngo-border)] bg-slate-50 px-4 py-3 text-sm text-slate-800">
                 Governance context is being updated.
               </div>
             )}
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-cyan-200 bg-white shadow-md">
-          <div className="bg-gradient-to-r from-cyan-600 to-sky-500 px-5 py-4">
+        <section className="overflow-hidden rounded-2xl border border-[var(--ngo-border)] bg-white shadow-md">
+          <div className="bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-xl font-semibold text-white">
                 {policyTitle || 'Making Policies & Decisions'}
@@ -237,10 +237,10 @@ const Governance = () => {
                 {policyTiers.map((tier, index) => (
                   <div
                     key={`policy-tier-${index}`}
-                    className="rounded-xl border border-cyan-100 bg-cyan-50/40 p-4"
+                    className="rounded-xl border border-[var(--ngo-border)] bg-slate-50 p-4"
                   >
                     <h3 className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-900 md:text-base">
-                      <span className="inline-flex items-center rounded-full bg-cyan-600 px-2 py-0.5 text-xs font-semibold text-white">
+                      <span className="inline-flex items-center rounded-full bg-[var(--ngo-primary)] px-2 py-0.5 text-xs font-semibold text-white">
                         {tier.code || `${index + 1}.`}
                       </span>
                       {tier.title || `Tier ${index + 1}`}
@@ -252,7 +252,7 @@ const Governance = () => {
                 ))}
               </div>
             ) : (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <div className="rounded-xl border border-[var(--ngo-border)] bg-slate-50 px-4 py-3 text-sm text-slate-800">
                 Policy and decision details are being updated.
               </div>
             )}
@@ -264,3 +264,5 @@ const Governance = () => {
 };
 
 export default Governance;
+
+

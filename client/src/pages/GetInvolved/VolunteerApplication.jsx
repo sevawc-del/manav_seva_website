@@ -115,17 +115,17 @@ const VolunteerApplication = () => {
           <p className="mb-4 text-center text-gray-600">Loading role details...</p>
         ) : null}
         {roleError ? (
-          <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">{roleError}</p>
+          <p className="mb-4 rounded-md border border-[var(--ngo-border)] bg-slate-50 px-4 py-3 text-slate-800">{roleError}</p>
         ) : null}
         {selectedOpportunity ? (
-          <div className="mb-6 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-emerald-900">
+          <div className="mb-6 rounded-lg border border-[var(--ngo-border)] bg-slate-50 px-4 py-3 text-slate-900">
             Applying for: <span className="font-semibold">{selectedOpportunity.title}</span>
           </div>
         ) : null}
 
         {error ? <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-700">{error}</p> : null}
         {success ? (
-          <p className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">{success}</p>
+          <p className="mb-4 rounded-md border border-[var(--ngo-border)] bg-slate-50 px-4 py-3 text-slate-700">{success}</p>
         ) : null}
 
         <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -139,7 +139,7 @@ const VolunteerApplication = () => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[var(--ngo-primary)] focus:outline-none"
                 required
               />
             </div>
@@ -153,7 +153,7 @@ const VolunteerApplication = () => {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[var(--ngo-primary)] focus:outline-none"
                 required
               />
             </div>
@@ -166,7 +166,7 @@ const VolunteerApplication = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[var(--ngo-primary)] focus:outline-none"
                 required
               />
             </div>
@@ -179,7 +179,7 @@ const VolunteerApplication = () => {
                 name="currentLocation"
                 value={formData.currentLocation}
                 onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[var(--ngo-primary)] focus:outline-none"
               />
             </div>
             <div>
@@ -191,7 +191,7 @@ const VolunteerApplication = () => {
                 name="roleInterested"
                 value={formData.roleInterested}
                 onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[var(--ngo-primary)] focus:outline-none"
                 required
               />
             </div>
@@ -205,7 +205,7 @@ const VolunteerApplication = () => {
                 value={formData.yearsOfExperience}
                 onChange={handleChange}
                 placeholder="e.g. 2 years in community outreach"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[var(--ngo-primary)] focus:outline-none"
               />
             </div>
             <div>
@@ -217,7 +217,7 @@ const VolunteerApplication = () => {
                 name="currentCompany"
                 value={formData.currentCompany}
                 onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[var(--ngo-primary)] focus:outline-none"
               />
             </div>
             <div>
@@ -230,7 +230,7 @@ const VolunteerApplication = () => {
                 value={formData.availability}
                 onChange={handleChange}
                 placeholder="e.g. Weekends / 10 hours per week"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[var(--ngo-primary)] focus:outline-none"
               />
             </div>
             <div>
@@ -243,7 +243,7 @@ const VolunteerApplication = () => {
                 value={formData.linkedInUrl}
                 onChange={handleChange}
                 placeholder="https://linkedin.com/in/your-profile"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[var(--ngo-primary)] focus:outline-none"
               />
             </div>
             <div>
@@ -256,7 +256,7 @@ const VolunteerApplication = () => {
                 value={formData.portfolioUrl}
                 onChange={handleChange}
                 placeholder="https://your-portfolio.com"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[var(--ngo-primary)] focus:outline-none"
               />
             </div>
           </div>
@@ -271,7 +271,7 @@ const VolunteerApplication = () => {
               type="file"
               accept=".pdf,.doc,.docx"
               onChange={handleResumeChange}
-              className="w-full rounded-md border border-gray-300 bg-white text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-emerald-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-emerald-700 focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-md border border-gray-300 bg-white text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-[var(--ngo-primary)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-[var(--ngo-primary-strong)] focus:border-[var(--ngo-primary)] focus:outline-none"
               required
             />
             <p className="mt-1 text-xs text-gray-500">Accepted formats: PDF, DOC, DOCX (max 10MB)</p>
@@ -287,7 +287,7 @@ const VolunteerApplication = () => {
               rows="5"
               value={formData.coverLetter}
               onChange={handleChange}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[var(--ngo-primary)] focus:outline-none"
               placeholder="Share your motivation and how you can contribute."
             />
           </div>
@@ -307,3 +307,4 @@ const VolunteerApplication = () => {
 };
 
 export default VolunteerApplication;
+

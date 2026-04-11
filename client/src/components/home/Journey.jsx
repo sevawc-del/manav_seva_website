@@ -1,33 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
-const JOURNEY_THEMES = [
-  {
-    containerBorder: 'border-blue-200',
-    headerGradient: 'from-blue-600 to-sky-400',
-    countBadge: 'bg-white/25 text-white',
-    dot: 'bg-blue-600'
-  },
-  {
-    containerBorder: 'border-emerald-200',
-    headerGradient: 'from-emerald-600 to-teal-500',
-    countBadge: 'bg-white/25 text-white',
-    dot: 'bg-emerald-600'
-  },
-  {
-    containerBorder: 'border-amber-200',
-    headerGradient: 'from-amber-500 to-yellow-500',
-    countBadge: 'bg-white/30 text-white',
-    dot: 'bg-amber-500'
-  },
-  {
-    containerBorder: 'border-cyan-200',
-    headerGradient: 'from-cyan-500 to-sky-500',
-    countBadge: 'bg-white/25 text-white',
-    dot: 'bg-cyan-600'
-  }
-];
+const JOURNEY_THEME = {
+  containerBorder: 'border-[var(--ngo-border)]',
+  headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+  countBadge: 'bg-white/20 text-white',
+  dot: 'bg-[var(--ngo-primary)]'
+};
 
-const getThemeByIndex = (index) => JOURNEY_THEMES[index % JOURNEY_THEMES.length];
+const getThemeByIndex = () => JOURNEY_THEME;
 
 const normalizeMilestones = (journey) =>
   Array.isArray(journey?.milestones)
@@ -125,7 +105,7 @@ const JourneyCard = ({
               ))}
             </ul>
           ) : (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <div className="rounded-2xl border border-[var(--ngo-border)] bg-slate-50 px-3 py-2 text-xs text-slate-700">
               Milestones are being updated for this year.
             </div>
           )}
@@ -182,7 +162,7 @@ const Journey = ({ loading = false, journeys = [] }) => {
 
   return (
     <div className="mt-16">
-      <div className="mb-6 rounded-2xl bg-gradient-to-r from-cyan-500 to-sky-500 px-5 py-4">
+      <div className="mb-6 rounded-2xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
         <h2 className="text-3xl font-bold text-center text-white md:text-left">Our Journey</h2>
         <p className="mt-2 text-sm text-center text-white/90 md:text-left">
           Milestones that shaped our growth and community impact over the years.
@@ -194,71 +174,75 @@ const Journey = ({ loading = false, journeys = [] }) => {
       ) : journeys.length > 0 ? (
         <>
           <div className="relative mx-auto max-w-6xl lg:hidden">
-            <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 w-[3px] -translate-x-1/2 rounded-full bg-gradient-to-b from-blue-300 via-cyan-300 to-emerald-300" />
+            <div className="max-h-[min(70vh,34rem)] overflow-y-auto pr-1 no-scrollbar">
+              <div className="relative px-1">
+                <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 w-[3px] -translate-x-1/2 rounded-full bg-gradient-to-b from-slate-300 via-blue-300 to-slate-300" />
 
-            <div className="space-y-6">
-              {journeys.map((journey, index) => {
-                const isLeft = index % 2 === 0;
-                const theme = getThemeByIndex(index);
-                const cardId = String(journey?._id || `${journey?.year || 'year'}-${index}`);
+                <div className="space-y-6">
+                  {journeys.map((journey, index) => {
+                    const isLeft = index % 2 === 0;
+                    const theme = getThemeByIndex(index);
+                    const cardId = String(journey?._id || `${journey?.year || 'year'}-${index}`);
 
-                return (
-                  <div
-                    key={cardId}
-                    className="relative grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-x-3"
-                  >
-                    {isLeft ? (
-                      <div className="col-start-1">
-                        <JourneyCard
-                          journey={journey}
-                          theme={theme}
-                          compact
-                          cardId={cardId}
-                          expanded={expandedCardId === cardId}
-                          suppressHover={hoverSuppressedCardId === cardId}
-                          onToggle={handleToggleCard}
-                          onClearSuppress={clearSuppressedHover}
-                        />
+                    return (
+                      <div
+                        key={cardId}
+                        className="relative grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-x-3"
+                      >
+                        {isLeft ? (
+                          <div className="col-start-1">
+                            <JourneyCard
+                              journey={journey}
+                              theme={theme}
+                              compact
+                              cardId={cardId}
+                              expanded={expandedCardId === cardId}
+                              suppressHover={hoverSuppressedCardId === cardId}
+                              onToggle={handleToggleCard}
+                              onClearSuppress={clearSuppressedHover}
+                            />
+                          </div>
+                        ) : (
+                          <div className="col-start-1" />
+                        )}
+
+                        <div className="relative col-start-2 flex items-start justify-center pt-7">
+                          <span className={`h-4 w-4 rounded-full border-4 border-white shadow ${theme.dot}`} />
+                          <span
+                            className={`absolute top-[2.05rem] h-px w-6 bg-slate-300 ${
+                              isLeft ? '-left-6' : 'left-6'
+                            }`}
+                          />
+                        </div>
+
+                        {isLeft ? (
+                          <div className="col-start-3" />
+                        ) : (
+                          <div className="col-start-3">
+                            <JourneyCard
+                              journey={journey}
+                              theme={theme}
+                              compact
+                              cardId={cardId}
+                              expanded={expandedCardId === cardId}
+                              suppressHover={hoverSuppressedCardId === cardId}
+                              onToggle={handleToggleCard}
+                              onClearSuppress={clearSuppressedHover}
+                            />
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div className="col-start-1" />
-                    )}
-
-                    <div className="relative col-start-2 flex items-start justify-center pt-7">
-                      <span className={`h-4 w-4 rounded-full border-4 border-white shadow ${theme.dot}`} />
-                      <span
-                        className={`absolute top-[2.05rem] h-px w-6 bg-slate-300 ${
-                          isLeft ? '-left-6' : 'left-6'
-                        }`}
-                      />
-                    </div>
-
-                    {isLeft ? (
-                      <div className="col-start-3" />
-                    ) : (
-                      <div className="col-start-3">
-                        <JourneyCard
-                          journey={journey}
-                          theme={theme}
-                          compact
-                          cardId={cardId}
-                          expanded={expandedCardId === cardId}
-                          suppressHover={hoverSuppressedCardId === cardId}
-                          onToggle={handleToggleCard}
-                          onClearSuppress={clearSuppressedHover}
-                        />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="hidden lg:block">
             <div className="relative overflow-x-auto pb-2">
               <div className="relative mx-auto flex min-w-max items-stretch gap-[clamp(1rem,2.4vw,2.25rem)] px-[clamp(0.75rem,2vw,1.75rem)] py-[clamp(1rem,2vw,2rem)]">
-                <div className="pointer-events-none absolute left-0 right-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-300 via-cyan-300 to-emerald-300" />
+                <div className="pointer-events-none absolute left-0 right-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-gradient-to-r from-slate-300 via-blue-300 to-slate-300" />
 
                 {journeys.map((journey, index) => {
                   const isTop = index % 2 === 0;

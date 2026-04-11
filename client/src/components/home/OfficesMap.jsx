@@ -82,7 +82,7 @@ const OfficesMap = ({
 
   return (
     <div className="mt-16">
-      <div className="mb-5 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-4">
+      <div className="mb-5 rounded-2xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
           <div>
             <h2 className="text-3xl font-bold text-center text-white md:text-left">Our Offices</h2>
@@ -98,7 +98,7 @@ const OfficesMap = ({
             }
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+            className="inline-flex items-center rounded-md border border-white bg-white px-4 py-2 text-sm font-semibold text-[var(--ngo-primary)] shadow-sm transition hover:bg-slate-100"
           >
             Open in Google Maps
           </a>
@@ -122,8 +122,8 @@ const OfficesMap = ({
               onClick={() => handleSelectOffice('all')}
               className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-semibold transition ${
                 selectedOfficeId === 'all'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-blue-50 text-blue-800 border-blue-100 hover:bg-blue-100'
+                  ? 'bg-[var(--ngo-primary)] text-white border-[var(--ngo-primary)]'
+                  : 'bg-slate-50 text-[var(--ngo-primary)] border-[var(--ngo-border)] hover:bg-slate-100'
               }`}
             >
               Show All Offices (Map Focus)
@@ -141,7 +141,7 @@ const OfficesMap = ({
                 <div
                   key={office.id}
                   className={`rounded-lg border p-3 transition ${
-                    isActive ? 'border-blue-300 bg-blue-50/70' : 'border-gray-200 bg-white'
+                    isActive ? 'border-[var(--ngo-border)] bg-slate-50' : 'border-gray-200 bg-white'
                   }`}
                 >
                   <button
@@ -150,14 +150,14 @@ const OfficesMap = ({
                     className="w-full text-left"
                   >
                     <p className="text-sm font-semibold text-gray-900">{office.name}</p>
-                    <p className="text-xs text-blue-700 mt-0.5">{office.city}</p>
+                    <p className="text-xs text-[var(--ngo-primary)] mt-0.5">{office.city}</p>
                     <p className="text-xs text-gray-600 mt-1">{office.address}</p>
                   </button>
                   <a
                     href={officeLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-2 inline-block text-xs font-semibold text-blue-700 hover:text-blue-800"
+                    className="mt-2 inline-block text-xs font-semibold text-[var(--ngo-primary)] hover:text-[var(--ngo-primary-strong)]"
                   >
                     View on map
                   </a>
@@ -172,3 +172,4 @@ const OfficesMap = ({
 };
 
 export default OfficesMap;
+

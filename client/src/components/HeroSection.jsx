@@ -107,7 +107,7 @@ const HeroSection = () => {
         <div className="mt-5 md:mt-6 flex flex-wrap justify-center gap-3 md:gap-4 animate-fadeIn delay-300">
           <Link
             to={sliders[current]?.buttonLink || "/about/about-us"}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-blue-700"
+            className="px-6 py-3 bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] rounded-lg shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ngo-primary-strong)]"
           >
             {sliders[current]?.buttonText || "Learn More"}
           </Link>

@@ -5,76 +5,85 @@ import Loader from '../../components/Loader';
 import { stripRichText } from '../../utils/richContent';
 import { optimizeCloudinaryImage } from '../../utils/imageUrl';
 
+const ACTIVITY_PATHWAY_WORD_LIMIT = 24;
+
 const truncateText = (text = '', maxLength = 110) => {
   if (!text) return '';
   return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
 };
 
+const truncateWords = (text = '', maxWords = 24) => {
+  const cleaned = String(text || '').trim();
+  if (!cleaned) return '';
+  const words = cleaned.split(/\s+/);
+  return words.length > maxWords ? `${words.slice(0, maxWords).join(' ')}...` : cleaned;
+};
+
 const getActivityProblem = (activity) => {
   const problem = stripRichText(activity?.problem || activity?.description || '');
-  return truncateText(problem || 'A local challenge was identified by our team.', 110);
+  return truncateWords(problem || 'A local challenge was identified by our team.', ACTIVITY_PATHWAY_WORD_LIMIT);
 };
 
 const getActivityAction = (activity) => {
   const action = stripRichText(activity?.action || activity?.content || activity?.description || '');
-  return truncateText(action || 'Local volunteers and staff delivered focused interventions.', 110);
+  return truncateWords(action || 'Local volunteers and staff delivered focused interventions.', ACTIVITY_PATHWAY_WORD_LIMIT);
 };
 
 const getActivityResult = (activity) => {
   const result = stripRichText(activity?.result || '');
-  return truncateText(result || 'Impact summary is being updated as the program continues.', 110);
+  return truncateWords(result || 'Impact summary is being updated as the program continues.', ACTIVITY_PATHWAY_WORD_LIMIT);
 };
 
 const ACTIVITY_THEMES = [
   {
     containerBorder: 'border-blue-200',
-    headerGradient: 'from-blue-600 to-sky-500',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/25 text-white',
-    itemBorder: 'border-blue-100',
-    panelProblem: 'border-rose-100 bg-rose-50/70 text-rose-900',
-    panelAction: 'border-blue-100 bg-blue-50/70 text-blue-900',
-    panelResult: 'border-emerald-100 bg-emerald-50/70 text-emerald-900',
-    actionButton: 'bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500'
+    itemBorder: 'border-[var(--ngo-border)]',
+    panelProblem: 'par-card-problem',
+    panelAction: 'par-card-action',
+    panelResult: 'par-card-result',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   },
   {
-    containerBorder: 'border-emerald-200',
-    headerGradient: 'from-emerald-600 to-teal-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/25 text-white',
-    itemBorder: 'border-emerald-100',
-    panelProblem: 'border-amber-100 bg-amber-50/70 text-amber-900',
-    panelAction: 'border-cyan-100 bg-cyan-50/70 text-cyan-900',
-    panelResult: 'border-emerald-100 bg-emerald-50/70 text-emerald-900',
-    actionButton: 'bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500'
+    itemBorder: 'border-[var(--ngo-border)]',
+    panelProblem: 'par-card-problem',
+    panelAction: 'par-card-action',
+    panelResult: 'par-card-result',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   },
   {
-    containerBorder: 'border-amber-200',
-    headerGradient: 'from-amber-500 to-yellow-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/30 text-white',
-    itemBorder: 'border-amber-100',
-    panelProblem: 'border-rose-100 bg-rose-50/70 text-rose-900',
-    panelAction: 'border-blue-100 bg-blue-50/70 text-blue-900',
-    panelResult: 'border-emerald-100 bg-emerald-50/70 text-emerald-900',
-    actionButton: 'bg-amber-500 hover:bg-amber-600 focus-visible:ring-amber-500'
+    itemBorder: 'border-[var(--ngo-border)]',
+    panelProblem: 'par-card-problem',
+    panelAction: 'par-card-action',
+    panelResult: 'par-card-result',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   },
   {
-    containerBorder: 'border-cyan-200',
-    headerGradient: 'from-cyan-500 to-sky-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/25 text-white',
-    itemBorder: 'border-cyan-100',
-    panelProblem: 'border-rose-100 bg-rose-50/70 text-rose-900',
-    panelAction: 'border-cyan-100 bg-cyan-50/70 text-cyan-900',
-    panelResult: 'border-emerald-100 bg-emerald-50/70 text-emerald-900',
-    actionButton: 'bg-cyan-600 hover:bg-cyan-700 focus-visible:ring-cyan-500'
+    itemBorder: 'border-[var(--ngo-border)]',
+    panelProblem: 'par-card-problem',
+    panelAction: 'par-card-action',
+    panelResult: 'par-card-result',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   },
   {
-    containerBorder: 'border-rose-200',
-    headerGradient: 'from-rose-600 to-red-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/25 text-white',
-    itemBorder: 'border-rose-100',
-    panelProblem: 'border-rose-100 bg-rose-50/70 text-rose-900',
-    panelAction: 'border-blue-100 bg-blue-50/70 text-blue-900',
-    panelResult: 'border-emerald-100 bg-emerald-50/70 text-emerald-900',
-    actionButton: 'bg-rose-600 hover:bg-rose-700 focus-visible:ring-rose-500'
+    itemBorder: 'border-[var(--ngo-border)]',
+    panelProblem: 'par-card-problem',
+    panelAction: 'par-card-action',
+    panelResult: 'par-card-result',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   }
 ];
 
@@ -161,7 +170,7 @@ const Activities = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 px-6 py-7 text-white shadow-lg">
+      <div className="mb-8 rounded-3xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-6 py-7 text-white shadow-lg">
         <h1 className="text-3xl text-center font-bold md:text-left md:text-4xl">Our Activities</h1>
         <p className="mt-2 text-sm text-center text-sky-100 md:text-left md:text-base">
           Explore our key programs through their problem, action, and outcome pathways.
@@ -228,22 +237,22 @@ const Activities = () => {
                           prev === activityKey ? '' : activityKey
                         )
                       }
-                      className={`w-full rounded-lg border px-3 py-2 text-sm font-semibold md:hidden ${theme.itemBorder}`}
+                      className="w-full rounded-lg border border-[var(--ngo-border)] bg-slate-50 px-3 py-2 text-sm font-semibold text-[var(--ngo-primary)] md:hidden"
                     >
                       {isExpanded ? 'Hide pathway' : 'Show pathway'}
                     </button>
 
                     <div className="hidden grid-cols-1 gap-3 md:grid md:grid-cols-3">
                       <div className={`rounded-xl border p-3 ${theme.panelProblem}`}>
-                        <p className="text-[11px] font-semibold uppercase tracking-wide">Problem</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide par-label-problem">Challenge</p>
                         <p className="mt-1 text-sm">{getActivityProblem(activity)}</p>
                       </div>
                       <div className={`rounded-xl border p-3 ${theme.panelAction}`}>
-                        <p className="text-[11px] font-semibold uppercase tracking-wide">Action</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide par-label-action">Intervention</p>
                         <p className="mt-1 text-sm">{getActivityAction(activity)}</p>
                       </div>
                       <div className={`rounded-xl border p-3 ${theme.panelResult}`}>
-                        <p className="text-[11px] font-semibold uppercase tracking-wide">Result</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide par-label-result">Impact</p>
                         <p className="mt-1 text-sm">{getActivityResult(activity)}</p>
                       </div>
                     </div>
@@ -251,15 +260,15 @@ const Activities = () => {
                     {isExpanded ? (
                       <div className="grid grid-cols-1 gap-2 md:hidden">
                         <div className={`rounded-lg border p-2.5 ${theme.panelProblem}`}>
-                          <p className="text-[11px] font-semibold uppercase tracking-wide">Problem</p>
+                          <p className="text-[11px] font-semibold uppercase tracking-wide par-label-problem">Challenge</p>
                           <p className="mt-1 text-xs">{getActivityProblem(activity)}</p>
                         </div>
                         <div className={`rounded-lg border p-2.5 ${theme.panelAction}`}>
-                          <p className="text-[11px] font-semibold uppercase tracking-wide">Action</p>
+                          <p className="text-[11px] font-semibold uppercase tracking-wide par-label-action">Intervention</p>
                           <p className="mt-1 text-xs">{getActivityAction(activity)}</p>
                         </div>
                         <div className={`rounded-lg border p-2.5 ${theme.panelResult}`}>
-                          <p className="text-[11px] font-semibold uppercase tracking-wide">Result</p>
+                          <p className="text-[11px] font-semibold uppercase tracking-wide par-label-result">Impact</p>
                           <p className="mt-1 text-xs">{getActivityResult(activity)}</p>
                         </div>
                       </div>
@@ -268,7 +277,7 @@ const Activities = () => {
                     <div>
                       <Link
                         to={activityPath}
-                        className={`inline-flex items-center rounded-md px-4 py-2 text-sm font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${theme.actionButton}`}
+                        className="inline-flex items-center rounded-md bg-[var(--ngo-primary)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--ngo-primary-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ngo-primary)] focus-visible:ring-offset-2"
                       >
                         View Activity
                       </Link>
@@ -285,3 +294,5 @@ const Activities = () => {
 };
 
 export default Activities;
+
+

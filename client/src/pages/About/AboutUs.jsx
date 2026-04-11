@@ -27,7 +27,7 @@ const AboutUs = () => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-center text-rose-700">
+        <div className="rounded-xl border border-[var(--ngo-border)] bg-slate-50 px-5 py-4 text-center text-slate-700">
           {error}
         </div>
       </div>
@@ -43,7 +43,7 @@ const AboutUs = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 px-6 py-7 text-white shadow-lg">
+      <div className="mb-8 rounded-3xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-6 py-7 text-white shadow-lg">
         <h1 className="text-3xl text-center font-bold md:text-left md:text-4xl">
           {aboutUs?.title || 'About Us'}
         </h1>
@@ -53,7 +53,7 @@ const AboutUs = () => {
       </div>
 
       <section className="overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-md">
-        <div className="bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-4">
+        <div className="bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-xl font-semibold text-white">Our Identity</h2>
             <span className="rounded-full bg-white/25 px-2.5 py-1 text-xs font-semibold text-white">
@@ -72,11 +72,11 @@ const AboutUs = () => {
           ) : null}
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <article className="rounded-xl border border-emerald-100 bg-emerald-50/40 p-4 md:p-5">
-              <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+            <article className="rounded-xl border border-[var(--ngo-border)] bg-slate-50 p-4 md:p-5">
+              <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
                 Mission
               </span>
-              <h3 className="mt-3 text-xl font-semibold text-emerald-900">Our Mission</h3>
+              <h3 className="mt-3 text-xl font-semibold text-slate-900">Our Mission</h3>
               <div className="mt-2 text-slate-700">
                 <MarkdownContent content={missionText} className="text-base leading-7" />
               </div>
@@ -111,3 +111,5 @@ const AboutUs = () => {
 };
 
 export default AboutUs;
+
+

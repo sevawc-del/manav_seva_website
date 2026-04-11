@@ -4,7 +4,7 @@ import AutoCarousel from '../AutoCarousel';
 const Testimonials = ({ loading = false, testimonials = [] }) => {
   return (
     <div className="mt-16">
-      <div className="mb-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 px-5 py-4">
+      <div className="mb-6 rounded-2xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
         <h2 className="text-3xl font-bold text-center text-white md:text-left">What People Say</h2>
         <p className="mt-2 text-sm text-center text-white/90 md:text-left">
           Voices from people and communities we have served.

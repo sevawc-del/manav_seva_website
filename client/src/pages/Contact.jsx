@@ -82,7 +82,7 @@ const Contact = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 px-6 py-7 text-white shadow-lg">
+      <div className="mb-8 rounded-3xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-6 py-7 text-white shadow-lg">
         <h1 className="text-3xl text-center font-bold md:text-left md:text-4xl">Contact Us</h1>
         <p className="mt-2 text-sm text-center text-sky-100 md:text-left md:text-base">
           Reach out for support, collaboration, or any questions about our programs.
@@ -91,19 +91,19 @@ const Contact = () => {
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <section className="overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-md">
-          <div className="bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-4">
+          <div className="bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
             <h2 className="text-xl font-semibold text-white">Send a Message</h2>
             <p className="mt-1 text-sm text-white/90">Tell us how we can help.</p>
           </div>
 
           <div className="space-y-4 p-4 md:p-5">
             {error ? (
-              <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+              <div className="rounded-lg border border-[var(--ngo-border)] bg-slate-50 px-3 py-2 text-sm text-slate-700">
                 {error}
               </div>
             ) : null}
             {success ? (
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+              <div className="rounded-lg border border-[var(--ngo-border)] bg-slate-50 px-3 py-2 text-sm text-slate-700">
                 {success}
               </div>
             ) : null}
@@ -157,7 +157,7 @@ const Contact = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex w-full items-center justify-center rounded-md bg-[var(--ngo-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--ngo-primary-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ngo-primary)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? 'Sending...' : 'Send Message'}
               </button>
@@ -165,20 +165,20 @@ const Contact = () => {
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-md">
-          <div className="bg-gradient-to-r from-emerald-600 to-teal-500 px-5 py-4">
+        <section className="overflow-hidden rounded-2xl border border-[var(--ngo-border)] bg-white shadow-md">
+          <div className="bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
             <h2 className="text-xl font-semibold text-white">Share Your Feedback</h2>
             <p className="mt-1 text-sm text-white/90">Your feedback helps us improve and inspire others.</p>
           </div>
 
           <div className="space-y-4 p-4 md:p-5">
             {feedbackError ? (
-              <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+              <div className="rounded-lg border border-[var(--ngo-border)] bg-slate-50 px-3 py-2 text-sm text-slate-700">
                 {feedbackError}
               </div>
             ) : null}
             {feedbackSuccess ? (
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+              <div className="rounded-lg border border-[var(--ngo-border)] bg-slate-50 px-3 py-2 text-sm text-slate-700">
                 {feedbackSuccess}
               </div>
             ) : null}
@@ -195,7 +195,7 @@ const Contact = () => {
                     name="name"
                     value={feedbackData.name}
                     onChange={handleFeedbackChange}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-[var(--ngo-primary)] focus:outline-none focus:ring-2 focus:ring-blue-100"
                     required
                   />
                 </div>
@@ -210,7 +210,7 @@ const Contact = () => {
                     name="email"
                     value={feedbackData.email}
                     onChange={handleFeedbackChange}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-[var(--ngo-primary)] focus:outline-none focus:ring-2 focus:ring-blue-100"
                     required
                   />
                 </div>
@@ -225,7 +225,7 @@ const Contact = () => {
                     name="designation"
                     value={feedbackData.designation}
                     onChange={handleFeedbackChange}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-[var(--ngo-primary)] focus:outline-none focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
 
@@ -239,7 +239,7 @@ const Contact = () => {
                     name="location"
                     value={feedbackData.location}
                     onChange={handleFeedbackChange}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-[var(--ngo-primary)] focus:outline-none focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
               </div>
@@ -254,7 +254,7 @@ const Contact = () => {
                   value={feedbackData.quote}
                   onChange={handleFeedbackChange}
                   rows={6}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:border-[var(--ngo-primary)] focus:outline-none focus:ring-2 focus:ring-blue-100"
                   required
                 />
               </div>
@@ -264,7 +264,7 @@ const Contact = () => {
               <button
                 type="submit"
                 disabled={feedbackLoading}
-                className="inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex w-full items-center justify-center rounded-md bg-[var(--ngo-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--ngo-primary-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ngo-primary)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {feedbackLoading ? 'Submitting...' : 'Submit Feedback'}
               </button>
@@ -290,3 +290,5 @@ const Contact = () => {
 };
 
 export default Contact;
+
+

@@ -38,7 +38,7 @@ const getNewsSortTimestamp = (item) => {
 const TAB_THEMES = {
   news: {
     containerBorder: 'border-blue-200',
-    headerGradient: 'from-blue-600 to-sky-500',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/25 text-white',
     itemBorder: 'border-blue-100',
     itemHover: 'hover:border-blue-200 hover:bg-blue-50/50',
@@ -47,14 +47,14 @@ const TAB_THEMES = {
     readMoreText: 'text-blue-700 group-hover:text-blue-800'
   },
   events: {
-    containerBorder: 'border-emerald-200',
-    headerGradient: 'from-emerald-600 to-teal-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/25 text-white',
-    itemBorder: 'border-emerald-100',
-    itemHover: 'hover:border-emerald-200 hover:bg-emerald-50/50',
-    typeBadge: 'bg-emerald-100 text-emerald-700',
-    dateBadge: 'bg-emerald-50 text-emerald-700',
-    readMoreText: 'text-emerald-700 group-hover:text-emerald-800'
+    itemBorder: 'border-[var(--ngo-border)]',
+    itemHover: 'hover:border-[var(--ngo-border)] hover:bg-slate-50',
+    typeBadge: 'bg-slate-100 text-slate-700',
+    dateBadge: 'bg-slate-50 text-slate-700',
+    readMoreText: 'text-slate-700 group-hover:text-slate-800'
   }
 };
 
@@ -107,7 +107,7 @@ const NewsEvents = () => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-center text-rose-700">
+        <div className="rounded-xl border border-[var(--ngo-border)] bg-slate-50 px-5 py-4 text-center text-slate-700">
           {error}
         </div>
       </div>
@@ -123,7 +123,7 @@ const NewsEvents = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 px-6 py-7 text-white shadow-lg">
+      <div className="mb-8 rounded-3xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-6 py-7 text-white shadow-lg">
         <h1 className="text-3xl text-center font-bold md:text-left md:text-4xl">News & Events</h1>
         <p className="mt-2 text-sm text-center text-sky-100 md:text-left md:text-base">
           Follow the latest field updates and upcoming programs from across our initiatives.
@@ -152,7 +152,7 @@ const NewsEvents = () => {
                 onClick={() => setActiveTab('events')}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                   activeTab === 'events'
-                    ? 'bg-white text-emerald-700 shadow-sm'
+                    ? 'bg-white text-slate-700 shadow-sm'
                     : 'text-white hover:bg-white/20'
                 }`}
               >
@@ -257,8 +257,8 @@ const NewsEvents = () => {
                         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
                         <div className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-lg border border-white/50 bg-white/90 px-2.5 py-1.5">
                           <div className="text-center leading-none">
-                            <p className="text-base font-bold text-emerald-900">{day}</p>
-                            <p className="mt-0.5 text-[10px] font-semibold tracking-wide text-emerald-700">{month}</p>
+                            <p className="text-base font-bold text-slate-900">{day}</p>
+                            <p className="mt-0.5 text-[10px] font-semibold tracking-wide text-slate-700">{month}</p>
                           </div>
                         </div>
                       </div>
@@ -292,3 +292,5 @@ const NewsEvents = () => {
 };
 
 export default NewsEvents;
+
+

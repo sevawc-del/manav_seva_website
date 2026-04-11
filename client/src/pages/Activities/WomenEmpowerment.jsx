@@ -63,7 +63,7 @@ const WomenEmpowerment = () => {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
             <div className="text-center">
-              <div className="text-4xl text-pink-500 mb-2">👩‍🎓</div>
+              <div className="text-4xl text-[var(--ngo-primary)] mb-2">👩‍🎓</div>
               <h3 className="text-lg font-medium">Education</h3>
               <p className="text-gray-600 text-sm">Literacy and skill development programs</p>
             </div>

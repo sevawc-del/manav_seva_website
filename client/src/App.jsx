@@ -9,7 +9,7 @@ function App() {
   return (
     <GlobalContext>
       <Router>
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-[var(--ngo-bg)] text-[var(--ngo-text)]">
           <Navbar />
           <main className="flex-grow">
             <AppRoutes />

@@ -87,7 +87,7 @@ const HealthCampaigns = () => {
               <p className="text-gray-600 text-sm">Free medicines for common ailments</p>
             </div>
             <div className="text-center">
-              <div className="text-3xl text-purple-500 mb-2">📚</div>
+              <div className="text-3xl text-[var(--ngo-primary)] mb-2">📚</div>
               <h3 className="text-lg font-medium mb-2">Health Education</h3>
               <p className="text-gray-600 text-sm">Awareness programs on hygiene and nutrition</p>
             </div>

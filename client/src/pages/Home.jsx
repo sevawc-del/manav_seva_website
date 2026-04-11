@@ -32,10 +32,18 @@ const NEWS_MARQUEE_MIN_DURATION = 8;
 const NEWS_MARQUEE_PER_ITEM_DURATION = 2;
 const HOME_GEO_STATUS_CURRENT = 'currently_working';
 const HOME_GEO_STATUS_PREVIOUS = 'previously_worked';
+const ACTIVITY_PATHWAY_WORD_LIMIT = 24;
 
 const truncateText = (text = '', maxLength = 90) => {
   if (!text) return '';
   return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+};
+
+const truncateWords = (text = '', maxWords = 24) => {
+  const cleaned = String(text || '').trim();
+  if (!cleaned) return '';
+  const words = cleaned.split(/\s+/);
+  return words.length > maxWords ? `${words.slice(0, maxWords).join(' ')}...` : cleaned;
 };
 
 const parseSafeDate = (value) => {
@@ -62,17 +70,17 @@ const getNumericImpact = (impactValue = '') => {
 
 const getActivityProblem = (activity) => {
   const problem = stripRichText(activity?.problem || activity?.description || '');
-  return truncateText(problem || 'A local challenge was identified by our team.', 90);
+  return truncateWords(problem || 'A local challenge was identified by our team.', ACTIVITY_PATHWAY_WORD_LIMIT);
 };
 
 const getActivityAction = (activity) => {
   const action = stripRichText(activity?.action || activity?.content || activity?.description || '');
-  return truncateText(action || 'Local volunteers and staff delivered focused interventions.', 90);
+  return truncateWords(action || 'Local volunteers and staff delivered focused interventions.', ACTIVITY_PATHWAY_WORD_LIMIT);
 };
 
 const getActivityResult = (activity) => {
   const result = stripRichText(activity?.result || '');
-  return truncateText(result || 'Impact summary is being updated as the program continues.', 90);
+  return truncateWords(result || 'Impact summary is being updated as the program continues.', ACTIVITY_PATHWAY_WORD_LIMIT);
 };
 
 const normalizeStateName = (value = '') =>
@@ -172,7 +180,7 @@ const GalleryAutoRow = ({ items, direction = 'left' }) => {
                 key={`${item._id || item.image || 'gallery'}-${copyIndex}-${index}`}
                 to={`/gallery/${item._id}`}
                 state={{ from: 'home' }}
-                className="group relative block w-[19rem] sm:w-[21rem] md:w-[24rem] lg:w-[26rem] xl:w-[30rem] 2xl:w-[33rem] aspect-[16/10] shrink-0 overflow-hidden rounded-xl border border-gray-200 shadow-sm transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                className="group relative block w-[19rem] sm:w-[21rem] md:w-[24rem] lg:w-[26rem] xl:w-[30rem] 2xl:w-[33rem] aspect-[16/10] shrink-0 overflow-hidden rounded-xl border border-gray-200 shadow-sm transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ngo-primary)] focus-visible:ring-offset-2"
               >
                 <img
                   src={optimizeCloudinaryImage(item.image, { width: 1200, height: 750, crop: 'fill' }) || 'https://via.placeholder.com/640x420?text=Image+Not+Available'}
@@ -253,14 +261,14 @@ const VerticalNewsTicker = ({ items = [] }) => {
           <div key={`news-copy-${copyIndex}`} className="flex flex-col">
             {items.map((item, index) => {
               const rowIndex = copyIndex * items.length + index;
-              const rowClass = rowIndex % 2 === 0 ? 'bg-blue-50' : 'bg-white';
+              const rowClass = rowIndex % 2 === 0 ? 'bg-slate-50' : 'bg-white';
               return (
               <Link
                 key={`${item._id || item.slug || 'news'}-${copyIndex}-${index}`}
                 to={`/news-events/${item.slug || item._id}`}
                 className={`${rowClass} flex items-start gap-3 px-5 py-4 border-b border-gray-100`}
               >
-                <div className="w-2 h-2 rounded-full bg-blue-600 mt-2 shrink-0" />
+                <div className="w-2 h-2 rounded-full bg-[var(--ngo-primary)] mt-2 shrink-0" />
                 <div>
                   <p className="text-xs uppercase tracking-wide text-gray-500">
                     {formatDate(item.date || item.createdAt)}
@@ -583,7 +591,7 @@ const Home = () => {
       <HeroSection />
       <div className="container mx-auto px-4 py-8">
         <div>
-          <div className="mb-6 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-5 md:px-6">
+          <div className="mb-6 rounded-2xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-5 md:px-6">
             <div>
               <h2 className="text-3xl font-bold text-center text-white md:text-left">Welcome to Manav Seva Sansthan Seva</h2>
               <p className="mt-2 text-sm text-white/90 text-center md:text-left">
@@ -599,8 +607,8 @@ const Home = () => {
                     onClick={() => setActivitySort(option.id)}
                     className={`px-3 py-1.5 rounded-full border text-sm font-medium transition ${
                       activitySort === option.id
-                        ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                        : 'bg-white text-blue-800 border-white hover:bg-blue-50'
+                        ? 'bg-white text-[var(--ngo-primary)] border-white shadow-sm'
+                        : 'bg-white/15 text-white border-white/40 hover:bg-white/25'
                     }`}
                   >
                     {option.label}
@@ -609,7 +617,7 @@ const Home = () => {
               </div>
               <Link
                 to="/activities"
-                className="inline-flex items-center rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                className="inline-flex items-center rounded-md border border-white bg-white px-4 py-2 text-sm font-semibold text-[var(--ngo-primary)] shadow-sm transition hover:bg-slate-100"
               >
                 See More
               </Link>
@@ -629,7 +637,7 @@ const Home = () => {
                     <Link
                       to={`/activities/${activity.slug}`}
                       state={{ from: 'home' }}
-                      className="hidden md:block group bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                      className="hidden md:block group bg-white rounded-2xl shadow-sm border border-[var(--ngo-border)] overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-lg"
                     >
                       <div className="lg:grid lg:grid-cols-[15rem_1fr]">
                         <img
@@ -648,31 +656,31 @@ const Home = () => {
                               <h3 className="text-xl font-semibold text-gray-900">{activity.name}</h3>
                               <p className="text-sm text-gray-600 mt-1">Impact Pathway</p>
                             </div>
-                            <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 border border-blue-100">
-                              <span className="text-xs uppercase tracking-wide text-blue-700 font-semibold mr-2">Impact</span>
-                              <span className="text-sm font-bold text-blue-900">{activity.impactNumber || 'Updating'}</span>
+                            <div className="inline-flex items-center rounded-full bg-slate-50 px-3 py-1 border border-[var(--ngo-border)]">
+                              <span className="text-xs uppercase tracking-wide text-[var(--ngo-primary)] font-semibold mr-2">Impact</span>
+                              <span className="text-sm font-bold text-[var(--ngo-primary)]">{activity.impactNumber || 'Updating'}</span>
                             </div>
                           </div>
 
                           <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-3">
-                              <p className="text-[11px] uppercase tracking-wide text-rose-700 font-semibold">Problem</p>
-                              <p className="mt-1 text-sm text-rose-900">{getActivityProblem(activity)}</p>
+                            <div className="rounded-xl border p-3 par-card-problem">
+                              <p className="text-[11px] uppercase tracking-wide font-semibold par-label-problem">Challenge</p>
+                              <p className="mt-1 text-sm text-slate-900">{getActivityProblem(activity)}</p>
                             </div>
-                            <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-3">
-                              <p className="text-[11px] uppercase tracking-wide text-blue-700 font-semibold">Action</p>
-                              <p className="mt-1 text-sm text-blue-900">{getActivityAction(activity)}</p>
+                            <div className="rounded-xl border p-3 par-card-action">
+                              <p className="text-[11px] uppercase tracking-wide font-semibold par-label-action">Intervention</p>
+                              <p className="mt-1 text-sm text-[var(--ngo-primary)]">{getActivityAction(activity)}</p>
                             </div>
-                            <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-3">
-                              <p className="text-[11px] uppercase tracking-wide text-emerald-700 font-semibold">Result</p>
-                              <p className="mt-1 text-sm text-emerald-900">{getActivityResult(activity)}</p>
+                            <div className="rounded-xl border p-3 par-card-result">
+                              <p className="text-[11px] uppercase tracking-wide font-semibold par-label-result">Impact</p>
+                              <p className="mt-1 text-sm text-[var(--ngo-secondary)]">{getActivityResult(activity)}</p>
                             </div>
                           </div>
                         </div>
                       </div>
                     </Link>
 
-                    <div className="md:hidden bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden">
+                    <div className="md:hidden bg-white rounded-2xl shadow-sm border border-[var(--ngo-border)] overflow-hidden">
                       <img
                         src={optimizeCloudinaryImage(activity.image, { width: 900, height: 540, crop: 'fill' }) || 'https://via.placeholder.com/600x360?text=Activity+Image'}
                         alt={activity.name}
@@ -689,32 +697,32 @@ const Home = () => {
                             <h3 className="text-lg font-semibold text-gray-900">{activity.name}</h3>
                             <p className="text-xs text-gray-600 mt-1">Impact Pathway</p>
                           </div>
-                          <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 border border-blue-100">
-                            <span className="text-xs font-semibold text-blue-900">{activity.impactNumber || 'Updating'}</span>
+                          <div className="inline-flex items-center rounded-full bg-slate-50 px-3 py-1 border border-[var(--ngo-border)]">
+                            <span className="text-xs font-semibold text-[var(--ngo-primary)]">{activity.impactNumber || 'Updating'}</span>
                           </div>
                         </div>
 
                         <button
                           type="button"
                           onClick={() => setExpandedActivityId((prev) => (prev === activityKey ? null : activityKey))}
-                          className="mt-3 w-full py-2 rounded-lg border border-blue-200 text-blue-700 text-sm font-medium bg-blue-50/70"
+                          className="mt-3 w-full py-2 rounded-lg border border-[var(--ngo-border)] text-[var(--ngo-primary)] text-sm font-medium bg-slate-50"
                         >
                           {isExpanded ? 'Hide details' : 'Show details'}
                         </button>
 
                         {isExpanded && (
                           <div className="mt-3 space-y-2">
-                            <div className="rounded-lg border border-rose-100 bg-rose-50/60 p-2.5">
-                              <p className="text-[11px] uppercase tracking-wide text-rose-700 font-semibold">Problem</p>
-                              <p className="mt-1 text-xs text-rose-900">{getActivityProblem(activity)}</p>
+                            <div className="rounded-lg border p-2.5 par-card-problem">
+                              <p className="text-[11px] uppercase tracking-wide font-semibold par-label-problem">Challenge</p>
+                              <p className="mt-1 text-xs text-slate-900">{getActivityProblem(activity)}</p>
                             </div>
-                            <div className="rounded-lg border border-blue-100 bg-blue-50/60 p-2.5">
-                              <p className="text-[11px] uppercase tracking-wide text-blue-700 font-semibold">Action</p>
-                              <p className="mt-1 text-xs text-blue-900">{getActivityAction(activity)}</p>
+                            <div className="rounded-lg border p-2.5 par-card-action">
+                              <p className="text-[11px] uppercase tracking-wide font-semibold par-label-action">Intervention</p>
+                              <p className="mt-1 text-xs text-[var(--ngo-primary)]">{getActivityAction(activity)}</p>
                             </div>
-                            <div className="rounded-lg border border-emerald-100 bg-emerald-50/60 p-2.5">
-                              <p className="text-[11px] uppercase tracking-wide text-emerald-700 font-semibold">Result</p>
-                              <p className="mt-1 text-xs text-emerald-900">{getActivityResult(activity)}</p>
+                            <div className="rounded-lg border p-2.5 par-card-result">
+                              <p className="text-[11px] uppercase tracking-wide font-semibold par-label-result">Impact</p>
+                              <p className="mt-1 text-xs text-[var(--ngo-secondary)]">{getActivityResult(activity)}</p>
                             </div>
                           </div>
                         )}
@@ -732,6 +740,12 @@ const Home = () => {
                 );
               })}
 
+              <div className="hidden md:flex justify-end pt-2">
+                <Link to="/activities" className="app-btn app-btn-primary">
+                  See More Activities
+                </Link>
+              </div>
+
               <div className="md:hidden sticky bottom-3 z-20 pt-1">
                 <Link to="/activities" className="app-btn app-btn-primary w-full shadow-lg">
                   View All Activities
@@ -745,7 +759,7 @@ const Home = () => {
 
         {/* Who We Are Section */}
         <div className="mt-12 overflow-hidden rounded-2xl">
-          <div className="bg-gradient-to-r from-emerald-600 to-teal-500 px-5 py-4">
+          <div className="bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
             <h2 className="text-3xl font-bold text-center text-white md:text-left">Our Identity</h2>
             <p className="mt-2 text-sm text-center text-white/90 md:text-left">
               Know our story, leadership vision, and mission.
@@ -813,7 +827,7 @@ const Home = () => {
 
         {/* Gallery Section */}
         <div className="mt-16">
-          <div className="mb-6 rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-600 px-5 py-4">
+          <div className="mb-6 rounded-2xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
               <div>
                 <h2 className="text-3xl font-bold text-center text-white md:text-left">Gallery Highlights</h2>
@@ -823,7 +837,7 @@ const Home = () => {
               <div className="flex justify-center md:justify-end">
                 <Link
                   to="/gallery"
-                  className="inline-flex items-center rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                  className="inline-flex items-center rounded-md border border-white bg-white px-4 py-2 text-sm font-semibold text-[var(--ngo-primary)] shadow-sm transition hover:bg-slate-100"
                 >
                   See More
                 </Link>
@@ -852,13 +866,21 @@ const Home = () => {
 
         {/* Geographic Focus Section */}
         <div className="mt-16">
-          <div className="mb-6 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 px-5 py-4">
-            <div className="flex flex-col gap-3">
+          <div className="mb-6 rounded-2xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
               <div>
                 <h2 className="text-3xl font-bold text-center text-white md:text-left">Geographic Focus</h2>
                 <p className="mt-2 text-sm text-white/90 text-center md:text-left">
                   See the states where MSS currently works or has previously worked.
                 </p>
+              </div>
+              <div className="flex justify-center md:justify-end">
+                <Link
+                  to="/about/geographic-focus"
+                  className="inline-flex items-center rounded-md border border-white bg-white px-4 py-2 text-sm font-semibold text-[var(--ngo-primary)] shadow-sm transition hover:bg-slate-100"
+                >
+                  View Geographic Focus
+                </Link>
               </div>
             </div>
           </div>
@@ -873,8 +895,8 @@ const Home = () => {
                   onClick={() => setShowCurrentStates((prev) => !prev)}
                   className={`px-4 py-2 rounded-full border text-sm font-semibold transition ${
                     showCurrentStates
-                      ? 'bg-emerald-600 text-white border-emerald-600'
-                      : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      ? 'bg-[var(--ngo-secondary)] text-white border-[var(--ngo-secondary)]'
+                      : 'bg-slate-50 text-[var(--ngo-secondary)] border-[var(--ngo-border)]'
                   }`}
                 >
                   Currently Working
@@ -884,8 +906,8 @@ const Home = () => {
                   onClick={() => setShowPreviousStates((prev) => !prev)}
                   className={`px-4 py-2 rounded-full border text-sm font-semibold transition ${
                     showPreviousStates
-                      ? 'bg-amber-500 text-white border-amber-500'
-                      : 'bg-amber-50 text-amber-800 border-amber-200'
+                      ? 'bg-[var(--ngo-accent)] text-white border-[var(--ngo-accent)]'
+                      : 'bg-slate-50 text-[var(--ngo-accent)] border-[var(--ngo-border)]'
                   }`}
                 >
                   Previously Worked
@@ -898,12 +920,12 @@ const Home = () => {
                     <HomeStateMap stateStatusEntries={filteredHomeGeographicStates} />
                   </Suspense>
                   <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
-                    <span className="inline-flex items-center gap-2 text-emerald-800">
-                      <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                    <span className="inline-flex items-center gap-2 text-[var(--ngo-secondary)]">
+                      <span className="h-2.5 w-2.5 rounded-full bg-[var(--ngo-secondary)]" />
                       Currently Working
                     </span>
-                    <span className="inline-flex items-center gap-2 text-amber-800">
-                      <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                    <span className="inline-flex items-center gap-2 text-[var(--ngo-accent)]">
+                      <span className="h-2.5 w-2.5 rounded-full bg-[var(--ngo-accent)]" />
                       Previously Worked
                     </span>
                     <span className="inline-flex items-center gap-2 text-gray-600">
@@ -921,7 +943,7 @@ const Home = () => {
                         <div className="space-y-4">
                           {showCurrentStates ? (
                             <div>
-                              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--ngo-secondary)]">
                                 Currently Working
                               </p>
                               {currentHomeGeographicStates.length > 0 ? (
@@ -929,7 +951,7 @@ const Home = () => {
                                   {currentHomeGeographicStates.map((item) => (
                                     <span
                                       key={`${item.state}-${item.status}`}
-                                      className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800"
+                                      className="inline-flex items-center rounded-full border border-[var(--ngo-border)] bg-slate-50 px-3 py-1 text-xs font-semibold text-[var(--ngo-secondary)]"
                                     >
                                       {item.state}
                                     </span>
@@ -943,7 +965,7 @@ const Home = () => {
 
                           {showPreviousStates ? (
                             <div>
-                              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-700">
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--ngo-accent)]">
                                 Previously Worked
                               </p>
                               {previousHomeGeographicStates.length > 0 ? (
@@ -951,7 +973,7 @@ const Home = () => {
                                   {previousHomeGeographicStates.map((item) => (
                                     <span
                                       key={`${item.state}-${item.status}`}
-                                      className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800"
+                                      className="inline-flex items-center rounded-full border border-[var(--ngo-border)] bg-slate-50 px-3 py-1 text-xs font-semibold text-[var(--ngo-accent)]"
                                     >
                                       {item.state}
                                     </span>
@@ -981,7 +1003,7 @@ const Home = () => {
                   </p>
                   <Link
                     to="/about/geographic-focus"
-                    className="mt-3 inline-flex items-center rounded-md border border-blue-700 bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-800"
+                    className="mt-3 inline-flex items-center rounded-md border border-[var(--ngo-primary)] bg-[var(--ngo-primary)] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[var(--ngo-primary-strong)]"
                   >
                     See Full District & Activity Presence
                   </Link>
@@ -993,7 +1015,7 @@ const Home = () => {
 
         {/* News and Events Section */}
         <div className="mt-16">
-          <div className="mb-6 rounded-2xl bg-gradient-to-r from-indigo-700 to-blue-700 px-5 py-4">
+          <div className="mb-6 rounded-2xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
                 <h2 className="text-3xl font-bold text-center text-white md:text-left">News & Events</h2>
@@ -1010,8 +1032,8 @@ const Home = () => {
               onClick={() => setMobileFeedTab('news')}
               className={`px-4 py-2 rounded-full text-sm font-semibold border transition ${
                 mobileFeedTab === 'news'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-blue-700 border-blue-200'
+                  ? 'bg-[var(--ngo-primary)] text-white border-[var(--ngo-primary)]'
+                  : 'bg-white text-[var(--ngo-primary)] border-[var(--ngo-border)]'
               }`}
             >
               News
@@ -1021,8 +1043,8 @@ const Home = () => {
               onClick={() => setMobileFeedTab('events')}
               className={`px-4 py-2 rounded-full text-sm font-semibold border transition ${
                 mobileFeedTab === 'events'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-blue-700 border-blue-200'
+                  ? 'bg-[var(--ngo-primary)] text-white border-[var(--ngo-primary)]'
+                  : 'bg-white text-[var(--ngo-primary)] border-[var(--ngo-border)]'
               }`}
             >
               Events
@@ -1035,7 +1057,7 @@ const Home = () => {
                 <h3 className="text-lg font-semibold text-gray-900">Latest News</h3>
                 <Link
                   to="/news-events?tab=news"
-                  className="inline-flex items-center rounded-lg border border-blue-700 bg-blue-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-800"
+                  className="inline-flex items-center rounded-lg border border-[var(--ngo-primary)] bg-[var(--ngo-primary)] px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-[var(--ngo-primary-strong)]"
                 >
                   All News
                 </Link>
@@ -1060,7 +1082,7 @@ const Home = () => {
                             e.target.src = 'https://via.placeholder.com/720x360?text=News+Image';
                           }}
                         />
-                        <div className="absolute top-3 left-3 bg-white/90 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">
+                        <div className="absolute top-3 left-3 bg-white/90 text-[var(--ngo-primary)] text-xs font-semibold px-2.5 py-1 rounded-full">
                           Featured
                         </div>
                       </div>
@@ -1088,7 +1110,7 @@ const Home = () => {
                 <h3 className="text-lg font-semibold text-gray-900">Upcoming Events</h3>
                 <Link
                   to="/news-events?tab=events"
-                  className="inline-flex items-center rounded-lg border border-blue-700 bg-blue-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-800"
+                  className="inline-flex items-center rounded-lg border border-[var(--ngo-primary)] bg-[var(--ngo-primary)] px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-[var(--ngo-primary-strong)]"
                 >
                   All Events
                 </Link>
@@ -1107,11 +1129,11 @@ const Home = () => {
                       <Link
                         key={item._id}
                         to={eventLink}
-                        className="flex items-start gap-3 rounded-xl border border-gray-200 p-3 hover:border-blue-200 hover:bg-blue-50/30 transition-colors"
+                        className="flex items-start gap-3 rounded-xl border border-gray-200 p-3 hover:border-[var(--ngo-border)] hover:bg-slate-50 transition-colors"
                       >
-                        <div className="w-14 shrink-0 rounded-lg bg-blue-50 border border-blue-100 text-center py-2">
-                          <p className="text-lg font-bold leading-none text-blue-900">{day}</p>
-                          <p className="text-[11px] font-semibold tracking-wide text-blue-700">{month}</p>
+                        <div className="w-14 shrink-0 rounded-lg bg-slate-50 border border-[var(--ngo-border)] text-center py-2">
+                          <p className="text-lg font-bold leading-none text-[var(--ngo-primary)]">{day}</p>
+                          <p className="text-[11px] font-semibold tracking-wide text-[var(--ngo-primary)]">{month}</p>
                         </div>
                         <div className="min-w-0">
                           <h4 className="text-sm font-semibold text-gray-900">{item.title}</h4>
@@ -1149,3 +1171,6 @@ const Home = () => {
 };
 
 export default Home;
+
+
+

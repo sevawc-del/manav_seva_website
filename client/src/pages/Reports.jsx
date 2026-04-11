@@ -28,49 +28,49 @@ const getPublicReportFileUrl = (report) =>
 
 const CATEGORY_THEMES = [
   {
-    containerBorder: 'border-blue-200',
-    headerGradient: 'from-blue-600 to-sky-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/25 text-white',
-    itemBorder: 'border-blue-100',
-    itemHover: 'hover:border-blue-200 hover:bg-blue-50/50',
-    actionButton: 'bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500',
-    yearBadge: 'bg-blue-100 text-blue-700'
+    itemBorder: 'border-[var(--ngo-border)]',
+    itemHover: 'hover:border-slate-300 hover:bg-slate-50',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]',
+    yearBadge: 'bg-slate-100 text-slate-700'
   },
   {
-    containerBorder: 'border-emerald-200',
-    headerGradient: 'from-emerald-600 to-teal-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/20 text-white',
-    itemBorder: 'border-emerald-100',
-    itemHover: 'hover:border-emerald-200 hover:bg-emerald-50/50',
-    actionButton: 'bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500',
-    yearBadge: 'bg-emerald-100 text-emerald-700'
+    itemBorder: 'border-[var(--ngo-border)]',
+    itemHover: 'hover:border-[var(--ngo-border)] hover:bg-slate-50',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]',
+    yearBadge: 'bg-slate-100 text-slate-700'
   },
   {
-    containerBorder: 'border-amber-200',
-    headerGradient: 'from-amber-500 to-yellow-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/30 text-white',
-    itemBorder: 'border-amber-100',
-    itemHover: 'hover:border-amber-200 hover:bg-amber-50/60',
-    actionButton: 'bg-amber-500 hover:bg-amber-600 focus-visible:ring-amber-500',
-    yearBadge: 'bg-amber-100 text-amber-700'
+    itemBorder: 'border-[var(--ngo-border)]',
+    itemHover: 'hover:border-[var(--ngo-border)] hover:bg-slate-50',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]',
+    yearBadge: 'bg-slate-100 text-slate-700'
   },
   {
-    containerBorder: 'border-cyan-200',
-    headerGradient: 'from-cyan-500 to-sky-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/25 text-white',
-    itemBorder: 'border-cyan-100',
-    itemHover: 'hover:border-cyan-200 hover:bg-cyan-50/50',
-    actionButton: 'bg-cyan-600 hover:bg-cyan-700 focus-visible:ring-cyan-500',
-    yearBadge: 'bg-cyan-100 text-cyan-700'
+    itemBorder: 'border-[var(--ngo-border)]',
+    itemHover: 'hover:border-slate-300 hover:bg-slate-50',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]',
+    yearBadge: 'bg-slate-100 text-slate-700'
   },
   {
-    containerBorder: 'border-rose-200',
-    headerGradient: 'from-rose-600 to-red-500',
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
     countBadge: 'bg-white/25 text-white',
-    itemBorder: 'border-rose-100',
-    itemHover: 'hover:border-rose-200 hover:bg-rose-50/50',
-    actionButton: 'bg-rose-600 hover:bg-rose-700 focus-visible:ring-rose-500',
-    yearBadge: 'bg-rose-100 text-rose-700'
+    itemBorder: 'border-[var(--ngo-border)]',
+    itemHover: 'hover:border-slate-300 hover:bg-slate-50',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]',
+    yearBadge: 'bg-slate-100 text-slate-700'
   }
 ];
 
@@ -111,12 +111,12 @@ const getMessageTone = (message) => {
 
 const getMessageToneClasses = (tone) => {
   if (tone === 'success') {
-    return 'border-emerald-200 bg-emerald-50 text-emerald-800';
+    return 'border-[var(--ngo-border)] bg-slate-50 text-slate-800';
   }
   if (tone === 'error') {
-    return 'border-rose-200 bg-rose-50 text-rose-800';
+    return 'border-[var(--ngo-border)] bg-slate-50 text-slate-800';
   }
-  return 'border-blue-200 bg-blue-50 text-blue-800';
+  return 'border-[var(--ngo-border)] bg-slate-50 text-slate-800';
 };
 
 const getFriendlyProtectedAccessMessage = (rawMessage, hasAccessKey) => {
@@ -470,7 +470,7 @@ const Reports = () => {
   return (
     <>
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8 rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 px-6 py-7 text-white shadow-lg">
+        <div className="mb-8 rounded-3xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-6 py-7 text-white shadow-lg">
           <h1 className="text-3xl font-bold text-center md:text-left">Reports & Documents</h1>
           <p className="mt-2 text-sm text-sky-100 text-center md:text-left">
             Browse categorized reports, view details instantly, and request access where needed.
@@ -519,8 +519,8 @@ const Reports = () => {
                                 <span
                                   className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                                     visibility === 'protected'
-                                      ? 'bg-amber-100 text-amber-800'
-                                      : 'bg-emerald-100 text-emerald-800'
+                                      ? 'bg-slate-100 text-slate-800'
+                                      : 'bg-slate-100 text-slate-800'
                                   }`}
                                 >
                                   {visibility === 'protected' ? 'Protected' : 'Public'}
@@ -529,7 +529,7 @@ const Reports = () => {
                               <h3 className="text-base sm:text-lg font-semibold text-gray-900">{report.title}</h3>
                               <p className="mt-1 text-sm text-gray-600">{truncateSummary(summary)}</p>
                               {visibility === 'protected' && hasToken ? (
-                                <p className="mt-2 text-xs font-medium text-emerald-700">Access request saved</p>
+                                <p className="mt-2 text-xs font-medium text-slate-700">Access request saved</p>
                               ) : null}
                             </div>
 
@@ -620,7 +620,7 @@ const Reports = () => {
                     <button
                       type="button"
                       onClick={() => handleDownload(viewerReport)}
-                      className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                      className="px-4 py-2 rounded-md bg-[var(--ngo-primary)] text-white hover:bg-[var(--ngo-primary-strong)]"
                     >
                       Download Report
                     </button>
@@ -628,31 +628,25 @@ const Reports = () => {
                 </div>
               ) : (
                 <div className="space-y-5">
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-                    <p className="text-sm text-amber-800 flex items-start gap-2">
-                      <FiLock className="mt-0.5" />
-                      This report is protected. Download is enabled after your request is approved.
-                    </p>
-                  </div>
-
-                  <div className="rounded-lg border border-gray-200 bg-white">
-                    <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-gray-200">
-                      <div>
-                        <h4 className="font-semibold text-gray-900">Request Access</h4>
-                        <p className="text-xs text-gray-600 mt-0.5">Click "Show Form" to request access. Download is enabled after approval.</p>
-                      </div>
+                  <div className="rounded-lg border border-[var(--ngo-border)] bg-slate-50 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-sm text-slate-800 flex items-start gap-2">
+                        <FiLock className="mt-0.5" />
+                        This report is protected. Download is enabled after your request is approved.
+                      </p>
                       <button
                         type="button"
                         onClick={() => setIsRequestFormOpen((prev) => !prev)}
                         aria-expanded={isRequestFormOpen}
-                        className="px-3 py-1.5 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        className="px-3 py-1.5 rounded-md bg-[var(--ngo-primary)] text-sm font-medium text-white hover:bg-[var(--ngo-primary-strong)]"
                       >
-                        {isRequestFormOpen ? 'Hide Form' : 'Show Form'}
+                        {isRequestFormOpen ? 'Hide Form' : 'Request Access'}
                       </button>
                     </div>
+                  </div>
 
-                    {isRequestFormOpen ? (
-                      <div className="p-4 space-y-2">
+                  {isRequestFormOpen ? (
+                    <div className="rounded-lg border border-gray-200 bg-white p-4 space-y-2">
                         <input
                           type="text"
                           placeholder="Full name"
@@ -695,13 +689,12 @@ const Reports = () => {
                           type="button"
                           disabled={submittingRequestId === viewerReport._id}
                           onClick={() => handleSubmitRequest(viewerReport)}
-                          className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
+                          className="px-4 py-2 rounded-md bg-[var(--ngo-primary)] text-white hover:bg-[var(--ngo-primary-strong)] disabled:bg-gray-400"
                         >
                           {submittingRequestId === viewerReport._id ? 'Submitting...' : 'Submit Request'}
                         </button>
-                      </div>
-                    ) : null}
-                  </div>
+                    </div>
+                  ) : null}
 
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -710,7 +703,7 @@ const Reports = () => {
                       disabled={!isActiveReportAccessApproved}
                       className={`px-4 py-2 rounded-md ${
                         isActiveReportAccessApproved
-                          ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                          ? 'bg-[var(--ngo-primary)] text-white hover:bg-[var(--ngo-primary-strong)]'
                           : 'bg-gray-300 text-gray-600 cursor-not-allowed'
                       }`}
                     >
@@ -750,3 +743,5 @@ const Reports = () => {
 };
 
 export default Reports;
+
+

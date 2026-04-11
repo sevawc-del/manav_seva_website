@@ -12,7 +12,7 @@ const TYPE_LABELS = {
 const STATUS_META = {
   open: {
     label: 'Open',
-    classes: 'bg-emerald-100 text-emerald-800'
+    classes: 'bg-slate-100 text-slate-800'
   },
   closed: {
     label: 'Closed',
@@ -22,34 +22,34 @@ const STATUS_META = {
 
 const VOLUNTEER_THEMES = [
   {
-    containerBorder: 'border-emerald-200',
-    headerGradient: 'from-emerald-600 to-teal-500',
-    itemBorder: 'border-emerald-100',
-    actionButton: 'bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500'
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    itemBorder: 'border-[var(--ngo-border)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   },
   {
-    containerBorder: 'border-blue-200',
-    headerGradient: 'from-blue-600 to-sky-500',
-    itemBorder: 'border-blue-100',
-    actionButton: 'bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500'
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    itemBorder: 'border-[var(--ngo-border)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   },
   {
-    containerBorder: 'border-amber-200',
-    headerGradient: 'from-amber-500 to-yellow-500',
-    itemBorder: 'border-amber-100',
-    actionButton: 'bg-amber-500 hover:bg-amber-600 focus-visible:ring-amber-500'
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    itemBorder: 'border-[var(--ngo-border)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   },
   {
-    containerBorder: 'border-cyan-200',
-    headerGradient: 'from-cyan-500 to-sky-500',
-    itemBorder: 'border-cyan-100',
-    actionButton: 'bg-cyan-600 hover:bg-cyan-700 focus-visible:ring-cyan-500'
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    itemBorder: 'border-[var(--ngo-border)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   },
   {
-    containerBorder: 'border-rose-200',
-    headerGradient: 'from-rose-600 to-red-500',
-    itemBorder: 'border-rose-100',
-    actionButton: 'bg-rose-600 hover:bg-rose-700 focus-visible:ring-rose-500'
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    itemBorder: 'border-[var(--ngo-border)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   }
 ];
 
@@ -132,7 +132,7 @@ const Volunteer = () => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-center text-rose-700">
+        <div className="rounded-xl border border-[var(--ngo-border)] bg-slate-50 px-5 py-4 text-center text-slate-700">
           {error}
         </div>
       </div>
@@ -141,7 +141,7 @@ const Volunteer = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 px-6 py-7 text-white shadow-lg">
+      <div className="mb-8 rounded-3xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-6 py-7 text-white shadow-lg">
         <h1 className="text-3xl text-center font-bold md:text-left md:text-4xl">Volunteer Opportunities</h1>
         <p className="mt-2 text-sm text-center text-sky-100 md:text-left md:text-base">
           Support our community initiatives by sharing your time and skills.
@@ -191,7 +191,7 @@ const Volunteer = () => {
                       {volunteer.typeLabel}
                     </span>
                     {volunteer.commitment ? (
-                      <span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
+                      <span className="rounded-full border border-[var(--ngo-border)] bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
                         {volunteer.commitment}
                       </span>
                     ) : null}
@@ -247,3 +247,5 @@ const Volunteer = () => {
 };
 
 export default Volunteer;
+
+

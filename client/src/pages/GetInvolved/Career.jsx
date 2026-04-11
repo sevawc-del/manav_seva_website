@@ -18,7 +18,7 @@ const TYPE_LABELS = {
 const STATUS_META = {
   open: {
     label: 'Open',
-    classes: 'bg-emerald-100 text-emerald-800'
+    classes: 'bg-slate-100 text-slate-800'
   },
   closed: {
     label: 'Closed',
@@ -28,34 +28,34 @@ const STATUS_META = {
 
 const CARD_THEMES = [
   {
-    containerBorder: 'border-blue-200',
-    itemBorder: 'border-blue-100',
-    headerGradient: 'from-blue-600 to-sky-500',
-    actionButton: 'bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500'
+    containerBorder: 'border-[var(--ngo-border)]',
+    itemBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   },
   {
-    containerBorder: 'border-emerald-200',
-    itemBorder: 'border-emerald-100',
-    headerGradient: 'from-emerald-600 to-teal-500',
-    actionButton: 'bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500'
+    containerBorder: 'border-[var(--ngo-border)]',
+    itemBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   },
   {
-    containerBorder: 'border-amber-200',
-    itemBorder: 'border-amber-100',
-    headerGradient: 'from-amber-500 to-yellow-500',
-    actionButton: 'bg-amber-500 hover:bg-amber-600 focus-visible:ring-amber-500'
+    containerBorder: 'border-[var(--ngo-border)]',
+    itemBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   },
   {
-    containerBorder: 'border-cyan-200',
-    itemBorder: 'border-cyan-100',
-    headerGradient: 'from-cyan-500 to-sky-500',
-    actionButton: 'bg-cyan-600 hover:bg-cyan-700 focus-visible:ring-cyan-500'
+    containerBorder: 'border-[var(--ngo-border)]',
+    itemBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   },
   {
-    containerBorder: 'border-rose-200',
-    itemBorder: 'border-rose-100',
-    headerGradient: 'from-rose-600 to-red-500',
-    actionButton: 'bg-rose-600 hover:bg-rose-700 focus-visible:ring-rose-500'
+    containerBorder: 'border-[var(--ngo-border)]',
+    itemBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]'
   }
 ];
 
@@ -146,7 +146,7 @@ const Career = () => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-center text-rose-700">
+        <div className="rounded-xl border border-[var(--ngo-border)] bg-slate-50 px-5 py-4 text-center text-slate-700">
           {error}
         </div>
       </div>
@@ -155,7 +155,7 @@ const Career = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 px-6 py-7 text-white shadow-lg">
+      <div className="mb-8 rounded-3xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-6 py-7 text-white shadow-lg">
         <h1 className="text-3xl text-center font-bold md:text-left md:text-4xl">Career Opportunities</h1>
         <p className="mt-2 text-sm text-center text-sky-100 md:text-left md:text-base">
           Join our team and contribute to meaningful social impact.
@@ -163,8 +163,8 @@ const Career = () => {
       </div>
 
       {jobsWithStatus.length > 0 ? (
-        <section className="mb-6 overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-md">
-          <div className="bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-4">
+        <section className="mb-6 overflow-hidden rounded-2xl border border-[var(--ngo-border)] bg-white shadow-md">
+          <div className="bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-xl font-semibold text-white">Open Positions</h2>
               <div className="flex flex-wrap items-center gap-2">
@@ -189,8 +189,8 @@ const Career = () => {
                 onClick={() => setActiveFilter(filter.key)}
                 className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
                   activeFilter === filter.key
-                    ? 'border-blue-600 bg-blue-600 text-white'
-                    : 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
+                    ? 'border-[var(--ngo-primary)] bg-[var(--ngo-primary)] text-white'
+                    : 'border-[var(--ngo-border)] bg-slate-50 text-[var(--ngo-primary)] hover:bg-slate-100'
                 }`}
               >
                 {filter.label} ({filterCounts[filter.key] || 0})
@@ -242,7 +242,7 @@ const Career = () => {
                       {job.typeLabel}
                     </span>
                     {job.salary ? (
-                      <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                      <span className="rounded-full border border-[var(--ngo-border)] bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
                         {job.salary}
                       </span>
                     ) : null}
@@ -296,3 +296,5 @@ const Career = () => {
 };
 
 export default Career;
+
+

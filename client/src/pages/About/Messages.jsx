@@ -3,19 +3,19 @@ import { getMessages } from '../../utils/api.js';
 
 const MESSAGE_THEMES = [
   {
-    cardBg: 'from-lime-500 via-emerald-500 to-teal-500',
-    positionBadge: 'bg-emerald-900/20 text-white',
-    avatarRing: 'ring-emerald-300'
+    cardBg: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    positionBadge: 'bg-white/20 text-white',
+    avatarRing: 'ring-blue-200'
   },
   {
-    cardBg: 'from-sky-500 via-blue-500 to-indigo-500',
-    positionBadge: 'bg-blue-900/20 text-white',
-    avatarRing: 'ring-blue-300'
+    cardBg: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    positionBadge: 'bg-white/20 text-white',
+    avatarRing: 'ring-blue-200'
   },
   {
-    cardBg: 'from-amber-400 via-orange-500 to-rose-500',
-    positionBadge: 'bg-rose-900/20 text-white',
-    avatarRing: 'ring-orange-300'
+    cardBg: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    positionBadge: 'bg-white/20 text-white',
+    avatarRing: 'ring-blue-200'
   }
 ];
 
@@ -63,9 +63,9 @@ const Messages = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 px-6 py-7 text-white shadow-lg">
+      <div className="mb-8 rounded-3xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-6 py-7 text-white shadow-lg">
         <h1 className="text-3xl font-bold text-center md:text-left">Messages</h1>
-        <p className="mt-2 text-center text-emerald-100 md:text-left">
+        <p className="mt-2 text-center text-white/90 md:text-left">
           Messages from our leadership and key figures.
         </p>
       </div>

@@ -95,30 +95,34 @@ const Footer = () => {
   const footerWebsiteHref = /^https?:\/\//i.test(footerWebsite) ? footerWebsite : `https://${footerWebsite}`;
 
   return (
-    <footer className="bg-gray-900 text-gray-300 pt-12 pb-6 mt-12">
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 flex flex-col gap-10">
+    <footer className="relative overflow-hidden bg-[var(--ngo-shell-bg)] text-white/90 pt-12 mt-12 border-t border-white/25 before:pointer-events-none before:absolute before:inset-0 before:bg-[var(--ngo-shell-overlay)]">
+      <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8 xl:px-10 flex flex-col gap-10 pb-6">
         <div className="text-center md:text-left min-w-0 lg:pr-6 xl:pr-8">
           <Link
             to="/"
             className="flex items-center justify-center md:justify-start gap-2.5 min-w-0 w-full mb-4"
           >
-            <img
-              src={siteSettings.logoUrl || DEFAULT_SITE_SETTINGS.logoUrl}
-              alt={organizationLabel || "Logo"}
-              className="w-16 h-16 object-contain shrink-0 brightness-0 invert"
-            />
-            <div className="leading-none min-w-0 text-left">
-              <p className="font-bold text-base sm:text-lg text-orange-400 whitespace-normal break-words">
-                {primaryName}
-              </p>
-              {derivedSubline && (
-                <p className="font-semibold text-[11px] sm:text-xs text-gray-200 tracking-wide whitespace-normal break-words">
-                  {derivedSubline}
+            <div className="flex items-center gap-2.5 min-w-0 rounded-lg bg-white/95 ring-1 ring-white/45 shadow-sm px-2.5 py-1">
+              <span className="inline-flex items-center justify-center shrink-0">
+                <img
+                  src={siteSettings.logoUrl || DEFAULT_SITE_SETTINGS.logoUrl}
+                  alt={organizationLabel || "Logo"}
+                  className="w-16 h-16 object-contain"
+                />
+              </span>
+              <div className="leading-none min-w-0 text-left">
+                <p className="font-bold text-base sm:text-lg text-[var(--ngo-logo-wordmark)] whitespace-normal break-words">
+                  {primaryName}
                 </p>
-              )}
+                {derivedSubline && (
+                  <p className="font-semibold text-[11px] sm:text-xs text-slate-600 tracking-wide whitespace-normal break-words">
+                    {derivedSubline}
+                  </p>
+                )}
+              </div>
             </div>
           </Link>
-          <p className="text-sm leading-relaxed">
+          <p className="text-sm leading-relaxed text-white/85">
             {siteSettings.footerAboutText || DEFAULT_SITE_SETTINGS.footerAboutText}
           </p>
 
@@ -130,7 +134,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noreferrer"
                 aria-label={item.label}
-                className="hover:text-white text-lg"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/35 text-white transition hover:bg-white/15 hover:text-white"
               >
                 <item.Icon />
               </a>
@@ -144,12 +148,12 @@ const Footer = () => {
               Quick Links
             </h3>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/" className="hover:text-white">Home</Link></li>
-              <li><Link to="/about/about-us" className="hover:text-white">About Us</Link></li>
-              <li><Link to="/activities" className="hover:text-white">Our Activities</Link></li>
-              <li><Link to="/donate" className="hover:text-white">Donate Now</Link></li>
-              <li><Link to="/get-involved/career" className="hover:text-white">Career</Link></li>
-              <li><Link to="/contact" className="hover:text-white">Contact Us</Link></li>
+              <li><Link to="/" className="hover:text-[var(--ngo-accent)]">Home</Link></li>
+              <li><Link to="/about/about-us" className="hover:text-[var(--ngo-accent)]">About Us</Link></li>
+              <li><Link to="/activities" className="hover:text-[var(--ngo-accent)]">Our Activities</Link></li>
+              <li><Link to="/donate" className="hover:text-[var(--ngo-accent)]">Donate Now</Link></li>
+              <li><Link to="/get-involved/career" className="hover:text-[var(--ngo-accent)]">Career</Link></li>
+              <li><Link to="/contact" className="hover:text-[var(--ngo-accent)]">Contact Us</Link></li>
             </ul>
           </div>
 
@@ -158,11 +162,11 @@ const Footer = () => {
               Information
             </h3>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/reports" className="hover:text-white">Reports</Link></li>
-              <li><Link to="/news-events" className="hover:text-white">News & Events</Link></li>
-              <li><Link to="/gallery" className="hover:text-white">Gallery</Link></li>
-              <li><Link to="/get-involved/tenders" className="hover:text-white">Tenders</Link></li>
-              <li><Link to="/about/governance" className="hover:text-white">Governance</Link></li>
+              <li><Link to="/reports" className="hover:text-[var(--ngo-accent)]">Reports</Link></li>
+              <li><Link to="/news-events" className="hover:text-[var(--ngo-accent)]">News & Events</Link></li>
+              <li><Link to="/gallery" className="hover:text-[var(--ngo-accent)]">Gallery</Link></li>
+              <li><Link to="/get-involved/tenders" className="hover:text-[var(--ngo-accent)]">Tenders</Link></li>
+              <li><Link to="/about/governance" className="hover:text-[var(--ngo-accent)]">Governance</Link></li>
             </ul>
           </div>
 
@@ -172,21 +176,21 @@ const Footer = () => {
             </h3>
 
             <p className="flex items-center md:items-start justify-center md:justify-start gap-3 text-sm">
-              <FaPhoneAlt className="mt-1" /> {siteSettings.footerPhone || DEFAULT_SITE_SETTINGS.footerPhone}
+              <FaPhoneAlt className="mt-1 text-[var(--ngo-accent)]" /> {siteSettings.footerPhone || DEFAULT_SITE_SETTINGS.footerPhone}
             </p>
 
             <p className="flex items-center md:items-start justify-center md:justify-start gap-3 text-sm mt-2">
-              <HiOutlineMail className="mt-1" /> {siteSettings.footerEmail || DEFAULT_SITE_SETTINGS.footerEmail}
+              <HiOutlineMail className="mt-1 text-[var(--ngo-accent)]" /> {siteSettings.footerEmail || DEFAULT_SITE_SETTINGS.footerEmail}
             </p>
             {footerSecondaryEmail && (
               <p className="flex items-center md:items-start justify-center md:justify-start gap-3 text-sm mt-2">
-                <HiOutlineMail className="mt-1" /> {footerSecondaryEmail}
+                <HiOutlineMail className="mt-1 text-[var(--ngo-accent)]" /> {footerSecondaryEmail}
               </p>
             )}
             {footerWebsite && (
               <p className="flex items-center md:items-start justify-center md:justify-start gap-3 text-sm mt-2">
-                <FaGlobe className="mt-1" />
-                <a href={footerWebsiteHref} target="_blank" rel="noreferrer" className="hover:text-white">
+                <FaGlobe className="mt-1 text-[var(--ngo-accent)]" />
+                <a href={footerWebsiteHref} target="_blank" rel="noreferrer" className="hover:text-[var(--ngo-accent)]">
                   {footerWebsite}
                 </a>
               </p>
@@ -210,12 +214,12 @@ const Footer = () => {
               <img
                 src={siteSettings.chairpersonImageUrl}
                 alt={siteSettings.chairpersonName || DEFAULT_SITE_SETTINGS.chairpersonName}
-                className="w-20 h-20 rounded-full object-cover border border-gray-700 mx-auto md:mx-0"
+                className="w-20 h-20 rounded-full object-cover border border-white/35 mx-auto md:mx-0"
               />
             ) : (
-              <div className="w-20 h-20 rounded-full border border-dashed border-gray-600 mx-auto md:mx-0" />
+              <div className="w-20 h-20 rounded-full border border-dashed border-white/45 mx-auto md:mx-0" />
             )}
-            <p className="mt-3 text-sm text-gray-200">
+            <p className="mt-3 text-sm text-white/80">
               {siteSettings.chairpersonName || DEFAULT_SITE_SETTINGS.chairpersonName}
             </p>
             <h3 className="text-lg font-semibold mb-4 text-white">
@@ -225,7 +229,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="text-center text-gray-500 text-sm mt-10 border-t border-gray-700 pt-4">
+      <div className="relative z-20 border-t border-white/25 bg-[var(--ngo-shell-overlay)] py-4 text-center text-sm text-white/78 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_-10px_22px_-16px_rgba(2,23,41,0.85)]">
         &copy; {new Date().getFullYear()}{" "}
         {siteSettings.footerCopyrightText || DEFAULT_SITE_SETTINGS.footerCopyrightText}
       </div>
@@ -234,3 +238,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

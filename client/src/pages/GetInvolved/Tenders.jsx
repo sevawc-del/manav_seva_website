@@ -46,41 +46,41 @@ const truncateText = (value = '', maxLength = 220) => {
 
 const TENDER_THEMES = [
   {
-    containerBorder: 'border-blue-200',
-    headerGradient: 'from-blue-600 to-sky-500',
-    actionButton: 'bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500',
-    outlineButton: 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]',
+    outlineButton: 'border-[var(--ngo-border)] bg-slate-50 text-[var(--ngo-primary)] hover:bg-slate-100'
   },
   {
-    containerBorder: 'border-emerald-200',
-    headerGradient: 'from-emerald-600 to-teal-500',
-    actionButton: 'bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500',
-    outlineButton: 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]',
+    outlineButton: 'border-[var(--ngo-border)] bg-slate-50 text-[var(--ngo-primary)] hover:bg-slate-100'
   },
   {
-    containerBorder: 'border-amber-200',
-    headerGradient: 'from-amber-500 to-yellow-500',
-    actionButton: 'bg-amber-500 hover:bg-amber-600 focus-visible:ring-amber-500',
-    outlineButton: 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]',
+    outlineButton: 'border-[var(--ngo-border)] bg-slate-50 text-[var(--ngo-primary)] hover:bg-slate-100'
   },
   {
-    containerBorder: 'border-cyan-200',
-    headerGradient: 'from-cyan-500 to-sky-500',
-    actionButton: 'bg-cyan-600 hover:bg-cyan-700 focus-visible:ring-cyan-500',
-    outlineButton: 'border-cyan-200 bg-cyan-50 text-cyan-700 hover:bg-cyan-100'
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]',
+    outlineButton: 'border-[var(--ngo-border)] bg-slate-50 text-[var(--ngo-primary)] hover:bg-slate-100'
   },
   {
-    containerBorder: 'border-rose-200',
-    headerGradient: 'from-rose-600 to-red-500',
-    actionButton: 'bg-rose-600 hover:bg-rose-700 focus-visible:ring-rose-500',
-    outlineButton: 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'
+    containerBorder: 'border-[var(--ngo-border)]',
+    headerGradient: 'from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)]',
+    actionButton: 'bg-[var(--ngo-primary)] hover:bg-[var(--ngo-primary-strong)] focus-visible:ring-[var(--ngo-primary)]',
+    outlineButton: 'border-[var(--ngo-border)] bg-slate-50 text-[var(--ngo-primary)] hover:bg-slate-100'
   }
 ];
 
 const getThemeByIndex = (index) => TENDER_THEMES[index % TENDER_THEMES.length];
 
 const statusPillClasses = (status) =>
-  status === 'Open' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
+  status === 'Open' ? 'bg-slate-100 text-slate-800' : 'bg-slate-100 text-slate-800';
 
 const Tenders = () => {
   const [tenders, setTenders] = useState([]);
@@ -121,7 +121,7 @@ const Tenders = () => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-center text-rose-700">
+        <div className="rounded-xl border border-[var(--ngo-border)] bg-slate-50 px-5 py-4 text-center text-slate-700">
           {error}
         </div>
       </div>
@@ -152,7 +152,7 @@ const Tenders = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 px-6 py-7 text-white shadow-lg">
+      <div className="mb-8 rounded-3xl bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-6 py-7 text-white shadow-lg">
         <h1 className="text-3xl text-center font-bold md:text-left md:text-4xl">Tenders</h1>
         <p className="mt-2 text-sm text-center text-sky-100 md:text-left md:text-base">
           Explore procurement opportunities and apply for open tenders.
@@ -287,7 +287,7 @@ const Tenders = () => {
                         key={`${docUrl}-${index}`}
                         onClick={() => handleOpenTenderDocument(index)}
                         disabled={openingDocumentIndex === index}
-                        className="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-70"
+                        className="inline-flex items-center rounded-md border border-[var(--ngo-border)] bg-slate-50 px-3 py-1.5 text-sm font-semibold text-[var(--ngo-primary)] hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70"
                       >
                         {openingDocumentIndex === index
                           ? 'Opening...'
@@ -300,7 +300,7 @@ const Tenders = () => {
                 )}
 
                 {documentError ? (
-                  <p className="mt-2 text-sm text-rose-600">{documentError}</p>
+                  <p className="mt-2 text-sm text-red-600">{documentError}</p>
                 ) : null}
               </section>
 
@@ -308,7 +308,7 @@ const Tenders = () => {
                 {getTenderStatus(activeTender) === 'Open' ? (
                   <Link
                     to={`/get-involved/tenders/apply/${activeTender._id}`}
-                    className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                    className="inline-flex items-center rounded-md bg-[var(--ngo-primary)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--ngo-primary-strong)]"
                     onClick={() => setActiveTender(null)}
                   >
                     Apply for Tender
@@ -332,3 +332,5 @@ const Tenders = () => {
 };
 
 export default Tenders;
+
+
