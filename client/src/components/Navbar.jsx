@@ -188,7 +188,7 @@ const Navbar = () => {
               to="/"
               className={({ isActive }) =>
                 `text-gray-700 hover:text-blue-600 transition ${
-                  isActive ? "font-semibold text-blue-600" : ""
+                  isActive ? "font-semibold text-blue-700" : ""
                 }`
               }
             >
