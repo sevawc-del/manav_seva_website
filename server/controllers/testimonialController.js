@@ -29,9 +29,7 @@ const submitTestimonial = async (req, res) => {
       return res.status(400).json({ message: 'Name, email and feedback are required' });
     }
 
-    if (!(consentToPublish === true || consentToPublish === 'true')) {
-      return res.status(400).json({ message: 'Consent to publish is required' });
-    }
+    const hasConsentToPublish = consentToPublish === true || consentToPublish === 'true';
 
     const testimonial = new Testimonial({
       name,
@@ -39,7 +37,7 @@ const submitTestimonial = async (req, res) => {
       designation: designation || '',
       location: location || '',
       quote,
-      consentToPublish: true,
+      consentToPublish: hasConsentToPublish,
       status: 'pending',
       isPublic: false,
       source: 'contact_form'

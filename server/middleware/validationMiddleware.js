@@ -43,7 +43,7 @@ const validateContact = (req, res, next) => {
 };
 
 const validateTestimonial = (req, res, next) => {
-  const { name, email, quote, designation, location, consentToPublish } = req.body;
+  const { name, email, quote, designation, location } = req.body;
 
   if (!isNonEmptyString(name, 2, 100)) {
     return res.status(400).json({ message: 'Name must be between 2 and 100 characters' });
@@ -63,10 +63,6 @@ const validateTestimonial = (req, res, next) => {
 
   if (location && !isNonEmptyString(location, 2, 120)) {
     return res.status(400).json({ message: 'Location must be between 2 and 120 characters' });
-  }
-
-  if (!(consentToPublish === true || consentToPublish === 'true')) {
-    return res.status(400).json({ message: 'Consent to publish is required' });
   }
 
   next();

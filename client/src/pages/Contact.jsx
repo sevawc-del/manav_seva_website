@@ -276,9 +276,8 @@ const Contact = () => {
                   checked={feedbackData.consentToPublish}
                   onChange={handleFeedbackChange}
                   className="mt-1"
-                  required
                 />
-                I consent to publish my feedback.
+                I consent to publish my feedback on the website (optional).
               </label>
 
             </form>
