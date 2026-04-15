@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { FiEye, FiLock } from 'react-icons/fi';
 import { getReportDownloadLink, getReports, requestReportAccess } from '../utils/api';
 import Loader from '../components/Loader';
+import { useToast } from '../context/ToastContext';
 
 const normalizeCategory = (value) => {
   const category = String(value || '').trim();
@@ -160,6 +161,7 @@ const shouldClearAccessKey = (rawMessage) => {
 };
 
 const Reports = () => {
+  const toast = useToast();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -249,6 +251,7 @@ const Reports = () => {
         ? 'Your request is under review. Download will be enabled after approval.'
         : 'Please submit an access request to download this report.';
       updateReportMessage(reportId, message);
+      toast.info(message);
       if (viewerReport?._id === reportId) {
         setViewerError(message);
         setIsRequestFormOpen(true);
@@ -268,6 +271,7 @@ const Reports = () => {
       }
       updateReportMessage(reportId, '');
       setViewerError('');
+      toast.success('Download started.');
     } catch (downloadError) {
       if (visibility === 'public') {
         const fallbackUrl = getPublicReportFileUrl(report);
@@ -305,6 +309,14 @@ const Reports = () => {
       updateReportMessage(reportId, message);
       if (viewerReport?._id === reportId) {
         setViewerError(message);
+      }
+      const tone = getMessageTone(message);
+      if (tone === 'error') {
+        toast.error(message);
+      } else if (tone === 'success') {
+        toast.success(message);
+      } else {
+        toast.info(message);
       }
     }
   };
@@ -393,6 +405,7 @@ const Reports = () => {
       const message = 'Please fill name, email, and purpose before submitting.';
       updateReportMessage(reportId, message);
       setViewerError(message);
+      toast.error(message);
       return;
     }
 
@@ -415,6 +428,11 @@ const Reports = () => {
 
       updateReportMessage(reportId, successMessage);
       setViewerError('');
+      if (requestStatus === 'approved') {
+        toast.success(successMessage);
+      } else {
+        toast.info(successMessage);
+      }
       setRequestForm({
         requesterName: '',
         requesterEmail: '',
@@ -427,6 +445,7 @@ const Reports = () => {
         requestError?.response?.data?.message || 'Failed to submit access request.';
       updateReportMessage(reportId, message);
       setViewerError(message);
+      toast.error(message);
     } finally {
       setSubmittingRequestId('');
     }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { applyForJob, getJobById } from '../../utils/api';
+import { useToast } from '../../context/ToastContext';
 
 const DEFAULT_FORM = {
   fullName: '',
@@ -23,9 +24,8 @@ const CareerApplication = () => {
   const [resumeFile, setResumeFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [jobLoading, setJobLoading] = useState(Boolean(jobId));
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [jobError, setJobError] = useState('');
+  const toast = useToast();
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -43,14 +43,16 @@ const CareerApplication = () => {
           roleInterested: job?.title || prev.roleInterested
         }));
       } catch {
-        setJobError('Could not load the selected role details. You can still continue by filling role manually.');
+        const message = 'Could not load the selected role details. You can still continue by filling role manually.';
+        setJobError(message);
+        toast.warning(message);
       } finally {
         setJobLoading(false);
       }
     };
 
     fetchJob();
-  }, [jobId]);
+  }, [jobId, toast]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -68,12 +70,10 @@ const CareerApplication = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
 
     if (!resumeFile) {
       setLoading(false);
-      setError('Please upload your resume before submitting.');
+      toast.error('Please upload your resume before submitting.');
       return;
     }
 
@@ -90,14 +90,14 @@ const CareerApplication = () => {
 
       await applyForJob(payload);
 
-      setSuccess('Application submitted successfully. Our team will review your profile and get in touch.');
+      toast.success('Application submitted successfully. Our team will review your profile and get in touch.');
       setResumeFile(null);
       setFormData({
         ...DEFAULT_FORM,
         roleInterested: selectedJob?.title || ''
       });
     } catch (submitError) {
-      setError(submitError?.response?.data?.message || 'Unable to submit application right now. Please try again.');
+      toast.error(submitError?.response?.data?.message || 'Unable to submit application right now. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -121,11 +121,6 @@ const CareerApplication = () => {
           <div className="mb-6 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-blue-900">
             Applying for: <span className="font-semibold">{selectedJob.title}</span>
           </div>
-        ) : null}
-
-        {error ? <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-700">{error}</p> : null}
-        {success ? (
-          <p className="mb-4 rounded-md border border-[var(--ngo-border)] bg-slate-50 px-4 py-3 text-slate-700">{success}</p>
         ) : null}
 
         <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">

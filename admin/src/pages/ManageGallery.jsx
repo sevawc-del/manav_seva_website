@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import DataTable from '../components/DataTable';
 import { getGallery, createGalleryItem, updateGalleryItem, deleteGalleryItem } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const ManageGallery = () => {
+  const toast = useToast();
   const [gallery, setGallery] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({ title: '', image: '', description: '', showOnHome: true });
@@ -48,7 +50,7 @@ const ManageGallery = () => {
         await updateGalleryItem(editing._id, payload);
       } else {
         if (!selectedFile && !formData.image.trim()) {
-          alert('Please choose an image file or provide an image URL.');
+          toast.error('Please choose an image file or provide an image URL.');
           setSubmitting(false);
           return;
         }
@@ -64,6 +66,7 @@ const ManageGallery = () => {
       fetchGallery();
     } catch (error) {
       console.error(error);
+      toast.error('Failed to save gallery item');
     } finally {
       setSubmitting(false);
     }
@@ -98,6 +101,7 @@ const ManageGallery = () => {
       fetchGallery();
     } catch (error) {
       console.error(error);
+      toast.error('Failed to delete gallery item');
     }
   };
 

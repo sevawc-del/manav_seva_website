@@ -9,8 +9,10 @@ import {
   getReportAccessRequests,
   updateReportAccessRequestStatus
 } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const ManageReports = () => {
+  const toast = useToast();
   const [reports, setReports] = useState([]);
   const [accessRequests, setAccessRequests] = useState([]);
   const [formData, setFormData] = useState({
@@ -113,7 +115,7 @@ const ManageReports = () => {
       fetchReports();
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.message || 'Failed to save report');
+      toast.error(error?.response?.data?.message || 'Failed to save report');
     } finally {
       setUploadingFile(false);
     }
@@ -145,6 +147,7 @@ const ManageReports = () => {
       fetchReports();
     } catch (error) {
       console.error(error);
+      toast.error('Failed to delete report');
     }
   };
 
@@ -167,7 +170,7 @@ const ManageReports = () => {
       await fetchAccessRequests();
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.message || 'Failed to update access request status');
+      toast.error(error?.response?.data?.message || 'Failed to update access request status');
     } finally {
       setUpdatingRequestId('');
     }

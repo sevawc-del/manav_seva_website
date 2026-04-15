@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createOrUpdateSiteSettings, getSiteSettingsAdmin } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const STATUS_OPTIONS = [
   { value: 'currently_working', label: 'Currently Working' },
@@ -66,6 +67,7 @@ const sanitizeHomeGeographicStates = (items = []) => {
 };
 
 const ManageHomeGeographicFocus = () => {
+  const toast = useToast();
   const [entries, setEntries] = useState([]);
   const [description, setDescription] = useState('');
   const [newState, setNewState] = useState('');
@@ -84,14 +86,14 @@ const ManageHomeGeographicFocus = () => {
         setDescription(String(response?.data?.homeGeographicFocusDescription || '').trim());
       } catch (error) {
         console.error('Failed to load home geographic focus states:', error);
-        alert('Failed to load home geographic focus states');
+        toast.error('Failed to load home geographic focus states');
       } finally {
         setLoading(false);
       }
     };
 
     fetchSettings();
-  }, []);
+  }, [toast]);
 
   const availableStates = useMemo(() => {
     const used = new Set(entries.map((entry) => normalizeStateName(entry.state)));
@@ -136,10 +138,10 @@ const ManageHomeGeographicFocus = () => {
       payload.append('homeGeographicFocusStates', JSON.stringify(sanitizeHomeGeographicStates(entries)));
       payload.append('homeGeographicFocusDescription', description || '');
       await createOrUpdateSiteSettings(payload);
-      alert('Home geographic focus states saved successfully');
+      toast.success('Home geographic focus states saved successfully');
     } catch (error) {
       console.error('Failed to save home geographic focus states:', error);
-      alert(error?.response?.data?.message || 'Failed to save home geographic focus states');
+      toast.error(error?.response?.data?.message || 'Failed to save home geographic focus states');
     } finally {
       setSubmitting(false);
     }

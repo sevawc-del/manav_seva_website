@@ -20,7 +20,7 @@ export const pickImageFile = () =>
     input.click();
   });
 
-export const createMarkdownImageCommandFilter = ({ uploadImage }) => {
+export const createMarkdownImageCommandFilter = ({ uploadImage, onError }) => {
   if (typeof uploadImage !== 'function') {
     return undefined;
   }
@@ -54,7 +54,9 @@ export const createMarkdownImageCommandFilter = ({ uploadImage }) => {
             console.error('Inline image upload failed:', error);
             const message =
               error?.response?.data?.message || 'Failed to upload image';
-            alert(message);
+            if (typeof onError === 'function') {
+              onError(message);
+            }
           }
         })();
       }

@@ -16,6 +16,7 @@ import {
   uploadEventImage
 } from '../utils/api';
 import { createMarkdownImageCommandFilter } from '../utils/markdownImageUpload';
+import { useToast } from '../context/ToastContext';
 
 const toSlug = (value) =>
   String(value || '')
@@ -45,6 +46,7 @@ const toStableNewsDateIso = (dateInputValue) => {
 };
 
 const ManageNews = () => {
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('news');
 
   const [news, setNews] = useState([]);
@@ -78,12 +80,18 @@ const ManageNews = () => {
   const eventFileInputRef = useRef(null);
 
   const newsEditorCommandFilter = useMemo(
-    () => createMarkdownImageCommandFilter({ uploadImage: uploadNewsImage }),
-    []
+    () => createMarkdownImageCommandFilter({
+      uploadImage: uploadNewsImage,
+      onError: (message) => toast.error(message)
+    }),
+    [toast]
   );
   const eventEditorCommandFilter = useMemo(
-    () => createMarkdownImageCommandFilter({ uploadImage: uploadEventImage }),
-    []
+    () => createMarkdownImageCommandFilter({
+      uploadImage: uploadEventImage,
+      onError: (message) => toast.error(message)
+    }),
+    [toast]
   );
 
   const fetchNewsItems = async () => {
@@ -152,7 +160,10 @@ const ManageNews = () => {
   const handleNewsSubmit = async (e) => {
     e.preventDefault();
     if (newsSubmitting) return;
-    if (!newsForm.content.trim()) return alert('Body is required');
+    if (!newsForm.content.trim()) {
+      toast.error('Body is required');
+      return;
+    }
 
     setNewsSubmitting(true);
     try {
@@ -174,6 +185,7 @@ const ManageNews = () => {
       resetNewsForm();
     } catch (error) {
       console.error(error);
+      toast.error('Failed to save news');
     } finally {
       setNewsSubmitting(false);
     }
@@ -182,8 +194,14 @@ const ManageNews = () => {
   const handleEventSubmit = async (e) => {
     e.preventDefault();
     if (eventSubmitting) return;
-    if (!eventForm.content.trim()) return alert('Body is required');
-    if (!eventForm.startDateTime) return alert('Start date/time is required');
+    if (!eventForm.content.trim()) {
+      toast.error('Body is required');
+      return;
+    }
+    if (!eventForm.startDateTime) {
+      toast.error('Start date/time is required');
+      return;
+    }
 
     setEventSubmitting(true);
     try {
@@ -202,6 +220,7 @@ const ManageNews = () => {
       resetEventForm();
     } catch (error) {
       console.error(error);
+      toast.error('Failed to save event');
     } finally {
       setEventSubmitting(false);
     }

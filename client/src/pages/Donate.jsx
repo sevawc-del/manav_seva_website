@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createDonationOrder, getDonationSettings, getDonationStatus } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const PRESET_AMOUNTS = [500, 1000, 2500, 5000];
 const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
@@ -61,8 +62,6 @@ const Donate = () => {
   const [donationConfig, setDonationConfig] = useState(fallbackConfig);
   const [loadingConfig, setLoadingConfig] = useState(true);
   const [processingPayment, setProcessingPayment] = useState(false);
-  const [statusMessage, setStatusMessage] = useState('');
-  const [statusType, setStatusType] = useState('info');
   const [formData, setFormData] = useState({
     donorName: '',
     email: '',
@@ -72,6 +71,7 @@ const Donate = () => {
     presetAmount: PRESET_AMOUNTS[1],
     customAmount: ''
   });
+  const toast = useToast();
 
   useEffect(() => {
     const fetchDonationSettings = async () => {
@@ -113,14 +113,12 @@ const Donate = () => {
 
         if (status === 'paid') {
           const receipt = response.data?.receiptNumber ? ` Receipt: ${response.data.receiptNumber}.` : '';
-          setStatusType('success');
-          setStatusMessage(`Payment verified successfully.${receipt} The 80G certificate has been emailed.`);
+          toast.success(`Payment verified successfully.${receipt} The 80G certificate has been emailed.`);
           return;
         }
 
         if (status === 'failed') {
-          setStatusType('error');
-          setStatusMessage(response.data?.reason || 'Payment failed. Please try again.');
+          toast.error(response.data?.reason || 'Payment failed. Please try again.');
           return;
         }
       } catch (error) {
@@ -130,8 +128,7 @@ const Donate = () => {
       await new Promise((resolve) => setTimeout(resolve, 3000));
     }
 
-    setStatusType('info');
-    setStatusMessage('Payment is being verified. You will receive the receipt and 80G certificate by email shortly.');
+    toast.info('Payment is being verified. You will receive the receipt and 80G certificate by email shortly.');
   };
 
   const handleDonate = async (e) => {
@@ -140,13 +137,11 @@ const Donate = () => {
 
     const validationError = validateForm();
     if (validationError) {
-      setStatusType('error');
-      setStatusMessage(validationError);
+      toast.error(validationError);
       return;
     }
 
     setProcessingPayment(true);
-    setStatusMessage('');
 
     try {
       await loadRazorpayScript();
@@ -178,14 +173,12 @@ const Donate = () => {
           pan: payload.pan
         },
         handler: async () => {
-          setStatusType('info');
-          setStatusMessage('Payment received. Verifying securely, please wait...');
+          toast.info('Payment received. Verifying securely, please wait...');
           await pollPaymentStatus(orderId, payload.email);
         },
         modal: {
           ondismiss: () => {
-            setStatusType('info');
-            setStatusMessage('Payment popup closed. If payment was completed, verification may still be in progress.');
+            toast.info('Payment popup closed. If payment was completed, verification may still be in progress.');
           }
         },
         theme: {
@@ -196,8 +189,7 @@ const Donate = () => {
       razorpay.open();
     } catch (error) {
       console.error('Donation checkout error:', error);
-      setStatusType('error');
-      setStatusMessage(error?.response?.data?.message || error.message || 'Unable to initiate payment');
+      toast.error(error?.response?.data?.message || error.message || 'Unable to initiate payment');
     } finally {
       setProcessingPayment(false);
     }
@@ -211,20 +203,6 @@ const Donate = () => {
           Your donation helps us deliver healthcare, education, and social development initiatives.
         </p>
       </section>
-
-      {statusMessage && (
-        <div
-          className={`max-w-3xl mx-auto mb-6 rounded-lg px-4 py-3 text-sm ${
-            statusType === 'success'
-              ? 'bg-green-50 text-green-700 border border-green-200'
-              : statusType === 'error'
-                ? 'bg-red-50 text-red-700 border border-red-200'
-                : 'bg-blue-50 text-blue-700 border border-blue-200'
-          }`}
-        >
-          {statusMessage}
-        </div>
-      )}
 
       <section className="max-w-3xl mx-auto bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-10">
         <h2 className="text-2xl font-semibold mb-5">Online Donation Form</h2>

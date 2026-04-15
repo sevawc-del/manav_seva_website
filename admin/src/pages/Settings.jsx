@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createOrUpdateSiteSettings, getSiteSettingsAdmin } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const initialForm = {
   organizationName: '',
@@ -22,6 +23,7 @@ const initialForm = {
 };
 
 const Settings = () => {
+  const toast = useToast();
   const [formData, setFormData] = useState(initialForm);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -40,14 +42,14 @@ const Settings = () => {
         }));
       } catch (error) {
         console.error('Failed to load site settings:', error);
-        alert('Failed to load site settings');
+        toast.error('Failed to load site settings');
       } finally {
         setLoading(false);
       }
     };
 
     fetchSettings();
-  }, []);
+  }, [toast]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -96,10 +98,10 @@ const Settings = () => {
         fileInputRef.current.value = '';
       }
 
-      alert('Site settings saved successfully');
+      toast.success('Site settings saved successfully');
     } catch (error) {
       console.error('Failed to save site settings:', error);
-      alert(error?.response?.data?.message || 'Failed to save site settings');
+      toast.error(error?.response?.data?.message || 'Failed to save site settings');
     } finally {
       setSubmitting(false);
     }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createOrUpdateSiteSettings, getSiteSettingsAdmin } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const DEFAULT_OFFICES = [
   {
@@ -56,6 +57,7 @@ const sanitizeOffices = (offices) => {
 };
 
 const ManageOfficeLocations = () => {
+  const toast = useToast();
   const [offices, setOffices] = useState(DEFAULT_OFFICES);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -76,14 +78,14 @@ const ManageOfficeLocations = () => {
         setOffices(mapped.length > 0 ? mapped : DEFAULT_OFFICES);
       } catch (error) {
         console.error('Failed to load office locations:', error);
-        alert('Failed to load office locations');
+        toast.error('Failed to load office locations');
       } finally {
         setLoading(false);
       }
     };
 
     fetchSettings();
-  }, []);
+  }, [toast]);
 
   const handleOfficeChange = (id, key, value) => {
     setOffices((prev) => prev.map((office) => (office.id === id ? { ...office, [key]: value } : office)));
@@ -106,10 +108,10 @@ const ManageOfficeLocations = () => {
       const payload = new FormData();
       payload.append('homeOfficeLocations', JSON.stringify(sanitizeOffices(offices)));
       await createOrUpdateSiteSettings(payload);
-      alert('Office locations saved successfully');
+      toast.success('Office locations saved successfully');
     } catch (error) {
       console.error('Failed to save office locations:', error);
-      alert(error?.response?.data?.message || 'Failed to save office locations');
+      toast.error(error?.response?.data?.message || 'Failed to save office locations');
     } finally {
       setSubmitting(false);
     }

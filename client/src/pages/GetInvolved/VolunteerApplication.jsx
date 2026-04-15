@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { applyForVolunteer, getVolunteerById } from '../../utils/api';
+import { useToast } from '../../context/ToastContext';
 
 const DEFAULT_FORM = {
   fullName: '',
@@ -23,9 +24,8 @@ const VolunteerApplication = () => {
   const [resumeFile, setResumeFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [roleLoading, setRoleLoading] = useState(Boolean(volunteerId));
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [roleError, setRoleError] = useState('');
+  const toast = useToast();
 
   useEffect(() => {
     const fetchOpportunity = async () => {
@@ -43,14 +43,16 @@ const VolunteerApplication = () => {
           roleInterested: opportunity?.title || prev.roleInterested
         }));
       } catch {
-        setRoleError('Could not load the selected volunteer role details. You can still continue by filling role manually.');
+        const message = 'Could not load the selected volunteer role details. You can still continue by filling role manually.';
+        setRoleError(message);
+        toast.warning(message);
       } finally {
         setRoleLoading(false);
       }
     };
 
     fetchOpportunity();
-  }, [volunteerId]);
+  }, [volunteerId, toast]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -68,12 +70,10 @@ const VolunteerApplication = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
 
     if (!resumeFile) {
       setLoading(false);
-      setError('Please upload your resume before submitting.');
+      toast.error('Please upload your resume before submitting.');
       return;
     }
 
@@ -90,14 +90,14 @@ const VolunteerApplication = () => {
 
       await applyForVolunteer(payload);
 
-      setSuccess('Application submitted successfully. Our team will review your profile and get in touch.');
+      toast.success('Application submitted successfully. Our team will review your profile and get in touch.');
       setResumeFile(null);
       setFormData({
         ...DEFAULT_FORM,
         roleInterested: selectedOpportunity?.title || ''
       });
     } catch (submitError) {
-      setError(submitError?.response?.data?.message || 'Unable to submit application right now. Please try again.');
+      toast.error(submitError?.response?.data?.message || 'Unable to submit application right now. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -121,11 +121,6 @@ const VolunteerApplication = () => {
           <div className="mb-6 rounded-lg border border-[var(--ngo-border)] bg-slate-50 px-4 py-3 text-slate-900">
             Applying for: <span className="font-semibold">{selectedOpportunity.title}</span>
           </div>
-        ) : null}
-
-        {error ? <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-700">{error}</p> : null}
-        {success ? (
-          <p className="mb-4 rounded-md border border-[var(--ngo-border)] bg-slate-50 px-4 py-3 text-slate-700">{success}</p>
         ) : null}
 
         <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">

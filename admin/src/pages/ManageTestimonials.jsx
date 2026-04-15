@@ -70,7 +70,6 @@ const ManageTestimonials = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this testimonial?')) return;
     try {
       await deleteTestimonialAdmin(id);
       await fetchTestimonials();

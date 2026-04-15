@@ -72,13 +72,11 @@ const ManageVolunteers = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this volunteer opportunity?')) {
-      try {
-        await deleteVolunteer(id);
-        fetchVolunteers();
-      } catch (error) {
-        console.error('Error deleting volunteer:', error);
-      }
+    try {
+      await deleteVolunteer(id);
+      fetchVolunteers();
+    } catch (error) {
+      console.error('Error deleting volunteer:', error);
     }
   };
 

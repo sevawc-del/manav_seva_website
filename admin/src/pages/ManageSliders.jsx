@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import DataTable from '../components/DataTable';
 import { getAllSliders, createSlider, updateSlider, deleteSlider } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const ManageSliders = () => {
+  const toast = useToast();
   const [sliders, setSliders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -28,7 +30,7 @@ const ManageSliders = () => {
       setSliders(response.data);
     } catch (error) {
       console.error('Failed to fetch sliders:', error);
-      alert('Failed to fetch sliders');
+      toast.error('Failed to fetch sliders');
     } finally {
       setLoading(false);
     }
@@ -41,14 +43,14 @@ const ManageSliders = () => {
     try {
       // Validate required fields
       if (!formData.title || !formData.subtitle) {
-        alert('Title and subtitle are required');
+        toast.error('Title and subtitle are required');
         setSubmitting(false);
         return;
       }
 
       // Validate image
       if (!formData.image) {
-        alert('Please provide an image URL or upload an image file');
+        toast.error('Please provide an image URL or upload an image file');
         setSubmitting(false);
         return;
       }
@@ -76,10 +78,10 @@ const ManageSliders = () => {
       }
       await fetchSliders();
       resetForm();
-      alert('Slider saved successfully!');
+      toast.success('Slider saved successfully');
     } catch (error) {
       console.error('Failed to save slider:', error);
-      alert('Failed to save slider: ' + (error.response?.data?.message || error.message));
+      toast.error(error.response?.data?.message || error.message || 'Failed to save slider');
     } finally {
       setSubmitting(false);
     }
@@ -100,14 +102,12 @@ const ManageSliders = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this slider?')) return;
-
     try {
       await deleteSlider(id);
       await fetchSliders();
     } catch (error) {
       console.error('Failed to delete slider:', error);
-      alert('Failed to delete slider');
+      toast.error('Failed to delete slider');
     }
   };
 

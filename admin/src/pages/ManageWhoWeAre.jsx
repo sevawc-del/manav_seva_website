@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createOrUpdateSiteSettings, getSiteSettingsAdmin } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const initialForm = {
   chairpersonName: '',
@@ -12,6 +13,7 @@ const initialForm = {
 };
 
 const ManageWhoWeAre = () => {
+  const toast = useToast();
   const [formData, setFormData] = useState(initialForm);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -37,14 +39,14 @@ const ManageWhoWeAre = () => {
         }));
       } catch (error) {
         console.error('Failed to load Who We Are settings:', error);
-        alert('Failed to load Who We Are settings');
+        toast.error('Failed to load Who We Are settings');
       } finally {
         setLoading(false);
       }
     };
 
     fetchSettings();
-  }, []);
+  }, [toast]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -93,10 +95,10 @@ const ManageWhoWeAre = () => {
         rightFileInputRef.current.value = '';
       }
 
-      alert('Who We Are section saved successfully');
+      toast.success('Who We Are section saved successfully');
     } catch (error) {
       console.error('Failed to save Who We Are settings:', error);
-      alert(error?.response?.data?.message || 'Failed to save Who We Are settings');
+      toast.error(error?.response?.data?.message || 'Failed to save Who We Are settings');
     } finally {
       setSubmitting(false);
     }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { applyForTender, getTenderById } from '../../utils/api';
+import { useToast } from '../../context/ToastContext';
 
 const DEFAULT_FORM = {
   organizationName: '',
@@ -37,9 +38,8 @@ const TenderApplication = () => {
   const [proposalDocument, setProposalDocument] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tenderLoading, setTenderLoading] = useState(Boolean(tenderId));
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [tenderError, setTenderError] = useState('');
+  const toast = useToast();
 
   useEffect(() => {
     const fetchTender = async () => {
@@ -57,14 +57,16 @@ const TenderApplication = () => {
           roleInterested: tender?.title || prev.roleInterested
         }));
       } catch {
-        setTenderError('Could not load the selected tender details. You can still continue by filling tender reference manually.');
+        const message = 'Could not load the selected tender details. You can still continue by filling tender reference manually.';
+        setTenderError(message);
+        toast.warning(message);
       } finally {
         setTenderLoading(false);
       }
     };
 
     fetchTender();
-  }, [tenderId]);
+  }, [tenderId, toast]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -82,18 +84,16 @@ const TenderApplication = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
 
     if (!proposalDocument) {
       setLoading(false);
-      setError('Please upload your proposal document before submitting.');
+      toast.error('Please upload your proposal document before submitting.');
       return;
     }
 
     if (selectedTender && isTenderClosed(selectedTender)) {
       setLoading(false);
-      setError('This tender is closed for new applications.');
+      toast.error('This tender is closed for new applications.');
       return;
     }
 
@@ -110,14 +110,14 @@ const TenderApplication = () => {
 
       await applyForTender(payload);
 
-      setSuccess('Tender application submitted successfully. Our team will review and contact you.');
+      toast.success('Tender application submitted successfully. Our team will review and contact you.');
       setProposalDocument(null);
       setFormData({
         ...DEFAULT_FORM,
         roleInterested: selectedTender?.title || ''
       });
     } catch (submitError) {
-      setError(submitError?.response?.data?.message || 'Unable to submit application right now. Please try again.');
+      toast.error(submitError?.response?.data?.message || 'Unable to submit application right now. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -141,11 +141,6 @@ const TenderApplication = () => {
           <div className="mb-6 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-blue-900">
             Applying for: <span className="font-semibold">{selectedTender.title}</span>
           </div>
-        ) : null}
-
-        {error ? <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-700">{error}</p> : null}
-        {success ? (
-          <p className="mb-4 rounded-md border border-[var(--ngo-border)] bg-slate-50 px-4 py-3 text-slate-700">{success}</p>
         ) : null}
 
         <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">

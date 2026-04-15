@@ -3,6 +3,7 @@ import {
   createOrUpdateDonationSettings,
   getDonationSettingsAdmin
 } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const initialForm = {
   ngoName: '',
@@ -24,6 +25,7 @@ const initialForm = {
 };
 
 const ManageDonationSettings = () => {
+  const toast = useToast();
   const [formData, setFormData] = useState(initialForm);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -45,7 +47,7 @@ const ManageDonationSettings = () => {
       }));
     } catch (error) {
       console.error('Failed to load donation settings:', error);
-      alert('Failed to load donation settings');
+      toast.error('Failed to load donation settings');
     } finally {
       setLoading(false);
     }
@@ -53,7 +55,7 @@ const ManageDonationSettings = () => {
 
   useEffect(() => {
     fetchSettings();
-  }, []);
+  }, [toast]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,10 +105,10 @@ const ManageDonationSettings = () => {
       if (signatureInputRef.current) {
         signatureInputRef.current.value = '';
       }
-      alert('Donation settings saved successfully');
+      toast.success('Donation settings saved successfully');
     } catch (error) {
       console.error('Failed to save donation settings:', error);
-      alert(error?.response?.data?.message || 'Failed to save donation settings');
+      toast.error(error?.response?.data?.message || 'Failed to save donation settings');
     } finally {
       setSubmitting(false);
     }

@@ -7,8 +7,10 @@ import {
   deleteTender,
   uploadTenderDocument
 } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const ManageTenders = () => {
+  const toast = useToast();
   const [tenders, setTenders] = useState([]);
   const [formData, setFormData] = useState({ title: '', description: '', deadline: '', documents: '' });
   const [editing, setEditing] = useState(null);
@@ -62,7 +64,7 @@ const ManageTenders = () => {
       fetchTenders();
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.message || 'Failed to save tender');
+      toast.error(error?.response?.data?.message || 'Failed to save tender');
     } finally {
       setUploadingFile(false);
     }
@@ -92,6 +94,7 @@ const ManageTenders = () => {
       fetchTenders();
     } catch (error) {
       console.error(error);
+      toast.error('Failed to delete tender');
     }
   };
 

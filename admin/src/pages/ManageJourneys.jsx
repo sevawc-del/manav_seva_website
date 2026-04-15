@@ -5,6 +5,7 @@ import { getJourneys, createJourney, updateJourney, deleteJourney } from '../uti
 const ManageJourneys = () => {
   const [journeys, setJourneys] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingJourney, setEditingJourney] = useState(null);
   const [formData, setFormData] = useState({
@@ -31,6 +32,10 @@ const ManageJourneys = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (submitting) return;
+    setSubmitting(true);
+
     try {
       const data = {
         ...formData,
@@ -44,10 +49,12 @@ const ManageJourneys = () => {
         await createJourney(data);
       }
 
-      fetchJourneys();
+      await fetchJourneys();
       resetForm();
     } catch (error) {
       console.error('Error saving journey:', error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -63,13 +70,11 @@ const ManageJourneys = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this journey?')) {
-      try {
-        await deleteJourney(id);
-        fetchJourneys();
-      } catch (error) {
-        console.error('Error deleting journey:', error);
-      }
+    try {
+      await deleteJourney(id);
+      fetchJourneys();
+    } catch (error) {
+      console.error('Error deleting journey:', error);
     }
   };
 
@@ -212,9 +217,10 @@ const ManageJourneys = () => {
             <div className="flex space-x-2">
               <button
                 type="submit"
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                disabled={submitting}
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {editingJourney ? 'Update' : 'Create'}
+                {submitting ? (editingJourney ? 'Updating...' : 'Creating...') : (editingJourney ? 'Update' : 'Create')}
               </button>
               <button
                 type="button"

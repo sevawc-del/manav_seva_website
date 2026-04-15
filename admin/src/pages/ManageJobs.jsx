@@ -72,13 +72,11 @@ const ManageJobs = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this job?')) {
-      try {
-        await deleteJob(id);
-        fetchJobs();
-      } catch (error) {
-        console.error('Error deleting job:', error);
-      }
+    try {
+      await deleteJob(id);
+      fetchJobs();
+    } catch (error) {
+      console.error('Error deleting job:', error);
     }
   };
 

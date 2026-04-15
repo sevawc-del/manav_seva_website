@@ -1,10 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { login } from '../utils/api';
 import { AuthContext } from '../context/AuthContextValue';
+import { useToast } from '../context/ToastContext';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const { login: authLogin } = useContext(AuthContext);
+  const toast = useToast();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,7 +21,7 @@ const Login = () => {
       window.location.href = '/#/dashboard';
     } catch (error) {
       console.error(error);
-      alert('Login failed');
+      toast.error(error?.response?.data?.message || 'Login failed');
     }
   };
 

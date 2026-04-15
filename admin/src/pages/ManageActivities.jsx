@@ -10,8 +10,10 @@ import {
   uploadAdminActivityImage
 } from '../utils/api';
 import { createMarkdownImageCommandFilter } from '../utils/markdownImageUpload';
+import { useToast } from '../context/ToastContext';
 
 const ManageActivities = () => {
+  const toast = useToast();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -20,8 +22,11 @@ const ManageActivities = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
   const activityEditorCommandFilter = useMemo(
-    () => createMarkdownImageCommandFilter({ uploadImage: uploadAdminActivityImage }),
-    []
+    () => createMarkdownImageCommandFilter({
+      uploadImage: uploadAdminActivityImage,
+      onError: (message) => toast.error(message)
+    }),
+    [toast]
   );
   const [formData, setFormData] = useState({
     name: '',
@@ -82,7 +87,7 @@ const ManageActivities = () => {
       resetForm();
     } catch (error) {
       console.error('Failed to save activity:', error);
-      alert('Failed to save activity');
+      toast.error('Failed to save activity');
     } finally {
       setSubmitting(false);
     }
@@ -118,7 +123,7 @@ const ManageActivities = () => {
       await fetchActivities();
     } catch (error) {
       console.error('Failed to delete activity:', error);
-      alert('Failed to delete activity');
+      toast.error('Failed to delete activity');
     }
   };
 

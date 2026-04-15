@@ -14,6 +14,7 @@ import {
   deleteGeographicActivity,
   getGeographicActivities,
 } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const DEFAULT_ABOUT_US_FORM = {
   title: '',
@@ -92,6 +93,7 @@ const indianStatesAndDistricts = {
 };
 
 const ManageAbout = () => {
+  const toast = useToast();
   const formRef = useRef(null);
   const messageImageInputRef = useRef(null);
   const geographicImageInputRef = useRef(null);
@@ -136,7 +138,7 @@ const ManageAbout = () => {
       setter(imageUrl);
     } catch (error) {
       console.error(error);
-      alert('Failed to upload image');
+      toast.error('Failed to upload image');
     } finally {
       setUploadingImage(false);
     }
@@ -327,7 +329,7 @@ const ManageAbout = () => {
         console.log('Form data:', dataToSubmit);
         if (!dataToSubmit) {
           console.error('No form data available for submission');
-          alert('No form data available for submission');
+          toast.error('No form data available for submission');
           return;
         }
         if (activeTab === 'governance') {
@@ -363,7 +365,7 @@ const ManageAbout = () => {
           // Validate districts
           const invalidDistricts = districts.filter(d => !d.stateCode || !d.districtCode);
           if (invalidDistricts.length > 0) {
-            alert('Invalid district format. Please use format like State-District');
+            toast.error('Invalid district format. Please use format like State-District');
             return;
           }
           if (editingActivity) {
@@ -407,11 +409,11 @@ const ManageAbout = () => {
           }));
         }
 
-        alert('Data saved successfully');
+        toast.success('Data saved successfully');
       }
     } catch (error) {
       console.error(error);
-      alert('Failed to save data');
+      toast.error('Failed to save data');
     } finally {
       setSubmitting(false);
     }
@@ -430,10 +432,10 @@ const ManageAbout = () => {
       setMessages(res.data);
       setMessageForm({ name: '', position: '', displayOrder: '', message: '', image: '' });
       setEditingMessage(null);
-      alert('Message saved successfully');
+      toast.success('Message saved successfully');
     } catch (error) {
       console.error(error);
-      alert('Failed to save message');
+      toast.error('Failed to save message');
     }
   };
 
@@ -469,13 +471,13 @@ const ManageAbout = () => {
     if (window.confirm('Are you sure you want to delete this activity?')) {
       try {
         await deleteGeographicActivity(id);
-        alert('Activity deleted successfully');
+        toast.success('Activity deleted successfully');
         // Refresh activities
         const res = await getGeographicActivities();
         setExistingActivities(res.data);
       } catch (error) {
         console.error(error);
-        alert('Failed to delete activity');
+        toast.error('Failed to delete activity');
       }
     }
   };

@@ -5,6 +5,7 @@ import {
   updateSponsor,
   deleteSponsor
 } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const TIER_OPTIONS = [
   { value: 'strategic', label: 'Strategic' },
@@ -14,6 +15,7 @@ const TIER_OPTIONS = [
 ];
 
 const ManageSponsors = () => {
+  const toast = useToast();
   const [sponsors, setSponsors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -37,7 +39,7 @@ const ManageSponsors = () => {
       setSponsors(response.data || []);
     } catch (error) {
       console.error('Failed to fetch sponsors:', error);
-      alert('Failed to load sponsors');
+      toast.error('Failed to load sponsors');
     } finally {
       setLoading(false);
     }
@@ -70,13 +72,13 @@ const ManageSponsors = () => {
     if (submitting) return;
 
     if (!formData.name.trim()) {
-      alert('Name is required');
+      toast.error('Name is required');
       return;
     }
 
     const hasLogoUrl = formData.logo.trim().length > 0;
     if (!editingSponsor && !hasLogoUrl && !selectedFile) {
-      alert('Please add a logo URL or choose a logo file');
+      toast.error('Please add a logo URL or choose a logo file');
       return;
     }
 
@@ -103,7 +105,7 @@ const ManageSponsors = () => {
       resetForm();
     } catch (error) {
       console.error('Failed to save sponsor:', error);
-      alert(error?.response?.data?.message || 'Failed to save sponsor');
+      toast.error(error?.response?.data?.message || 'Failed to save sponsor');
     } finally {
       setSubmitting(false);
     }
@@ -137,7 +139,7 @@ const ManageSponsors = () => {
       }
     } catch (error) {
       console.error('Failed to delete sponsor:', error);
-      alert('Failed to delete sponsor');
+      toast.error('Failed to delete sponsor');
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { sendContactMessage, submitTestimonial } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -8,8 +9,7 @@ const Contact = () => {
     message: ''
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const toast = useToast();
 
   const [feedbackData, setFeedbackData] = useState({
     name: '',
@@ -20,8 +20,6 @@ const Contact = () => {
     consentToPublish: false
   });
   const [feedbackLoading, setFeedbackLoading] = useState(false);
-  const [feedbackError, setFeedbackError] = useState('');
-  const [feedbackSuccess, setFeedbackSuccess] = useState('');
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -34,15 +32,13 @@ const Contact = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
 
     try {
       await sendContactMessage(formData);
-      setSuccess('We will get back to you soon.');
+      toast.success('We will get back to you soon.');
       setFormData({ name: '', email: '', message: '' });
     } catch {
-      setError('Failed to send message. Please try again.');
+      toast.error('Failed to send message. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -59,12 +55,10 @@ const Contact = () => {
   const handleFeedbackSubmit = async (event) => {
     event.preventDefault();
     setFeedbackLoading(true);
-    setFeedbackError('');
-    setFeedbackSuccess('');
 
     try {
       await submitTestimonial(feedbackData);
-      setFeedbackSuccess('Thank you for your feedback. It has been submitted for review.');
+      toast.success('Thank you for your feedback. It has been submitted for review.');
       setFeedbackData({
         name: '',
         email: '',
@@ -74,7 +68,7 @@ const Contact = () => {
         consentToPublish: false
       });
     } catch {
-      setFeedbackError('Failed to submit feedback. Please try again.');
+      toast.error('Failed to submit feedback. Please try again.');
     } finally {
       setFeedbackLoading(false);
     }
@@ -97,17 +91,6 @@ const Contact = () => {
           </div>
 
           <div className="space-y-4 p-4 md:p-5">
-            {error ? (
-              <div className="rounded-lg border border-[var(--ngo-border)] bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                {error}
-              </div>
-            ) : null}
-            {success ? (
-              <div className="rounded-lg border border-[var(--ngo-border)] bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                {success}
-              </div>
-            ) : null}
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="name" className="mb-1.5 block text-sm font-semibold text-slate-700">
@@ -172,17 +155,6 @@ const Contact = () => {
           </div>
 
           <div className="space-y-4 p-4 md:p-5">
-            {feedbackError ? (
-              <div className="rounded-lg border border-[var(--ngo-border)] bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                {feedbackError}
-              </div>
-            ) : null}
-            {feedbackSuccess ? (
-              <div className="rounded-lg border border-[var(--ngo-border)] bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                {feedbackSuccess}
-              </div>
-            ) : null}
-
             <form onSubmit={handleFeedbackSubmit} className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>

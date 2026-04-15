@@ -2,6 +2,10 @@ import React from 'react';
 
 const DataTable = ({ data, columns, onEdit, onDelete }) => {
   const showActions = typeof onEdit === 'function' && typeof onDelete === 'function';
+  const handleDelete = (itemId) => {
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
+    onDelete(itemId);
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -23,7 +27,7 @@ const DataTable = ({ data, columns, onEdit, onDelete }) => {
               {showActions && (
                 <td className="py-2 px-4 border-b">
                   <button onClick={() => onEdit(item)} className="bg-blue-500 text-white px-2 py-1 rounded mr-2">Edit</button>
-                  <button onClick={() => onDelete(item._id)} className="bg-red-600 text-white px-2 py-1 rounded">Delete</button>
+                  <button onClick={() => handleDelete(item._id)} className="bg-red-600 text-white px-2 py-1 rounded">Delete</button>
                 </td>
               )}
             </tr>

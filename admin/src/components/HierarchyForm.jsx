@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useToast } from '../context/ToastContext';
 
 const getInitials = (name = '') =>
   String(name)
@@ -50,6 +51,7 @@ const updateNodeAtPath = (nodes, path, updater) => {
 const HierarchyNode = ({ node, onChange, onAddChild, onRemove, path, onUploadImage, level = 0 }) => {
   const imageInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const toast = useToast();
 
   const hasParent = path.length > 1;
   const imageUrl = String(node?.image || '').trim();
@@ -110,7 +112,7 @@ const HierarchyNode = ({ node, onChange, onAddChild, onRemove, path, onUploadIma
                 handleFieldChange('image', uploadedImageUrl);
               } catch (error) {
                 console.error(error);
-                alert('Failed to upload image');
+                toast.error(error?.response?.data?.message || 'Failed to upload image');
               } finally {
                 setUploading(false);
                 e.target.value = '';
