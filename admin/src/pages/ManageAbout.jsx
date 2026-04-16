@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import HierarchyForm from '../components/HierarchyForm';
+import OrgChartEditor from '../components/OrgChartEditor';
 import {
   getAboutUs,
   createOrUpdateAboutUs,
@@ -44,6 +45,84 @@ const DEFAULT_GOVERNANCE_POLICY_TIERS = [
 
 const createDefaultGovernancePolicyTiers = () =>
   DEFAULT_GOVERNANCE_POLICY_TIERS.map((tier) => ({ ...tier }));
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+const toSafeNumber = (value, fallback) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const toSafeColor = (value) => {
+  const candidate = String(value || '').trim();
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(candidate) ? candidate : '#dbeafe';
+};
+
+const createDefaultOrgChart = () => ({
+  enabled: false,
+  width: 1400,
+  height: 900,
+  groups: [],
+  nodes: [],
+  edges: []
+});
+
+const normalizeOrgChart = (orgChart) => {
+  const source = orgChart && typeof orgChart === 'object' ? orgChart : {};
+  const width = clamp(Math.round(toSafeNumber(source.width, 1400)), 900, 3000);
+  const height = clamp(Math.round(toSafeNumber(source.height, 900)), 600, 2400);
+
+  const groups = Array.isArray(source.groups)
+    ? source.groups.map((group, index) => ({
+      id: String(group?.id || `group-${index}`),
+      name: String(group?.name || '').trim(),
+      color: toSafeColor(group?.color),
+      x: clamp(Math.round(toSafeNumber(group?.x, 40)), 0, width - 100),
+      y: clamp(Math.round(toSafeNumber(group?.y, 40)), 0, height - 80),
+      width: clamp(Math.round(toSafeNumber(group?.width, 360)), 200, width),
+      height: clamp(Math.round(toSafeNumber(group?.height, 220)), 140, height)
+    }))
+    : [];
+
+  const nodes = Array.isArray(source.nodes)
+    ? source.nodes.map((node, index) => ({
+      id: String(node?.id || `node-${index}`),
+      name: String(node?.name || '').trim(),
+      position: String(node?.position || '').trim(),
+      experience: String(node?.experience || '').trim(),
+      image: String(node?.image || '').trim(),
+      groupId: String(node?.groupId || ''),
+      x: clamp(Math.round(toSafeNumber(node?.x, 80)), 0, width - 220),
+      y: clamp(Math.round(toSafeNumber(node?.y, 80)), 0, height - 110)
+    }))
+    : [];
+
+  const nodeIdSet = new Set(nodes.map((node) => node.id));
+
+  const edges = Array.isArray(source.edges)
+    ? source.edges
+      .map((edge, index) => ({
+        id: String(edge?.id || `edge-${index}`),
+        source: String(edge?.source || ''),
+        target: String(edge?.target || ''),
+        relation: ['reports_to', 'advises', 'dotted_line', 'supports'].includes(edge?.relation)
+          ? edge.relation
+          : 'reports_to',
+        label: String(edge?.label || '').trim()
+      }))
+      .filter((edge) => edge.source && edge.target && edge.source !== edge.target)
+      .filter((edge) => nodeIdSet.has(edge.source) && nodeIdSet.has(edge.target))
+    : [];
+
+  return {
+    enabled: source.enabled === true || source.enabled === 'true',
+    width,
+    height,
+    groups,
+    nodes,
+    edges
+  };
+};
 
 const normalizeGovernancePolicyTiers = (tiers) => {
   if (!Array.isArray(tiers) || tiers.length === 0) {
@@ -108,6 +187,7 @@ const ManageAbout = () => {
   const [governanceFormData, setGovernanceFormData] = useState({
     title: '',
     hierarchy: createDefaultGovernanceHierarchy(),
+    orgChart: createDefaultOrgChart(),
     needTitle: 'Need Of Governance',
     needContent: '',
     policyTitle: 'Making Policies & Decisions',
@@ -274,6 +354,7 @@ const ManageAbout = () => {
               setGovernanceFormData({
                 title: data?.title || '',
                 hierarchy: fetchedHierarchy,
+                orgChart: normalizeOrgChart(data?.orgChart || createDefaultOrgChart()),
                 needTitle: data?.needTitle || data?.ethicsTitle || 'Need Of Governance',
                 needContent: data?.needContent || data?.ethicsContent || '',
                 policyTitle: data?.policyTitle || 'Making Policies & Decisions',
@@ -343,6 +424,7 @@ const ManageAbout = () => {
 
           const governancePayload = {
             ...governanceFormData,
+            orgChart: normalizeOrgChart(governanceFormData.orgChart || createDefaultOrgChart()),
             needTitle: String(governanceFormData.needTitle || '').trim(),
             needContent: String(governanceFormData.needContent || '').trim(),
             policyTitle: String(governanceFormData.policyTitle || '').trim(),
@@ -776,6 +858,14 @@ const ManageAbout = () => {
             />
           </div>
 
+          <div className="mb-6">
+            <OrgChartEditor
+              value={governanceFormData.orgChart}
+              onUploadImage={uploadAboutImage}
+              onChange={(orgChart) => setGovernanceFormData({ ...governanceFormData, orgChart })}
+            />
+          </div>
+
           <div className="mb-6 rounded border bg-gray-50 p-4">
             <h3 className="mb-3 text-lg font-semibold">Need Of Governance</h3>
             <input
@@ -888,6 +978,9 @@ const ManageAbout = () => {
           />
           {activeTab === 'about-us' && (
             <>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Mission
+              </label>
               <textarea
                 placeholder="Mission"
                 value={formData[activeTab]?.mission || ''}
@@ -895,6 +988,9 @@ const ManageAbout = () => {
                 className="w-full p-2 mb-4 border rounded"
                 rows={3}
               />
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Vision
+              </label>
               <textarea
                 placeholder="Vision"
                 value={formData[activeTab]?.vision || ''}

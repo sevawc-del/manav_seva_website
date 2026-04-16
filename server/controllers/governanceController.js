@@ -1,5 +1,14 @@
 const Governance = require('../models/Governance');
 
+const createDefaultOrgChart = () => ({
+  enabled: false,
+  width: 1400,
+  height: 900,
+  groups: [],
+  nodes: [],
+  edges: []
+});
+
 // Get Governance
 const getGovernance = async (req, res) => {
   try {
@@ -8,6 +17,7 @@ const getGovernance = async (req, res) => {
       return res.json({
         title: '',
         hierarchy: [],
+        orgChart: createDefaultOrgChart(),
         needTitle: '',
         needContent: '',
         policyTitle: '',
@@ -17,6 +27,9 @@ const getGovernance = async (req, res) => {
         ethicsContent: '',
         ethicsPoints: []
       });
+    }
+    if (!governance.orgChart) {
+      governance.orgChart = createDefaultOrgChart();
     }
     return res.json(governance);
   } catch (error) {

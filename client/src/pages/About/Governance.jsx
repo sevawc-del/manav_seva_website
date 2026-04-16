@@ -9,7 +9,7 @@ const getInitials = (name = '') =>
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() || '')
-    .join('') || 'NA';
+    .join('');
 
 const countHierarchyMembers = (nodes = []) =>
   nodes.reduce(
@@ -26,6 +26,218 @@ const DEFAULT_POLICY_TIER_TITLES = [
   'Executive Board',
   'Departments & Divisions'
 ];
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+const toSafeNumber = (value, fallback) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const normalizeOrgChart = (orgChart) => {
+  const source = orgChart && typeof orgChart === 'object' ? orgChart : {};
+  const width = clamp(Math.round(toSafeNumber(source.width, 1400)), 900, 3000);
+  const height = clamp(Math.round(toSafeNumber(source.height, 900)), 600, 2400);
+
+  const groups = Array.isArray(source.groups)
+    ? source.groups.map((group, index) => ({
+      id: String(group?.id || `group-${index}`),
+      name: String(group?.name || '').trim(),
+      color: String(group?.color || '#dbeafe').trim() || '#dbeafe',
+      x: clamp(Math.round(toSafeNumber(group?.x, 40)), 0, width - 100),
+      y: clamp(Math.round(toSafeNumber(group?.y, 40)), 0, height - 80),
+      width: clamp(Math.round(toSafeNumber(group?.width, 360)), 200, width),
+      height: clamp(Math.round(toSafeNumber(group?.height, 220)), 140, height)
+    }))
+    : [];
+
+  const nodes = Array.isArray(source.nodes)
+    ? source.nodes.map((node, index) => ({
+      id: String(node?.id || `node-${index}`),
+      name: String(node?.name || '').trim(),
+      position: String(node?.position || '').trim(),
+      experience: String(node?.experience || '').trim(),
+      image: String(node?.image || '').trim(),
+      x: clamp(Math.round(toSafeNumber(node?.x, 80)), 0, width - 220),
+      y: clamp(Math.round(toSafeNumber(node?.y, 80)), 0, height - 110)
+    }))
+      .filter((node) => node.name || node.position || node.experience || node.image)
+    : [];
+
+  const nodeIdSet = new Set(nodes.map((node) => node.id));
+
+  const edges = Array.isArray(source.edges)
+    ? source.edges
+      .map((edge, index) => ({
+        id: String(edge?.id || `edge-${index}`),
+        source: String(edge?.source || ''),
+        target: String(edge?.target || ''),
+        relation: ['reports_to', 'advises', 'dotted_line', 'supports'].includes(edge?.relation)
+          ? edge.relation
+          : 'reports_to',
+        label: String(edge?.label || '').trim()
+      }))
+      .filter((edge) => edge.source && edge.target && edge.source !== edge.target)
+      .filter((edge) => nodeIdSet.has(edge.source) && nodeIdSet.has(edge.target))
+    : [];
+
+  return {
+    enabled: source.enabled === true || source.enabled === 'true',
+    width,
+    height,
+    groups,
+    nodes,
+    edges
+  };
+};
+
+const relationStroke = (relation) => {
+  if (relation === 'dotted_line') {
+    return { color: '#64748b', dash: '6 6' };
+  }
+  if (relation === 'advises') {
+    return { color: '#0284c7', dash: '10 6' };
+  }
+  if (relation === 'supports') {
+    return { color: '#059669', dash: 'none' };
+  }
+  return { color: '#1d4ed8', dash: 'none' };
+};
+
+const GovernanceOrgChart = ({ orgChart }) => (
+  <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+    <div className="overflow-auto">
+      <div
+        className="relative"
+        style={{
+          width: orgChart.width,
+          height: orgChart.height,
+          backgroundImage:
+            'linear-gradient(to right, rgba(148,163,184,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,184,0.12) 1px, transparent 1px)',
+          backgroundSize: '24px 24px'
+        }}
+      >
+        <svg className="absolute inset-0 h-full w-full pointer-events-none">
+          <defs>
+            <marker
+              id="governance-orgchart-arrow"
+              markerWidth="10"
+              markerHeight="10"
+              refX="9"
+              refY="3"
+              orient="auto"
+            >
+              <path d="M0,0 L0,6 L9,3 z" fill="#334155" />
+            </marker>
+          </defs>
+
+          {orgChart.edges.map((edge) => {
+            const source = orgChart.nodes.find((node) => node.id === edge.source);
+            const target = orgChart.nodes.find((node) => node.id === edge.target);
+            if (!source || !target) return null;
+
+            const fromX = source.x + 110;
+            const fromY = source.y + 55;
+            const toX = target.x + 110;
+            const toY = target.y + 55;
+            const middleX = (fromX + toX) / 2;
+            const middleY = (fromY + toY) / 2;
+            const stroke = relationStroke(edge.relation);
+
+            return (
+              <g key={edge.id}>
+                <line
+                  x1={fromX}
+                  y1={fromY}
+                  x2={toX}
+                  y2={toY}
+                  stroke={stroke.color}
+                  strokeWidth="2"
+                  strokeDasharray={stroke.dash}
+                  markerEnd="url(#governance-orgchart-arrow)"
+                />
+                {edge.label ? (
+                  <>
+                    <rect
+                      x={middleX - 50}
+                      y={middleY - 10}
+                      width="100"
+                      height="18"
+                      fill="rgba(255,255,255,0.95)"
+                      rx="4"
+                    />
+                    <text
+                      x={middleX}
+                      y={middleY + 3}
+                      textAnchor="middle"
+                      fontSize="11"
+                      fill="#1e293b"
+                    >
+                      {edge.label}
+                    </text>
+                  </>
+                ) : null}
+              </g>
+            );
+          })}
+        </svg>
+
+        {orgChart.groups.map((group) => (
+          <div
+            key={group.id}
+            className="absolute rounded-lg border-2 border-dashed border-slate-300 p-2"
+            style={{
+              left: group.x,
+              top: group.y,
+              width: group.width,
+              height: group.height,
+              backgroundColor: `${group.color}66`
+            }}
+          >
+            {group.name ? (
+              <div className="inline-flex rounded bg-white/90 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                {group.name}
+              </div>
+            ) : null}
+          </div>
+        ))}
+
+        {orgChart.nodes.map((node) => (
+          <article
+            key={node.id}
+            className="absolute overflow-hidden rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
+            style={{ left: node.x, top: node.y, width: 220, minHeight: 110 }}
+          >
+            <div className="flex items-start gap-3">
+              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100">
+                {node.image ? (
+                  <img src={node.image} alt={node.name || ''} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-slate-600">
+                    {node.name ? getInitials(node.name) : null}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0">
+                {node.name ? (
+                  <h4 className="truncate text-sm font-semibold text-slate-900">{node.name}</h4>
+                ) : null}
+                {node.position ? (
+                  <p className="mt-0.5 truncate text-xs font-medium uppercase tracking-wide text-blue-700">
+                    {node.position}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+            {node.experience ? (
+              <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">{node.experience}</p>
+            ) : null}
+          </article>
+        ))}
+      </div>
+    </div>
+  </div>
+);
 
 const GovernanceTreeNode = ({ node, level = 0 }) => {
   const hasChildren = Array.isArray(node?.children) && node.children.length > 0;
@@ -57,26 +269,28 @@ const GovernanceTreeNode = ({ node, level = 0 }) => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
           <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100 sm:h-28 sm:w-28">
             {imageUrl ? (
-              <img src={imageUrl} alt={name || 'Person'} className="h-full w-full object-cover" />
+              <img src={imageUrl} alt={name || ''} className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-100 to-slate-100 text-base font-semibold text-slate-700">
-                {initials}
+                {name ? initials : null}
               </div>
             )}
           </div>
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-blue-700">
-                {position || 'Team Member'}
-              </p>
+              {position ? (
+                <p className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-blue-700">
+                  {position}
+                </p>
+              ) : null}
               {level === 0 ? (
                 <span className="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
                   Leadership
                 </span>
               ) : null}
             </div>
-            <h3 className="mt-2 text-lg font-semibold text-slate-900">{name || 'Name Pending'}</h3>
+            {name ? <h3 className="mt-2 text-lg font-semibold text-slate-900">{name}</h3> : null}
             {experience ? <p className="mt-1 text-sm leading-6 text-slate-600">{experience}</p> : null}
           </div>
         </div>
@@ -129,6 +343,8 @@ const Governance = () => {
   }
 
   const hierarchy = Array.isArray(data?.hierarchy) ? data.hierarchy : [];
+  const orgChart = normalizeOrgChart(data?.orgChart);
+  const useOrgChart = orgChart.enabled && orgChart.nodes.length > 0;
   const needTitle = String(data?.needTitle || data?.ethicsTitle || 'Need Of Governance').trim();
   const needContent = String(data?.needContent || data?.ethicsContent || '').trim();
   const policyTitle = String(data?.policyTitle || 'Making Policies & Decisions').trim();
@@ -158,7 +374,7 @@ const Governance = () => {
         })
         .filter((tier) => tier.code || tier.title || tier.content)
       : legacyPolicyTiers;
-  const memberCount = countHierarchyMembers(hierarchy);
+  const memberCount = useOrgChart ? orgChart.nodes.length : countHierarchyMembers(hierarchy);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -175,7 +391,9 @@ const Governance = () => {
         <section className="overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-md">
           <div className="bg-gradient-to-r from-[var(--ngo-primary)] to-[var(--ngo-primary-strong)] px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-xl font-semibold text-white">Organizational Hierarchy</h2>
+              <h2 className="text-xl font-semibold text-white">
+                {useOrgChart ? 'Organizational Organogram' : 'Organizational Hierarchy'}
+              </h2>
               <span className="rounded-full bg-white/25 px-2.5 py-1 text-xs font-semibold text-white">
                 {memberCount} {memberCount === 1 ? 'Member' : 'Members'}
               </span>
@@ -183,7 +401,9 @@ const Governance = () => {
           </div>
 
           <div className="p-4 md:p-5">
-            {hierarchy.length > 0 ? (
+            {useOrgChart ? (
+              <GovernanceOrgChart orgChart={orgChart} />
+            ) : hierarchy.length > 0 ? (
               <ul className="space-y-4">
                 {hierarchy.map((node, index) => (
                   <GovernanceTreeNode key={node?.id || `root-${index}`} node={node} />
