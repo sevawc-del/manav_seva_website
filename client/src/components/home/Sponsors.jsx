@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { optimizeCloudinaryImage } from '../../utils/imageUrl';
 
 const FALLBACK_SPONSOR_IMAGE = 'https://via.placeholder.com/220x80?text=Sponsor';
-const SPONSORS_MARQUEE_DUPLICATE_LIMIT = 12;
 
 const SponsorCard = ({ item, allowHover = false }) => {
   const imageClassName = allowHover
@@ -51,9 +50,8 @@ const SponsorsMarquee = ({ items = [] }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const hasLoop = items.length > 1;
-  const canDuplicate = items.length <= SPONSORS_MARQUEE_DUPLICATE_LIMIT;
   const shouldAnimate = hasLoop && !prefersReducedMotion;
-  const shouldDuplicate = shouldAnimate && canDuplicate;
+  const shouldDuplicate = shouldAnimate;
   const durationSeconds = Math.max(4, items.length * 2.8);
 
   useEffect(() => {

@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const {
   getAllNews,
+  getNewsSummary,
   getNewsById,
   getNewsBySlug,
   createNews,
@@ -23,6 +24,7 @@ const handleUploadError = (req, res, next) => {
 };
 
 router.get('/', getAllNews);
+router.get('/summary', getNewsSummary);
 router.get('/slug/:slug', getNewsBySlug);
 router.post('/upload-image', protect, admin, handleUploadError, uploadNewsImage);
 router.get('/:id', getNewsById);

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getEvents, getNews } from '../utils/api';
+import { getEvents, getNewsSummary } from '../utils/api';
 import Loader from '../components/Loader';
 import { stripRichText } from '../utils/richContent';
 import { optimizeCloudinaryImage } from '../utils/imageUrl';
@@ -70,7 +70,7 @@ const NewsEvents = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [newsResponse, eventResponse] = await Promise.all([getNews(), getEvents()]);
+        const [newsResponse, eventResponse] = await Promise.all([getNewsSummary(), getEvents()]);
         setNewsItems(newsResponse.data || []);
         setEventItems(eventResponse.data || []);
       } catch (err) {
@@ -212,7 +212,7 @@ const NewsEvents = () => {
                       </div>
                       <h3 className="text-base font-semibold text-gray-900 sm:text-lg">{item.title}</h3>
                       <p className="text-sm leading-6 text-gray-600">
-                        {truncateText(stripRichText(item.content || ''), 160)}
+                        {truncateText(item.excerpt || 'Open to read the full update.', 160)}
                       </p>
                       <span className={`inline-flex text-sm font-semibold ${activeTheme.readMoreText}`}>
                         Read more

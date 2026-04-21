@@ -190,7 +190,7 @@ const Journey = ({ loading = false, journeys = [] }) => {
                         className="relative grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-x-3"
                       >
                         {isLeft ? (
-                          <div className="col-start-1">
+                          <div className="relative z-20 col-start-1">
                             <JourneyCard
                               journey={journey}
                               theme={theme}
@@ -206,7 +206,7 @@ const Journey = ({ loading = false, journeys = [] }) => {
                           <div className="col-start-1" />
                         )}
 
-                        <div className="relative col-start-2 flex items-start justify-center pt-7">
+                        <div className="relative z-10 col-start-2 flex items-start justify-center pt-7">
                           <span className={`h-4 w-4 rounded-full border-4 border-white shadow ${theme.dot}`} />
                           <span
                             className={`absolute top-[2.05rem] h-px w-6 bg-slate-300 ${
@@ -218,7 +218,7 @@ const Journey = ({ loading = false, journeys = [] }) => {
                         {isLeft ? (
                           <div className="col-start-3" />
                         ) : (
-                          <div className="col-start-3">
+                          <div className="relative z-20 col-start-3">
                             <JourneyCard
                               journey={journey}
                               theme={theme}
@@ -271,7 +271,7 @@ const Journey = ({ loading = false, journeys = [] }) => {
                         />
                       </div>
 
-                      <div className="absolute left-1/2 top-1/2 z-30 -translate-x-1/2 -translate-y-1/2">
+                      <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
                         <span className={`block h-4 w-4 rounded-full border-4 border-white shadow ${theme.dot}`} />
                       </div>
                     </div>

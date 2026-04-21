@@ -16,6 +16,7 @@ export const getSliders = () => api.get('/sliders');
 
 // News
 export const getNews = () => api.get('/news');
+export const getNewsSummary = () => api.get('/news/summary');
 export const getNewsById = (id) => api.get(`/news/${id}`);
 export const getNewsBySlug = (slug) => api.get(`/news/slug/${slug}`);
 

@@ -60,10 +60,44 @@ const deleteCloudinaryImage = async (imageUrl) => {
   }
 };
 
+const stripNewsMarkup = (value = '') =>
+  String(value)
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[`*_>#~]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const buildNewsExcerpt = (value = '', maxLength = 170) => {
+  const cleaned = stripNewsMarkup(value);
+  if (!cleaned) return '';
+  return cleaned.length > maxLength
+    ? `${cleaned.slice(0, maxLength).trimEnd()}...`
+    : cleaned;
+};
+
 const getAllNews = async (req, res) => {
   try {
     const news = await News.find();
     res.json(news);
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+const getNewsSummary = async (req, res) => {
+  try {
+    const news = await News.find()
+      .select('_id slug title date image content')
+      .sort({ date: -1, _id: -1 })
+      .lean();
+
+    const summary = news.map(({ content, ...item }) => ({
+      ...item,
+      excerpt: buildNewsExcerpt(content)
+    }));
+
+    res.json(summary);
   } catch (error) {
     res.status(500).json({ message: 'Internal Server Error' });
   }
@@ -195,6 +229,7 @@ const deleteNews = async (req, res) => {
 
 module.exports = {
   getAllNews,
+  getNewsSummary,
   getNewsById,
   getNewsBySlug,
   createNews,

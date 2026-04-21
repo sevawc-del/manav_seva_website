@@ -11,7 +11,7 @@ import {
   getEvents,
   getGallery,
   getJourneys,
-  getNews,
+  getNewsSummary,
   getSiteSettingsCached,
   getSponsors,
   getTestimonials
@@ -26,8 +26,6 @@ const HOME_ACTIVITIES_LIMIT_TABLET = 4;
 const HOME_ACTIVITIES_LIMIT_MOBILE = 3;
 const HOME_EVENTS_LIMIT = 4;
 const HOME_GALLERY_ITEMS_PER_ROW = 10;
-const GALLERY_MARQUEE_DUPLICATE_LIMIT = 5;
-const NEWS_MARQUEE_DUPLICATE_LIMIT = 5;
 const NEWS_MARQUEE_MIN_DURATION = 8;
 const NEWS_MARQUEE_PER_ITEM_DURATION = 2;
 const HOME_GEO_STATUS_CURRENT = 'currently_working';
@@ -128,9 +126,8 @@ const GalleryAutoRow = ({ items, direction = 'left' }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const hasLoop = items.length > 1;
-  const canDuplicate = items.length <= GALLERY_MARQUEE_DUPLICATE_LIMIT;
   const shouldAnimate = hasLoop && !prefersReducedMotion;
-  const shouldDuplicate = shouldAnimate && canDuplicate;
+  const shouldDuplicate = shouldAnimate;
   const durationSeconds = Math.max(6, items.length * 3.8);
   const animationName = direction === 'right'
     ? shouldDuplicate
@@ -212,9 +209,8 @@ const VerticalNewsTicker = ({ items = [] }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const hasLoop = items.length > 1;
-  const canDuplicate = items.length <= NEWS_MARQUEE_DUPLICATE_LIMIT;
   const shouldAnimate = hasLoop && !prefersReducedMotion;
-  const shouldDuplicate = shouldAnimate && canDuplicate;
+  const shouldDuplicate = shouldAnimate;
   const durationSeconds = Math.max(
     NEWS_MARQUEE_MIN_DURATION,
     items.length * NEWS_MARQUEE_PER_ITEM_DURATION
@@ -381,7 +377,7 @@ const Home = () => {
 
     const fetchNewsItems = async () => {
       try {
-        const response = await getNews();
+        const response = await getNewsSummary();
         setNewsItems(response.data || []);
       } catch (error) {
         console.error('Error fetching news:', error);
@@ -1091,7 +1087,7 @@ const Home = () => {
                           {formatDate(featuredNews.date || featuredNews.createdAt)}
                         </p>
                         <h4 className="mt-1 text-xl font-semibold text-gray-900">{featuredNews.title}</h4>
-                        <p className="mt-2 text-sm text-gray-600">{truncateText(stripRichText(featuredNews.content || ''), 130)}</p>
+                        <p className="mt-2 text-sm text-gray-600">Open this update to read the full story.</p>
                       </div>
                     </Link>
                   )}
