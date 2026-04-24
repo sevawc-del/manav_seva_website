@@ -91,6 +91,24 @@ client/public/*
 !client/public/maps/**
 !client/public/robots.txt
 !client/public/sitemap.xml
+!client/public/favicon.ico
+!client/public/favicon-16x16.png
+!client/public/favicon-32x32.png
+!client/public/apple-touch-icon.png
+!client/public/android-chrome-192x192.png
+!client/public/android-chrome-512x512.png
+!client/public/site.webmanifest
+
+# Keep only intentional favicon assets from admin/public tracked
+!admin/public/
+admin/public/*
+!admin/public/favicon.ico
+!admin/public/favicon-16x16.png
+!admin/public/favicon-32x32.png
+!admin/public/apple-touch-icon.png
+!admin/public/android-chrome-192x192.png
+!admin/public/android-chrome-512x512.png
+!admin/public/site.webmanifest
 
 # Storybook build outputs
 .out
