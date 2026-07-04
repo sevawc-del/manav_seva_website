@@ -1,4 +1,11 @@
 import React from 'react';
+import { applyImageFallback, createImagePlaceholder } from '../../utils/imageUrl';
+
+const SUCCESS_STORY_IMAGE_PLACEHOLDER = createImagePlaceholder({
+  width: 100,
+  height: 100,
+  text: 'Success Story'
+});
 
 const WomenEmpowerment = () => {
   const programs = [
@@ -106,7 +113,7 @@ const WomenEmpowerment = () => {
                   alt={story.name}
                   className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
                   onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/100x100?text=Success+Story';
+                    applyImageFallback(e, SUCCESS_STORY_IMAGE_PLACEHOLDER);
                   }}
                 />
                 <h3 className="text-lg font-medium mb-2">{story.name}</h3>

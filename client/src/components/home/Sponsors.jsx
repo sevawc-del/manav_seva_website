@@ -1,12 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { optimizeCloudinaryImage } from '../../utils/imageUrl';
+import {
+  applyImageFallback,
+  createImagePlaceholder,
+  optimizeCloudinaryImage
+} from '../../utils/imageUrl';
 
-const FALLBACK_SPONSOR_IMAGE = 'https://via.placeholder.com/220x80?text=Sponsor';
+const FALLBACK_SPONSOR_IMAGE = createImagePlaceholder({
+  width: 220,
+  height: 80,
+  text: 'Sponsor'
+});
 
 const SponsorCard = ({ item, allowHover = false }) => {
   const imageClassName = allowHover
     ? 'h-14 md:h-16 w-auto object-contain transition'
     : 'h-14 md:h-16 w-auto object-contain';
+  const sponsorImage =
+    optimizeCloudinaryImage(item.logo, { width: 440, height: 160, crop: 'fit' }) ||
+    FALLBACK_SPONSOR_IMAGE;
 
   if (item.website) {
     return (
@@ -17,13 +28,13 @@ const SponsorCard = ({ item, allowHover = false }) => {
         className="h-24 shrink-0 px-5 flex items-center justify-center"
       >
         <img
-          src={optimizeCloudinaryImage(item.logo, { width: 440, height: 160, crop: 'fit' }) || item.logo}
+          src={sponsorImage}
           alt={item.name}
           className={imageClassName}
           loading="lazy"
           decoding="async"
           onError={(e) => {
-            e.target.src = FALLBACK_SPONSOR_IMAGE;
+            applyImageFallback(e, FALLBACK_SPONSOR_IMAGE);
           }}
         />
       </a>
@@ -33,13 +44,13 @@ const SponsorCard = ({ item, allowHover = false }) => {
   return (
     <div className="h-24 shrink-0 px-5 flex items-center justify-center">
       <img
-        src={optimizeCloudinaryImage(item.logo, { width: 440, height: 160, crop: 'fit' }) || item.logo}
+        src={sponsorImage}
         alt={item.name}
         className={imageClassName}
         loading="lazy"
         decoding="async"
         onError={(e) => {
-          e.target.src = FALLBACK_SPONSOR_IMAGE;
+          applyImageFallback(e, FALLBACK_SPONSOR_IMAGE);
         }}
       />
     </div>

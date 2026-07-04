@@ -3,6 +3,17 @@ import { Link, useParams } from 'react-router-dom';
 import { getEventBySlug } from '../utils/api';
 import Loader from '../components/Loader';
 import MarkdownContent from '../components/MarkdownContent';
+import {
+  applyImageFallback,
+  createImagePlaceholder,
+  optimizeCloudinaryImage
+} from '../utils/imageUrl';
+
+const EVENT_IMAGE_PLACEHOLDER = createImagePlaceholder({
+  width: 1200,
+  height: 600,
+  text: 'Event Image'
+});
 
 const EventDetail = () => {
   const { slug } = useParams();
@@ -51,11 +62,14 @@ const EventDetail = () => {
 
       <article className="max-w-4xl mx-auto bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
         <img
-          src={eventItem.image || 'https://via.placeholder.com/1200x600?text=Event+Image'}
+          src={
+            optimizeCloudinaryImage(eventItem.image, { width: 1200, height: 600, crop: 'fill' }) ||
+            EVENT_IMAGE_PLACEHOLDER
+          }
           alt={eventItem.title}
           className="w-full h-64 md:h-96 object-cover"
           onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/1200x600?text=Event+Image';
+            applyImageFallback(e, EVENT_IMAGE_PLACEHOLDER);
           }}
         />
         <div className="p-6 md:p-8">

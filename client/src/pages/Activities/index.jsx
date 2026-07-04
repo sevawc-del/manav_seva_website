@@ -3,7 +3,11 @@ import { Link } from 'react-router-dom';
 import { getAdminActivities } from '../../utils/api';
 import Loader from '../../components/Loader';
 import { stripRichText } from '../../utils/richContent';
-import { optimizeCloudinaryImage } from '../../utils/imageUrl';
+import {
+  ACTIVITY_IMAGE_PLACEHOLDER,
+  applyImageFallback,
+  optimizeCloudinaryImage
+} from '../../utils/imageUrl';
 
 const ACTIVITY_PATHWAY_WORD_LIMIT = 24;
 
@@ -193,7 +197,7 @@ const Activities = () => {
               width: 960,
               height: 640,
               crop: 'fill'
-            }) || 'https://via.placeholder.com/600x360?text=Activity+Image';
+            }) || ACTIVITY_IMAGE_PLACEHOLDER;
 
           return (
             <section
@@ -217,7 +221,7 @@ const Activities = () => {
                       alt={activity?.name || 'Activity'}
                       className="h-52 w-full object-cover"
                       onError={(event) => {
-                        event.target.src = 'https://via.placeholder.com/600x360?text=Activity+Image';
+                        applyImageFallback(event, ACTIVITY_IMAGE_PLACEHOLDER);
                       }}
                     />
                   </div>

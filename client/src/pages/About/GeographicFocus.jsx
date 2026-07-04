@@ -1,7 +1,11 @@
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { getGeographicActivities, getGeographicActivityPresence } from '../../utils/api';
 import Loader from '../../components/Loader';
-import { optimizeCloudinaryImage } from '../../utils/imageUrl';
+import {
+  ACTIVITY_IMAGE_PLACEHOLDER,
+  applyImageFallback,
+  optimizeCloudinaryImage
+} from '../../utils/imageUrl';
 
 const IndiaMap = lazy(() => import('../../components/IndiaMap'));
 
@@ -154,14 +158,14 @@ const GeographicFocus = () => {
                   <img
                     src={
                       optimizeCloudinaryImage(selectedActivity.image, { width: 960, height: 540, crop: 'fill' }) ||
-                      'https://via.placeholder.com/960x540?text=Activity+Image'
+                      ACTIVITY_IMAGE_PLACEHOLDER
                     }
                     alt={selectedActivity.name}
                     className="h-52 w-full rounded-lg border border-slate-200 object-cover"
                     loading="lazy"
                     decoding="async"
                     onError={(event) => {
-                      event.target.src = 'https://via.placeholder.com/960x540?text=Activity+Image';
+                      applyImageFallback(event, ACTIVITY_IMAGE_PLACEHOLDER);
                     }}
                   />
                   <p className="text-sm leading-7 text-slate-700 whitespace-pre-line">

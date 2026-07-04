@@ -3,7 +3,23 @@ import { Link, useLocation } from 'react-router-dom';
 import { getEvents, getNewsSummary } from '../utils/api';
 import Loader from '../components/Loader';
 import { stripRichText } from '../utils/richContent';
-import { optimizeCloudinaryImage } from '../utils/imageUrl';
+import {
+  applyImageFallback,
+  createImagePlaceholder,
+  optimizeCloudinaryImage
+} from '../utils/imageUrl';
+
+const NEWS_CARD_IMAGE_PLACEHOLDER = createImagePlaceholder({
+  width: 960,
+  height: 720,
+  text: 'News Image'
+});
+
+const EVENT_CARD_IMAGE_PLACEHOLDER = createImagePlaceholder({
+  width: 960,
+  height: 720,
+  text: 'Event Image'
+});
 
 const truncateText = (value = '', maxLength = 140) => {
   if (!value) return '';
@@ -192,10 +208,13 @@ const NewsEvents = () => {
                     <div className="relative overflow-hidden">
                       <img
                         className="h-52 w-full object-cover transition duration-500 group-hover:scale-105"
-                        src={optimizeCloudinaryImage(item.image, { width: 960, height: 540, crop: 'fill' }) || 'https://via.placeholder.com/400x300?text=News+Image'}
+                        src={
+                          optimizeCloudinaryImage(item.image, { width: 960, height: 540, crop: 'fill' }) ||
+                          NEWS_CARD_IMAGE_PLACEHOLDER
+                        }
                         alt={item.title}
                         onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/400x300?text=News+Image';
+                          applyImageFallback(e, NEWS_CARD_IMAGE_PLACEHOLDER);
                         }}
                       />
                       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
@@ -248,10 +267,13 @@ const NewsEvents = () => {
                       <div className="relative overflow-hidden">
                         <img
                           className="h-52 w-full object-cover transition duration-500 group-hover:scale-105"
-                          src={optimizeCloudinaryImage(item.image, { width: 960, height: 540, crop: 'fill' }) || 'https://via.placeholder.com/400x300?text=Event+Image'}
+                          src={
+                            optimizeCloudinaryImage(item.image, { width: 960, height: 540, crop: 'fill' }) ||
+                            EVENT_CARD_IMAGE_PLACEHOLDER
+                          }
                           alt={item.title}
                           onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/400x300?text=Event+Image';
+                            applyImageFallback(e, EVENT_CARD_IMAGE_PLACEHOLDER);
                           }}
                         />
                         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />

@@ -2,6 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { getGalleryItemById } from '../utils/api';
 import Loader from '../components/Loader';
+import {
+  applyImageFallback,
+  createImagePlaceholder,
+  optimizeCloudinaryImage
+} from '../utils/imageUrl';
+
+const GALLERY_IMAGE_PLACEHOLDER = createImagePlaceholder({
+  width: 1200,
+  height: 800,
+  text: 'Image Not Available'
+});
 
 const GalleryDetail = () => {
   const { id } = useParams();
@@ -45,11 +56,14 @@ const GalleryDetail = () => {
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-5xl mx-auto">
         <img
-          src={item.image || item.imageUrl || 'https://via.placeholder.com/1200x800?text=Image+Not+Available'}
+          src={
+            optimizeCloudinaryImage(item.image || item.imageUrl, { width: 1200, height: 800, crop: 'fit' }) ||
+            GALLERY_IMAGE_PLACEHOLDER
+          }
           alt={item.title || item.description || 'Gallery Image'}
           className="w-full h-auto max-h-[80vh] object-contain bg-gray-100"
           onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/1200x800?text=Image+Not+Available';
+            applyImageFallback(e, GALLERY_IMAGE_PLACEHOLDER);
           }}
         />
         <div className="p-6">

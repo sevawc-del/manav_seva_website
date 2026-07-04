@@ -2,7 +2,17 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getGallery } from '../utils/api';
 import Loader from '../components/Loader';
-import { optimizeCloudinaryImage } from '../utils/imageUrl';
+import {
+  applyImageFallback,
+  createImagePlaceholder,
+  optimizeCloudinaryImage
+} from '../utils/imageUrl';
+
+const GALLERY_CARD_PLACEHOLDER = createImagePlaceholder({
+  width: 960,
+  height: 720,
+  text: 'Image Not Available'
+});
 
 const parseSafeDate = (value) => {
   if (!value) return null;
@@ -180,11 +190,17 @@ const Gallery = () => {
                       >
                         <div className="relative overflow-hidden">
                           <img
-                            src={optimizeCloudinaryImage(image.image || image.imageUrl, { width: 960, height: 720, crop: 'fill' }) || 'https://via.placeholder.com/400x300?text=Image+Not+Available'}
+                            src={
+                              optimizeCloudinaryImage(image.image || image.imageUrl, {
+                                width: 960,
+                                height: 720,
+                                crop: 'fill'
+                              }) || GALLERY_CARD_PLACEHOLDER
+                            }
                             alt={image.title || image.description || 'Gallery Image'}
                             className="h-56 w-full object-cover transition duration-500 group-hover:scale-105"
                             onError={(e) => {
-                              e.target.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
+                              applyImageFallback(e, GALLERY_CARD_PLACEHOLDER);
                             }}
                           />
                           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />

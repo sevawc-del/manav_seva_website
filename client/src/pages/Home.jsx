@@ -17,7 +17,12 @@ import {
   getTestimonials
 } from '../utils/api';
 import { stripRichText } from '../utils/richContent';
-import { optimizeCloudinaryImage } from '../utils/imageUrl';
+import {
+  ACTIVITY_IMAGE_PLACEHOLDER,
+  applyImageFallback,
+  createImagePlaceholder,
+  optimizeCloudinaryImage
+} from '../utils/imageUrl';
 
 const HomeStateMap = lazy(() => import('../components/HomeStateMap'));
 
@@ -122,6 +127,30 @@ const DEFAULT_HOME_OFFICES = [
   }
 ];
 
+const HOME_GALLERY_IMAGE_PLACEHOLDER = createImagePlaceholder({
+  width: 640,
+  height: 420,
+  text: 'Image Not Available'
+});
+
+const HOME_CHAIRPERSON_IMAGE_PLACEHOLDER = createImagePlaceholder({
+  width: 280,
+  height: 280,
+  text: 'Chairperson'
+});
+
+const HOME_PROGRAM_HIGHLIGHT_IMAGE_PLACEHOLDER = createImagePlaceholder({
+  width: 1200,
+  height: 700,
+  text: 'Program Highlight'
+});
+
+const HOME_NEWS_IMAGE_PLACEHOLDER = createImagePlaceholder({
+  width: 720,
+  height: 360,
+  text: 'News Image'
+});
+
 const GalleryAutoRow = ({ items, direction = 'left' }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -180,13 +209,16 @@ const GalleryAutoRow = ({ items, direction = 'left' }) => {
                 className="group relative block w-[19rem] sm:w-[21rem] md:w-[24rem] lg:w-[26rem] xl:w-[30rem] 2xl:w-[33rem] aspect-[16/10] shrink-0 overflow-hidden rounded-xl border border-gray-200 shadow-sm transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ngo-primary)] focus-visible:ring-offset-2"
               >
                 <img
-                  src={optimizeCloudinaryImage(item.image, { width: 1200, height: 750, crop: 'fill' }) || 'https://via.placeholder.com/640x420?text=Image+Not+Available'}
+                  src={
+                    optimizeCloudinaryImage(item.image, { width: 1200, height: 750, crop: 'fill' }) ||
+                    HOME_GALLERY_IMAGE_PLACEHOLDER
+                  }
                   alt={item.title || 'Gallery image'}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/640x420?text=Image+Not+Available';
+                    applyImageFallback(e, HOME_GALLERY_IMAGE_PLACEHOLDER);
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -627,6 +659,12 @@ const Home = () => {
               {impactShowcaseActivities.map((activity) => {
                 const activityKey = activity._id || activity.slug;
                 const isExpanded = expandedActivityId === activityKey;
+                const desktopActivityImage =
+                  optimizeCloudinaryImage(activity.image, { width: 960, height: 560, crop: 'fill' }) ||
+                  ACTIVITY_IMAGE_PLACEHOLDER;
+                const mobileActivityImage =
+                  optimizeCloudinaryImage(activity.image, { width: 900, height: 540, crop: 'fill' }) ||
+                  ACTIVITY_IMAGE_PLACEHOLDER;
 
                 return (
                   <React.Fragment key={activityKey}>
@@ -637,13 +675,13 @@ const Home = () => {
                     >
                       <div className="lg:grid lg:grid-cols-[15rem_1fr]">
                         <img
-                          src={optimizeCloudinaryImage(activity.image, { width: 960, height: 560, crop: 'fill' }) || 'https://via.placeholder.com/600x360?text=Activity+Image'}
+                          src={desktopActivityImage}
                           alt={activity.name}
                           className="w-full h-56 lg:h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
                           decoding="async"
                           onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/600x360?text=Activity+Image';
+                            applyImageFallback(e, ACTIVITY_IMAGE_PLACEHOLDER);
                           }}
                         />
                         <div className="p-5">
@@ -678,13 +716,13 @@ const Home = () => {
 
                     <div className="md:hidden bg-white rounded-2xl shadow-sm border border-[var(--ngo-border)] overflow-hidden">
                       <img
-                        src={optimizeCloudinaryImage(activity.image, { width: 900, height: 540, crop: 'fill' }) || 'https://via.placeholder.com/600x360?text=Activity+Image'}
+                        src={mobileActivityImage}
                         alt={activity.name}
                         className="w-full h-44 object-cover"
                         loading="lazy"
                         decoding="async"
                         onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/600x360?text=Activity+Image';
+                          applyImageFallback(e, ACTIVITY_IMAGE_PLACEHOLDER);
                         }}
                       />
                       <div className="p-4">
@@ -773,13 +811,16 @@ const Home = () => {
                 <div className="bg-white/65 backdrop-blur-[1px] border border-dashed border-gray-300 rounded-xl p-6 md:p-8 xl:px-8 xl:py-7 flex flex-col items-center text-center md:min-h-[420px] lg:min-h-[430px] xl:min-h-[500px]">
                   <div className="h-28 w-28 xl:h-40 xl:w-40 rounded-full overflow-hidden border-4 border-white shadow-md">
                     <img
-                      src={optimizeCloudinaryImage(leftImageUrl, { width: 480, height: 480, crop: 'fill' }) || 'https://via.placeholder.com/280x280?text=Chairperson'}
+                      src={
+                        optimizeCloudinaryImage(leftImageUrl, { width: 480, height: 480, crop: 'fill' }) ||
+                        HOME_CHAIRPERSON_IMAGE_PLACEHOLDER
+                      }
                       alt={chairpersonName}
                       className="w-full h-full object-cover"
                       loading="lazy"
                       decoding="async"
                       onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/280x280?text=Chairperson';
+                        applyImageFallback(e, HOME_CHAIRPERSON_IMAGE_PLACEHOLDER);
                       }}
                     />
                   </div>
@@ -798,13 +839,16 @@ const Home = () => {
                 <div className="rounded-xl overflow-hidden min-h-[280px] md:min-h-[440px] lg:min-h-[450px] xl:min-h-[530px] shadow-md border border-gray-200 bg-black/5 flex flex-col">
                   <div className="h-[70%] md:h-64 lg:h-72 xl:h-[26rem] shrink-0">
                     <img
-                      src={optimizeCloudinaryImage(rightImageUrl, { width: 1600, height: 900, crop: 'fill' }) || 'https://via.placeholder.com/1200x700?text=Program+Highlight'}
+                      src={
+                        optimizeCloudinaryImage(rightImageUrl, { width: 1600, height: 900, crop: 'fill' }) ||
+                        HOME_PROGRAM_HIGHLIGHT_IMAGE_PLACEHOLDER
+                      }
                       alt={rightCardTitle || 'Program highlight'}
                       className="w-full h-full object-cover"
                       loading="lazy"
                       decoding="async"
                       onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/1200x700?text=Program+Highlight';
+                        applyImageFallback(e, HOME_PROGRAM_HIGHLIGHT_IMAGE_PLACEHOLDER);
                       }}
                     />
                   </div>
@@ -1069,13 +1113,16 @@ const Home = () => {
                     >
                       <div className="relative">
                         <img
-                          src={optimizeCloudinaryImage(featuredNews.image, { width: 1280, height: 720, crop: 'fill' }) || 'https://via.placeholder.com/720x360?text=News+Image'}
+                          src={
+                            optimizeCloudinaryImage(featuredNews.image, { width: 1280, height: 720, crop: 'fill' }) ||
+                            HOME_NEWS_IMAGE_PLACEHOLDER
+                          }
                           alt={featuredNews.title}
                           className="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
                           decoding="async"
                           onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/720x360?text=News+Image';
+                            applyImageFallback(e, HOME_NEWS_IMAGE_PLACEHOLDER);
                           }}
                         />
                         <div className="absolute top-3 left-3 bg-white/90 text-[var(--ngo-primary)] text-xs font-semibold px-2.5 py-1 rounded-full">
